@@ -1,6 +1,6 @@
 import { Link, router, type Href } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icon } from './Icon';
 import { color, radius, space, type } from './tokens';
@@ -9,24 +9,66 @@ interface ScreenProps {
   title: string;
   /** Shows a back (or close) button in the header. */
   back?: 'back' | 'close';
+  /** Onboarding layout: the header shows this label (e.g. "Paso 1 de 2") and the title moves into the content, large. */
+  step?: string;
+  /** Text under a large title. Implies the large-title layout. */
+  lead?: string;
+  /** Pinned under the scroll area, above the home indicator: the screen's main button. */
+  footer?: ReactNode;
+  /** Replaces the header's title text, e.g. Home's avatars and month. `title` still names the screen. */
+  header?: ReactNode;
   children?: ReactNode;
 }
 
-export function Screen({ title, back, children }: ScreenProps) {
+export function Screen({ title, back, step, lead, footer, header, children }: ScreenProps) {
+  const large = step !== undefined || lead !== undefined;
   return (
-    <SafeAreaView style={styles.safe} edges={back ? ['top', 'bottom'] : ['top']}>
+    <SafeAreaView style={styles.safe} edges={back || footer ? ['top', 'bottom'] : ['top']}>
       <View style={styles.header}>
         {back && (
           <Pressable accessibilityRole="button" accessibilityLabel={back === 'close' ? 'Cerrar' : 'Volver'} onPress={() => router.back()} style={styles.iconButton}>
             <Icon name={back} size={22} color={color.ink} />
           </Pressable>
         )}
-        <Text style={back ? type.bar : type.screenTitle} accessibilityRole="header">
-          {title}
-        </Text>
+        {header ? (
+          header
+        ) : large ? (
+          step ? <Text style={[type.label, { color: color.textSecondary, fontSize: 15 }]}>{step}</Text> : null
+        ) : (
+          <Text style={back ? type.bar : type.screenTitle} accessibilityRole="header">
+            {title}
+          </Text>
+        )}
       </View>
-      <ScrollView contentContainerStyle={styles.content}>{children}</ScrollView>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          {large && (
+            <View style={{ gap: space[2], marginBottom: space[2] }}>
+              <Text style={type.screenTitle} accessibilityRole="header">
+                {title}
+              </Text>
+              {lead && <Text style={[type.body, { color: color.textSecondary, fontSize: 17, lineHeight: 26 }]}>{lead}</Text>}
+            </View>
+          )}
+          {children}
+        </ScrollView>
+        {footer && <View style={styles.footer}>{footer}</View>}
+      </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+/** Stand-in while a screen's data loads, or when it failed or doesn't exist. */
+export function Loading({ title, error, notFound }: { title: string; error?: Error | null; notFound?: boolean }) {
+  const message = notFound ? 'Este gasto ya no existe.' : error ? 'No se pudo cargar. Revisa tu conexión.' : null;
+  return (
+    <Screen title={title} back="back">
+      {message ? (
+        <Text style={[type.body, { color: color.textSecondary, textAlign: 'center', marginTop: space[8] }]}>{message}</Text>
+      ) : (
+        <ActivityIndicator color={color.ink} style={{ marginTop: space[8] }} />
+      )}
+    </Screen>
   );
 }
 
@@ -40,14 +82,39 @@ export function Todo({ feature, children }: { feature: string; children: ReactNo
   );
 }
 
-export function NavButton({ href, label, kind = 'primary', onPress }: { href?: Href; label: string; kind?: 'primary' | 'secondary'; onPress?: () => void }) {
+interface NavButtonProps {
+  href?: Href;
+  label: string;
+  /** primary: ink · secondary: white with a border · outline: transparent, for dark backgrounds. */
+  kind?: 'primary' | 'secondary' | 'outline';
+  onPress?: () => void;
+  /** Greyed out and not pressable, e.g. until a form is complete. */
+  disabled?: boolean;
+  /** Shows a spinner instead of the label while a request runs. */
+  loading?: boolean;
+}
+
+export function NavButton({ href, label, kind = 'primary', onPress, disabled, loading }: NavButtonProps) {
+  const inactive = disabled || loading;
+  const textColor = kind === 'secondary' ? color.ink : color.surface;
   const button = (
     // Link asChild rejects style arrays, so flatten.
-    <Pressable accessibilityRole="button" onPress={onPress} style={StyleSheet.flatten([styles.button, kind === 'secondary' && styles.buttonSecondary])}>
-      <Text style={StyleSheet.flatten([type.row, { color: kind === 'primary' ? color.surface : color.ink, fontFamily: 'DMSans_700Bold' }])}>{label}</Text>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: !!inactive, busy: !!loading }}
+      disabled={inactive}
+      onPress={onPress}
+      style={StyleSheet.flatten([styles.button, kind === 'secondary' && styles.buttonSecondary, kind === 'outline' && styles.buttonOutline, disabled && styles.buttonDisabled])}
+    >
+      {loading ? (
+        <ActivityIndicator color={textColor} />
+      ) : (
+        <Text style={StyleSheet.flatten([type.row, { color: textColor, fontFamily: 'DMSans_700Bold' }])}>{label}</Text>
+      )}
     </Pressable>
   );
-  return href ? (
+  return href && !inactive ? (
     <Link href={href} asChild>
       {button}
     </Link>
@@ -64,4 +131,7 @@ const styles = StyleSheet.create({
   todo: { gap: space[2], padding: space[4], borderRadius: radius.option, borderWidth: 1, borderStyle: 'dashed', borderColor: color.disabled },
   button: { height: 52, borderRadius: radius.control, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
   buttonSecondary: { backgroundColor: color.surface, borderWidth: 1, borderColor: color.fieldBorder },
+  buttonOutline: { backgroundColor: 'transparent', borderWidth: 1, borderColor: '#4A4E57' },
+  buttonDisabled: { backgroundColor: color.disabled, borderColor: color.disabled },
+  footer: { paddingHorizontal: space[5], paddingTop: space[3], paddingBottom: space[3], borderTopWidth: 1, borderTopColor: color.line },
 });

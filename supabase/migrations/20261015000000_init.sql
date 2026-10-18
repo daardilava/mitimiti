@@ -1,6 +1,7 @@
 -- a medias: initial schema
 -- Money is stored as integers in each currency's minor unit (COP: pesos, EUR/USD: cents).
 -- The balance is never stored; balance_view derives it from expenses, shares and settlements.
+-- People are Clerk users: ids are Clerk user ids (text, 'user_…'), read from the session token's `sub`.
 
 create type currency_code as enum ('COP', 'EUR', 'USD');
 create type expense_category as enum ('super', 'comida', 'casa', 'servicios', 'transporte', 'ocio', 'viajes', 'regalos', 'otros');
@@ -10,7 +11,7 @@ create type settle_method as enum ('transfer', 'cash', 'other');
 -- ─── Tables ────────────────────────────────────────────────────────────────
 
 create table profiles (
-  id uuid primary key references auth.users on delete cascade,
+  id text primary key,
   display_name text not null default '',
   created_at timestamptz not null default now()
 );
@@ -29,7 +30,7 @@ create table households (
 
 create table members (
   household_id uuid not null references households on delete cascade,
-  user_id uuid not null unique references auth.users on delete cascade,
+  user_id text not null unique,
   display_name text not null,
   role text not null default 'member',
   joined_at timestamptz not null default now(),
@@ -39,7 +40,7 @@ create table members (
 create table expenses (
   id uuid primary key default gen_random_uuid(),
   household_id uuid not null references households on delete cascade,
-  paid_by uuid not null references auth.users,
+  paid_by text not null,
   amount_minor bigint not null check (amount_minor > 0),
   category expense_category not null,
   description text not null default '',
@@ -47,8 +48,8 @@ create table expenses (
   split_mode split_mode not null,
   -- Payer's percentage when split_mode = 'pct'; null otherwise.
   split_pct smallint check (split_pct between 1 and 99),
-  created_by uuid not null references auth.users,
-  updated_by uuid references auth.users,
+  created_by text not null,
+  updated_by text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted_at timestamptz,
@@ -58,7 +59,7 @@ create index expenses_household_spent_on on expenses (household_id, spent_on des
 
 create table expense_shares (
   expense_id uuid not null references expenses on delete cascade,
-  user_id uuid not null references auth.users,
+  user_id text not null,
   share_minor bigint not null check (share_minor >= 0),
   primary key (expense_id, user_id)
 );
@@ -66,12 +67,12 @@ create table expense_shares (
 create table settlements (
   id uuid primary key default gen_random_uuid(),
   household_id uuid not null references households on delete cascade,
-  from_user uuid not null references auth.users,
-  to_user uuid not null references auth.users,
+  from_user text not null,
+  to_user text not null,
   amount_minor bigint not null check (amount_minor > 0),
   method settle_method not null,
   paid_on date not null default current_date,
-  created_by uuid not null references auth.users,
+  created_by text not null,
   created_at timestamptz not null default now(),
   deleted_at timestamptz,
   check (from_user <> to_user)
@@ -87,7 +88,7 @@ create table budgets (
 );
 
 create table push_tokens (
-  user_id uuid not null references auth.users on delete cascade,
+  user_id text not null,
   token text not null,
   platform text not null check (platform in ('ios', 'android')),
   updated_at timestamptz not null default now(),
@@ -97,7 +98,7 @@ create table push_tokens (
 create table audit_log (
   id bigint generated always as identity primary key,
   household_id uuid not null,
-  actor uuid,
+  actor text,
   action text not null,
   entity text not null,
   entity_id uuid,
@@ -108,21 +109,27 @@ create table audit_log (
 
 -- Failed and successful join attempts, for rate limiting.
 create table join_attempts (
-  user_id uuid not null,
+  user_id text not null,
   at timestamptz not null default now()
 );
 create index join_attempts_user_at on join_attempts (user_id, at desc);
 
 -- ─── Helpers ───────────────────────────────────────────────────────────────
 
+-- The signed-in person's Clerk user id, from the token Supabase verified (third-party auth). Null when signed out.
+create function requesting_user_id() returns text
+language sql stable as $$
+  select nullif(auth.jwt()->>'sub', '');
+$$;
+
 create function my_household() returns uuid
 language sql stable security definer set search_path = public as $$
-  select household_id from members where user_id = auth.uid();
+  select household_id from members where user_id = requesting_user_id();
 $$;
 
 create function is_member(h uuid) returns boolean
 language sql stable security definer set search_path = public as $$
-  select exists (select 1 from members where household_id = h and user_id = auth.uid());
+  select exists (select 1 from members where household_id = h and user_id = requesting_user_id());
 $$;
 
 -- A couple has exactly two people.
@@ -159,7 +166,7 @@ create function write_shares(p_expense uuid) returns void
 language plpgsql security definer set search_path = public as $$
 declare
   e expenses;
-  partner uuid;
+  partner text;
   partner_share bigint;
 begin
   select * into e from expenses where id = p_expense;
@@ -188,7 +195,7 @@ language plpgsql security definer set search_path = public as $$
 begin
   insert into audit_log (household_id, actor, action, entity, entity_id, before, after)
   values (
-    new.household_id, auth.uid(), lower(tg_op), tg_table_name, new.id,
+    new.household_id, requesting_user_id(), lower(tg_op), tg_table_name, new.id,
     case when tg_op = 'UPDATE' then to_jsonb(old) end,
     to_jsonb(new)
   );
@@ -241,7 +248,7 @@ create function create_household(
 language plpgsql security definer set search_path = public as $$
 declare
   h households;
-  me uuid := auth.uid();
+  me text := requesting_user_id();
 begin
   if me is null then raise exception 'not_authenticated'; end if;
   if exists (select 1 from members where user_id = me) then raise exception 'already_in_household'; end if;
@@ -265,7 +272,7 @@ create function join_household(p_code text, p_display_name text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
   h households;
-  me uuid := auth.uid();
+  me text := requesting_user_id();
 begin
   if me is null then raise exception 'not_authenticated'; end if;
   if exists (select 1 from members where user_id = me) then
@@ -307,7 +314,7 @@ end $$;
 
 create function upsert_expense(
   p_id uuid,
-  p_paid_by uuid,
+  p_paid_by text,
   p_amount_minor bigint,
   p_category expense_category,
   p_description text,
@@ -330,13 +337,13 @@ begin
   if p_id is null then
     insert into expenses (household_id, paid_by, amount_minor, category, description, spent_on, split_mode, split_pct, created_by)
     values (h, p_paid_by, p_amount_minor, p_category, coalesce(trim(p_description), ''),
-            coalesce(p_spent_on, current_date), p_split_mode, pct, auth.uid())
+            coalesce(p_spent_on, current_date), p_split_mode, pct, requesting_user_id())
     returning * into e;
   else
     update expenses set
       paid_by = p_paid_by, amount_minor = p_amount_minor, category = p_category,
       description = coalesce(trim(p_description), ''), spent_on = coalesce(p_spent_on, spent_on),
-      split_mode = p_split_mode, split_pct = pct, updated_by = auth.uid(), updated_at = now()
+      split_mode = p_split_mode, split_pct = pct, updated_by = requesting_user_id(), updated_at = now()
     where id = p_id and household_id = h and deleted_at is null
     returning * into e;
     if e.id is null then raise exception 'expense_not_found'; end if;
@@ -349,7 +356,7 @@ end $$;
 create function delete_expense(p_id uuid) returns void
 language plpgsql security definer set search_path = public as $$
 begin
-  update expenses set deleted_at = now(), updated_by = auth.uid(), updated_at = now()
+  update expenses set deleted_at = now(), updated_by = requesting_user_id(), updated_at = now()
   where id = p_id and household_id = my_household() and deleted_at is null;
   if not found then raise exception 'expense_not_found'; end if;
 end $$;
@@ -363,8 +370,8 @@ create function record_settlement(
 language plpgsql security definer set search_path = public as $$
 declare
   h uuid := my_household();
-  me uuid := auth.uid();
-  partner uuid;
+  me text := requesting_user_id();
+  partner text;
   my_net bigint;
   t settlements;
 begin
@@ -395,7 +402,7 @@ revoke execute on function
   create_household(text, text, currency_code, split_mode, smallint),
   join_household(text, text),
   regenerate_join_code(),
-  upsert_expense(uuid, uuid, bigint, expense_category, text, date, split_mode, smallint),
+  upsert_expense(uuid, text, bigint, expense_category, text, date, split_mode, smallint),
   delete_expense(uuid),
   record_settlement(bigint, settle_method, date)
 from public, anon;
@@ -403,7 +410,7 @@ grant execute on function
   create_household(text, text, currency_code, split_mode, smallint),
   join_household(text, text),
   regenerate_join_code(),
-  upsert_expense(uuid, uuid, bigint, expense_category, text, date, split_mode, smallint),
+  upsert_expense(uuid, text, bigint, expense_category, text, date, split_mode, smallint),
   delete_expense(uuid),
   record_settlement(bigint, settle_method, date)
 to authenticated;
@@ -423,7 +430,7 @@ alter table audit_log enable row level security;
 alter table join_attempts enable row level security;
 
 create policy "own profile" on profiles for all to authenticated
-  using (id = auth.uid()) with check (id = auth.uid());
+  using (id = requesting_user_id()) with check (id = requesting_user_id());
 
 create policy "members read household" on households for select to authenticated using (is_member(id));
 create policy "members update household" on households for update to authenticated
@@ -431,7 +438,7 @@ create policy "members update household" on households for update to authenticat
 
 create policy "members read members" on members for select to authenticated using (is_member(household_id));
 create policy "update own member row" on members for update to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = requesting_user_id()) with check (user_id = requesting_user_id());
 
 create policy "members read expenses" on expenses for select to authenticated using (is_member(household_id));
 create policy "members read shares" on expense_shares for select to authenticated
@@ -444,7 +451,7 @@ create policy "members update budgets" on budgets for update to authenticated
   using (is_member(household_id)) with check (is_member(household_id));
 
 create policy "own push tokens" on push_tokens for all to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = requesting_user_id()) with check (user_id = requesting_user_id());
 
 create policy "members read audit" on audit_log for select to authenticated using (is_member(household_id));
 -- join_attempts: no policies; only security-definer functions touch it.

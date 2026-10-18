@@ -1,15 +1,27 @@
 import { router } from 'expo-router';
-import { NavButton, Screen, Todo } from '@/ui/Screen';
+import { useCouple, useUpsertExpense } from '@/api/expenses';
+import { ExpenseForm } from '@/ui/ExpenseForm';
+import { Loading } from '@/ui/Screen';
 
 // 06 · Nuevo gasto
 export default function NewExpense() {
+  const couple = useCouple();
+  const save = useUpsertExpense();
+
+  if (!couple.data) return <Loading title="Nuevo gasto" error={couple.error} />;
+
   return (
-    <Screen title="Nuevo gasto" back="close">
-      <Todo feature="§4 Expenses">
-        Monto (parseMoneyInput), descripción, quién pagó, categoría, cómo se divide (splitShares), fecha y vista previa del saldo.
-        Guarda con la RPC upsert_expense.
-      </Todo>
-      <NavButton label="Agregar gasto" onPress={() => router.back()} />
-    </Screen>
+    <ExpenseForm
+      title="Nuevo gasto"
+      saveLabel="Agregar gasto"
+      couple={couple.data}
+      saving={save.isPending}
+      error={save.error ? 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.' : null}
+      onSave={(input) =>
+        save.mutate(input, {
+          onSuccess: (saved) => router.replace({ pathname: '/expense/[id]', params: { id: saved.id } }),
+        })
+      }
+    />
   );
 }

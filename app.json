@@ -29,7 +29,9 @@
       "expo-router",
       "expo-status-bar",
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-web-browser",
+      "@clerk/expo"
     ],
     "scheme": "amedias",
     "experiments": {

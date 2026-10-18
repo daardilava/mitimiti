@@ -25,6 +25,11 @@ export const color = {
   info: '#1A3F94',
   infoTint: '#E3E9F8',
   neutralTint: '#E8EAED',
+  /** Text on ink surfaces (balance card, Welcome): secondary, then tertiary. */
+  onInk: '#C9CDD3',
+  onInkMuted: '#AEB3BB',
+  /** Welcome logo's blue circle, lighter than `me` so the overlap reads on ink. */
+  logoBlue: '#4A78E0',
 } as const;
 
 export type CategoryId = 'super' | 'comida' | 'casa' | 'servicios' | 'transporte' | 'ocio' | 'viajes' | 'regalos' | 'otros';

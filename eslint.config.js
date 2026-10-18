@@ -6,5 +6,10 @@ module.exports = defineConfig([
   expoConfig,
   {
     ignores: ["dist/*"],
-  }
+  },
+  {
+    // PGlite ships one huge minified bundle that the import plugin cannot parse.
+    files: ["supabase/tests/**"],
+    rules: { "import/namespace": "off" },
+  },
 ]);

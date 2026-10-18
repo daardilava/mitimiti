@@ -1,5 +1,6 @@
 import { router, Tabs } from 'expo-router';
 import { View, type ColorValue } from 'react-native';
+import { useLiveHousehold } from '@/api/live';
 import { Icon, type IconName } from '@/ui/Icon';
 import { color, type } from '@/ui/tokens';
 
@@ -10,6 +11,7 @@ function tabIcon(name: IconName) {
 }
 
 export default function TabsLayout() {
+  useLiveHousehold();
   return (
     <Tabs
       screenOptions={{

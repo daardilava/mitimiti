@@ -1,24 +1,20 @@
 import 'react-native-url-polyfill/auto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getClerkInstance } from '@clerk/expo';
 import { createClient } from '@supabase/supabase-js';
-import { AppState, Platform } from 'react-native';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const key = process.env.EXPO_PUBLIC_SUPABASE_KEY ?? '';
 
-export const supabase = createClient(url, key, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// Clerk signs people in; Supabase trusts Clerk's session token (third-party auth) and RLS reads its `sub`.
+// getToken() returns a cached token and refreshes it before it expires.
+export const supabase = createClient(url, key, { accessToken: clerkToken });
 
-// Refresh tokens only while the app is in the foreground.
-if (Platform.OS !== 'web') {
-  AppState.addEventListener('change', (state) => {
-    if (state === 'active') supabase.auth.startAutoRefresh();
-    else supabase.auth.stopAutoRefresh();
-  });
+/** Null (anonymous) until ClerkProvider has loaded Clerk: supabase-js asks once at startup, for Realtime. */
+async function clerkToken(): Promise<string | null> {
+  try {
+    // On web this is undefined before ClerkProvider mounts; on native it throws until then.
+    return (await getClerkInstance()?.session?.getToken()) ?? null;
+  } catch {
+    return null;
+  }
 }

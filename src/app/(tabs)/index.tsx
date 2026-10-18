@@ -1,60 +1,153 @@
-import { Link } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { balanceKeys, useMyBalance, useSettlements } from '@/api/balance';
+import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
+import { balanceBasis, balanceHeadline, monthSpend, sharedCount } from '@/lib/balance';
+import { isoDate, monthName, monthOf, monthTitle } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
-import { ME, names, PARTNER, sampleExpenses, sampleSettlements } from '@/lib/sample';
-import { expenseEffect, netBalance } from '@/lib/splits';
+import { TextLink } from '@/ui/Auth';
+import { Avatar } from '@/ui/Avatar';
+import { ExpenseRow } from '@/ui/ExpenseRow';
 import { NavButton, Screen, Todo } from '@/ui/Screen';
-import { categories, color, radius, space, type } from '@/ui/tokens';
+import { color, font, radius, space, type } from '@/ui/tokens';
 
-// 05 · Inicio. Reads sample data until §5 wires balance_view, monthly_summary and budgets.
+const RECENT = 4;
+
+// 05 · Inicio: the live balance, this month's shared spending by who paid, and the latest expenses.
 export default function Home() {
-  const currency = 'COP';
-  const net = netBalance(sampleExpenses, sampleSettlements, ME);
-  const partner = names[PARTNER];
-  const label = net > 0 ? `${partner} te debe` : net < 0 ? `Le debes a ${partner}` : 'Están a mano';
-  const recent = sampleExpenses.slice(0, 4);
+  const client = useQueryClient();
+  const couple = useCouple();
+  const expenses = useExpenses();
+  const balance = useMyBalance();
+  const settlements = useSettlements();
+
+  const queries = [couple, expenses, balance, settlements];
+  const failed = queries.some((q) => q.isError);
+  const today = new Date();
+
+  if (!couple.data || !expenses.data || balance.data === undefined || !settlements.data) {
+    return (
+      <Screen title="Inicio">
+        {failed ? (
+          <View style={{ gap: space[4], marginTop: space[8] }}>
+            <Text style={[type.body, { color: color.textSecondary, textAlign: 'center' }]}>No se pudo cargar. Revisa tu conexión.</Text>
+            <NavButton
+              label="Reintentar"
+              kind="secondary"
+              onPress={() => [coupleKey, expenseKeys.all, balanceKeys.balance, balanceKeys.settlements].forEach((queryKey) => client.invalidateQueries({ queryKey }))}
+            />
+          </View>
+        ) : (
+          <ActivityIndicator color={color.ink} style={{ marginTop: space[8] }} />
+        )}
+      </Screen>
+    );
+  }
+
+  const { me, partner, currency } = couple.data;
+  const net = balance.data;
+  const headline = balanceHeadline(net, partner.name);
+  const month = monthSpend(expenses.data, monthOf(isoDate(today)), me.id);
+  const recent = expenses.data.slice(0, RECENT);
+  const fmt = (minor: number) => formatMoney(minor, currency);
 
   return (
-    <Screen title={`${names[ME]} y ${partner}`}>
-      <View style={styles.balance} accessibilityLabel={`${label} ${formatMoney(net, currency)}`}>
-        <Text style={[type.label, { color: '#C9CDD3', fontSize: 15 }]}>{label}</Text>
-        <Text style={[type.balance, { color: color.surface }]}>{formatMoney(net, currency)}</Text>
-        {net !== 0 && <NavButton href="/settle" label="Saldar cuentas" kind="secondary" />}
+    <Screen
+      title="Inicio"
+      header={
+        <View style={styles.header}>
+          <View style={styles.avatars} aria-hidden>
+            <Avatar name={me.name} isMe size={40} />
+            <View style={styles.overlap}>
+              <Avatar name={partner.name} isMe={false} size={40} />
+            </View>
+          </View>
+          <View>
+            <Text style={[type.label, { color: color.textSecondary, fontSize: 15 }]}>{monthTitle(today)}</Text>
+            <Text style={type.heading} accessibilityRole="header">
+              {me.name} y {partner.name}
+            </Text>
+          </View>
+        </View>
+      }
+    >
+      <View style={styles.balance} accessible accessibilityLabel={`${headline} ${fmt(net)}`}>
+        <Text style={[type.row, { color: color.onInk, fontSize: 17 }]}>{headline}</Text>
+        <Text style={[type.balance, styles.tabular, { color: color.surface }]} adjustsFontSizeToFit numberOfLines={1}>
+          {fmt(net)}
+        </Text>
+        <Text style={[type.body, { color: color.onInkMuted, fontSize: 15, lineHeight: 22 }]}>{balanceBasis(sharedCount(expenses.data), settlements.data.length)}</Text>
+        {net !== 0 && (
+          <View style={{ marginTop: space[2] }}>
+            <NavButton href="/settle" label="Saldar cuentas" kind="secondary" />
+          </View>
+        )}
       </View>
 
-      <Todo feature="§5 Dashboard">Gastado juntos en el mes, quién pagó y barra de presupuesto.</Todo>
-
       <View style={styles.card}>
-        <Text style={[type.row, { fontFamily: 'DMSans_700Bold' }]}>Recientes</Text>
-        {recent.map((e) => {
-          const effect = expenseEffect(e, ME);
-          const cat = categories[e.category];
-          return (
-            <Link key={e.id} href={{ pathname: '/expense/[id]', params: { id: e.id } }} asChild>
-              <Pressable style={styles.row} accessibilityRole="button">
-                <View style={[styles.tile, { backgroundColor: cat.tint }]} />
-                <View style={{ flex: 1 }}>
-                  <Text style={type.row} numberOfLines={1}>{e.description}</Text>
-                  <Text style={[type.label, { color: color.textSecondary }]}>Pagó {names[e.paidBy]}</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={[type.row, { fontFamily: 'DMSans_700Bold' }]}>{formatMoney(e.amountMinor, currency)}</Text>
-                  <Text style={[type.effect, { color: e.splitMode === 'personal' ? color.textSecondary : effect > 0 ? color.positiveText : color.negative }]}>
-                    {e.splitMode === 'personal' ? 'Personal' : effect > 0 ? `Te deben ${formatMoney(effect, currency)}` : `Debes ${formatMoney(effect, currency)}`}
-                  </Text>
-                </View>
-              </Pressable>
-            </Link>
-          );
-        })}
+        <View style={styles.cardTitle}>
+          <Text style={[type.row, { fontFamily: font.bodyBold, flex: 1 }]}>Gastado juntos en {monthName(today)}</Text>
+          <Text style={[type.heading, styles.tabular]}>{fmt(month.totalMinor)}</Text>
+        </View>
+        {month.totalMinor > 0 ? (
+          <>
+            <View style={styles.bar} aria-hidden>
+              {month.byMeMinor > 0 && <View style={{ flex: month.byMeMinor, backgroundColor: color.me }} />}
+              {month.byPartnerMinor > 0 && <View style={{ flex: month.byPartnerMinor, backgroundColor: color.partner }} />}
+            </View>
+            <View style={styles.legend}>
+              <Paid name={me.name} amount={fmt(month.byMeMinor)} dot={color.me} />
+              <Paid name={partner.name} amount={fmt(month.byPartnerMinor)} dot={color.partner} />
+            </View>
+          </>
+        ) : (
+          <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]}>Aún no hay gastos compartidos este mes.</Text>
+        )}
+      </View>
+
+      <Todo feature="v1.1 Budgets">Presupuesto del mes: barra con el porcentaje usado y los días que quedan.</Todo>
+
+      <View style={styles.sectionTitle}>
+        <Text style={[type.heading, { flex: 1 }]}>Recientes</Text>
+        {expenses.data.length > RECENT && <TextLink label="Ver todos" href="/activity" />}
+      </View>
+      <View style={styles.card}>
+        {recent.length > 0 ? (
+          recent.map((e) => <ExpenseRow key={e.id} expense={e} couple={couple.data} />)
+        ) : (
+          <Text style={[type.body, { color: color.textSecondary, textAlign: 'center', paddingVertical: space[4] }]}>
+            Aún no hay gastos. Toca + para agregar el primero.
+          </Text>
+        )}
       </View>
     </Screen>
   );
 }
 
+function Paid({ name, amount, dot }: { name: string; amount: string; dot: string }) {
+  return (
+    <View style={{ flex: 1, gap: 2 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
+        <View style={[styles.dot, { backgroundColor: dot }]} />
+        <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]} numberOfLines={1}>
+          Pagó {name}
+        </Text>
+      </View>
+      <Text style={[type.row, styles.tabular, { fontFamily: font.bodyBold, fontSize: 17 }]}>{amount}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  balance: { backgroundColor: color.ink, borderRadius: radius.sheet, padding: 22, gap: space[3] },
-  card: { backgroundColor: color.surface, borderRadius: radius.card, borderWidth: 1, borderColor: color.line, padding: space[4], gap: space[1] },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingVertical: space[2], minHeight: 44 },
-  tile: { width: 44, height: 44, borderRadius: radius.control },
+  header: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingTop: space[2] },
+  avatars: { flexDirection: 'row' },
+  overlap: { marginLeft: -10, borderRadius: 22, borderWidth: 2, borderColor: color.background },
+  balance: { backgroundColor: color.ink, borderRadius: radius.sheet, padding: 22, gap: space[2] },
+  tabular: { fontVariant: ['tabular-nums'] },
+  card: { backgroundColor: color.surface, borderRadius: radius.card, borderWidth: 1, borderColor: color.line, padding: space[4], gap: space[3] },
+  cardTitle: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  bar: { flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden', gap: 2, backgroundColor: color.line },
+  legend: { flexDirection: 'row', gap: space[4] },
+  dot: { width: 10, height: 10, borderRadius: 5 },
+  sectionTitle: { flexDirection: 'row', alignItems: 'center', marginTop: space[2] },
 });

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
+import { signOut as endSession } from '@/api/auth';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
 import { NavButton, Screen, Todo } from '@/ui/Screen';
 
 // 13 · Ajustes
@@ -9,7 +9,7 @@ export default function Settings() {
 
   const signOut = async () => {
     if (DEV_BYPASS_AUTH) setHousehold(null);
-    else await supabase.auth.signOut();
+    else await endSession();
     router.replace('/welcome');
   };
 
