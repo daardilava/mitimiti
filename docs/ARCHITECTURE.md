@@ -1,0 +1,79 @@
+# a medias — Architecture
+
+## Tech stack
+
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Mobile app | Expo SDK 57 + React Native + TypeScript | iOS and Android from one codebase; OTA updates with EAS |
+| Navigation | Expo Router | File-based routes that mirror the 13 screens |
+| **Auth** | **Clerk** (`@clerk/expo`) — email + password, Google, Apple | Session management, email verification, password reset |
+| **Billing** | **Clerk Billing** (later phase) | Plans and entitlements next to the user; see [PLAN.md](PLAN.md#billing-later-phase) |
+| Server state | TanStack Query | Caching, retries, optimistic updates |
+| UI state | Zustand | Form drafts and filters only |
+| Validation | Zod | Same schemas in the app and in Edge Functions |
+| Database | Supabase Postgres | Balances and summaries are plain SQL |
+| Security | Row Level Security, keyed on the **Clerk user id** | A member only reads/writes rows of their own couple |
+| Realtime | Supabase Realtime | Partner's screen updates within seconds |
+| Server logic | Supabase Edge Functions + pg_cron | Join by code, push, Sunday reminder |
+| Push | Expo Notifications | One API for APNs and FCM |
+| Offline (v1.2) | PowerSync on top of Supabase | Log without signal |
+| Testing | Vitest (balance math), Maestro (E2E) | The balance logic must never be wrong |
+| Monitoring | Sentry, PostHog | Crashes and success metrics |
+| Delivery | EAS Build + Submit, GitHub Actions | CI runs tests and type checks on every PR |
+
+## How Clerk and Supabase fit together
+
+```
+Phone ──sign in──▶ Clerk ──session JWT (sub = user_…, role = authenticated)──▶ Phone
+Phone ──supabase-js with accessToken: () => getToken()──▶ Supabase (third-party auth: Clerk)
+                                                           RLS: auth.jwt()->>'sub'
+```
+
+- Supabase trusts Clerk as a **third-party auth provider** (`[auth.third_party.clerk]` in
+  `supabase/config.toml`, and the Clerk integration enabled in the Supabase dashboard). Supabase Auth itself
+  is no longer used for sign-in.
+- Clerk session tokens must carry `role: "authenticated"` (enable the Supabase integration in the Clerk dashboard).
+- The Supabase client takes the Clerk token on every request: `createClient(url, key, { accessToken: async () => (await getToken()) ?? null })`.
+- **User ids are Clerk ids (`text`, e.g. `user_2x…`), not `uuid`.** Every `auth.uid()` becomes
+  `auth.jwt()->>'sub'`, and every `uuid references auth.users` column becomes `text`.
+
+## Data model
+
+| Table | Key columns |
+| --- | --- |
+| households | id, name, currency, join_code, default_split, created_at |
+| members | household_id, user_id (**text**, Clerk id), display_name, role |
+| expenses | id, household_id, paid_by, amount_minor, category, description, spent_on (date), split_mode, split_pct, created_by, updated_by, deleted_at |
+| expense_shares | expense_id, user_id, share_minor |
+| settlements | id, household_id, from_user, to_user, amount_minor, method, paid_on, created_by, deleted_at |
+| budgets | household_id, category, month, limit_minor |
+| push_tokens | user_id, token |
+| audit_log | household_id, actor, action, entity, before, after, at |
+
+- Money is always an integer in minor units (`bigint`), never floats.
+- `spent_on` is a `date`, so time zones never move an expense to another day.
+- Deletes are soft (`deleted_at`) and every change goes to `audit_log`.
+- Writes that touch an expense and its shares run in one Postgres function (one transaction):
+  `create_household`, `join_household`, `upsert_expense`, `delete_expense`, `record_settlement`, `regenerate_join_code`.
+
+| Currency | Display (es) | Decimals |
+| --- | --- | --- |
+| COP (default) | $184.000 | 0 |
+| EUR | 1.234,50 € | 2 |
+| USD | US$1,234.50 | 2 |
+
+## Code layout
+
+| Path | What |
+| --- | --- |
+| `src/app/` | Expo Router routes, one file per screen. `(onboarding)` for signed-out, `(tabs)` for the main app |
+| `src/api/` | Calls to Clerk and Supabase (`auth.ts`, `household.ts`, `expenses.ts`, `balance.ts`); `live.ts` keeps both phones in sync (Realtime + refetch on focus) |
+| `src/lib/money.ts` | Format and parse COP / EUR / USD; amounts are integers in minor units |
+| `src/lib/splits.ts` | Split modes and balance; mirrors `write_shares()` and `balance_view` in SQL |
+| `src/lib/session.ts` | Clerk auth state (`userId`) and the route guard's inputs |
+| `src/lib/authFlow.ts` | Password sign-in / sign-up / reset steps and Spanish auth errors, testable without React |
+| `src/lib/balance.ts` | Balance wording ("Ana te debe", "Te deben $X") and the month's shared spending by who paid |
+| `src/lib/joinCode.ts`, `dates.ts` | Invite code validation; date labels ("Ayer", "Lunes 12 de octubre") |
+| `src/ui/` | Design tokens, `Icon`, `Screen`, `Avatar`, form pieces, auth pieces, `ExpenseRow` and shared buttons |
+| `supabase/` | Local config, migrations, and SQL tests (`supabase/tests`) |
+| `scripts/check-clerk.mjs` | `npm run clerk:check` |

@@ -1,10 +1,26 @@
 # a medias
 
-App for two people to track shared expenses: who owes whom, settle up, monthly summary and budgets.
-Expo (React Native + TypeScript) on the phone, Supabase (Postgres) behind it. Money in COP by default; EUR and USD supported.
+App for two people who share a life and a budget. It answers one question in under five seconds:
+**who owes whom, and how much?**
 
-The design (13 screens + design system) and the project plan with the feature breakdown live in Claude artifacts;
-section numbers like `§4` in the code refer to the plan's Feature breakdown tab.
+Expo (React Native + TypeScript) on the phone, **Clerk** for sign-in (and later billing), **Supabase**
+(Postgres + Row Level Security + Realtime) for the data. Spanish first. Money in COP by default; EUR and USD
+supported, never converted.
+
+> **Current focus: Phase 2 — Core MVP** (Live balance on Home built; Activity next). See [docs/PLAN.md](docs/PLAN.md).
+
+## Docs
+
+| Doc | What's in it |
+| --- | --- |
+| [docs/PLAN.md](docs/PLAN.md) | Principles, features, roadmap, current phase and its acceptance checks, Clerk setup, billing, open questions |
+| [docs/DESIGN.md](docs/DESIGN.md) | The 13 screens and their routes, design system (UI kit v1) |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Tech stack, how Clerk and Supabase fit together, data model, code layout |
+| [CLAUDE.md](CLAUDE.md) | Working rules for Claude Code (loaded automatically each session) |
+
+Sources of truth: *a medias — Project Plan* (scope, data model, roadmap) and *a medias — UI design*
+(13 screens + design system "UI kit v1"). Section numbers like `§4` in the code refer to the plan's
+Feature breakdown tab.
 
 ## Run it
 
@@ -14,6 +30,10 @@ cp .env.example .env      # EXPO_PUBLIC_DEV_BYPASS_AUTH=1 lets you click through
 npx expo start            # press w for web, or scan the QR code with Expo Go
 ```
 
+Sign-in needs a Clerk key (see Set up Clerk in [docs/PLAN.md](docs/PLAN.md)). Google and Apple
+open the system browser through Clerk (`useSSO`), which works in Expo Go, on web and in development builds
+(`npx expo run:ios|android`).
+
 ## Database (needs Docker Desktop)
 
 ```bash
@@ -22,27 +42,13 @@ npm run db:reset          # applies supabase/migrations/*
 npm run db:types          # regenerates src/lib/database.types.ts
 ```
 
-`supabase/migrations/20261015000000_init.sql` has the tables, Row Level Security, the `balance_view` and
-`monthly_summary` views, and the RPCs the app writes through (`create_household`, `join_household`,
-`upsert_expense`, `delete_expense`, `record_settlement`, `regenerate_join_code`).
-
 ## Checks
+
+Run before declaring any task done:
 
 ```bash
 npm run typecheck
 npx expo lint
-npm test                  # money formatting and split/balance math
+npm test                  # money, splits, join codes, dates, email-code flow, and SQL/RLS on PGlite
+npm run clerk:check       # the Clerk instance in .env is configured the way the app signs in
 ```
-
-## Layout
-
-| Path | What |
-| --- | --- |
-| `src/app/` | Expo Router routes — one file per screen. `(onboarding)` for signed-out, `(tabs)` for the main app |
-| `src/lib/money.ts` | Format and parse COP / EUR / USD; amounts are integers in minor units |
-| `src/lib/splits.ts` | Split modes and balance — mirrors `write_shares()` and `balance_view` in SQL |
-| `src/lib/session.ts` | Auth state and the route guard's inputs |
-| `src/ui/` | Tokens from the design system, `Icon`, `Screen` and shared buttons |
-| `supabase/` | Local config and migrations |
-
-Screens marked **Por construir** are routed placeholders; each names the feature section that builds it.
