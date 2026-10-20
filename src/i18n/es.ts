@@ -226,13 +226,37 @@ export const es = {
 
   exportData: {
     title: 'Exportar movimientos',
-    lead: 'Elige el periodo. Se crea un archivo con los gastos y los pagos, para abrir en Excel, Google Sheets o Numbers.',
+    lead: 'Elige el periodo y el formato. El archivo incluye los gastos y los pagos.',
     period: 'Periodo',
     presets: { thisMonth: 'Este mes', lastMonth: 'Mes pasado', last3Months: 'Últimos 3 meses', thisYear: 'Este año', all: 'Todo' },
     /** "12 gastos y 2 pagos" */
     summary: (expenses: number, payments: number) =>
       `${expenses} ${expenses === 1 ? 'gasto' : 'gastos'} y ${payments} ${payments === 1 ? 'pago' : 'pagos'}`,
     empty: 'No hay movimientos en este periodo. Elige otro.',
+    format: 'Formato',
+    csvTitle: 'CSV',
+    csvDetail: 'Para Excel, Google Sheets o Numbers.',
+    pdfTitle: 'PDF',
+    pdfDetail: 'Un resumen para leer, imprimir o enviar.',
+    exportPdf: 'Exportar PDF',
+    /** The PDF report. */
+    pdf: {
+      title: 'Movimientos',
+      couple: (a: string, b: string) => `${a} y ${b}`,
+      range: (from: string, to: string) => `Del ${from} al ${to}`,
+      until: (to: string) => `Hasta el ${to}`,
+      /** "13 oct 2026" */
+      dateWithYear: (short: string, year: number) => `${short} ${year}`,
+      shared: 'Gastos compartidos',
+      paid: (name: string) => `Pagó ${name}`,
+      personal: 'Gastos personales',
+      payments: 'Pagos entre ustedes',
+      balanceAt: (date: string) => `Saldo al ${date}`,
+      owes: (from: string, amount: string, to: string) => `${from} le debe ${amount} a ${to}`,
+      even: 'Están a mano',
+      balanceNote: 'Con todos los gastos y pagos registrados hasta esa fecha.',
+      generated: (date: string) => `Creado con a medias el ${date}.`,
+    },
     exportCsv: 'Exportar CSV',
     failed: 'No se pudo crear el archivo. Inténtalo de nuevo.',
     /** File name, without date or extension. */

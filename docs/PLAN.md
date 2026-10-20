@@ -28,7 +28,7 @@ a web app (mobile only), converting between currencies.
 | Budgets | Monthly limit per category, warning at 80 %, over-limit alert | v1.1 → built early (the alert as a notification stays v1.1) |
 | Notifications | "Ana agregó un gasto"; Sunday reminder when a balance is open | v1.1 |
 | Default split and currency | Per-couple setting used for every new expense | v1.1 |
-| Export (CSV, PDF) | All expenses and payments for a period (this month, last month, last 3 months, this year, all), through the share sheet | v1.1 → CSV built early; PDF next |
+| Export (CSV, PDF) | All expenses and payments for a period (this month, last month, last 3 months, this year, all), through the share sheet | v1.1 → built early |
 | Subscription (Clerk Billing) | Paid plan, see [Billing](#billing-later-phase) | TBD |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |

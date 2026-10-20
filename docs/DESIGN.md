@@ -12,7 +12,7 @@ External source of truth: *a medias — UI design* (13 screens + design system "
 | — | Crea tu cuenta (Clerk) | `(onboarding)/sign-up` | Welcome (either button) | Name, email, password, terms → code by email · Google · Apple |
 | — | Términos y condiciones | `terms` (outside the guards) | Crea tu cuenta, Ajustes › Información legal | Read; Escribirnos (email) |
 | — | Política de privacidad | `privacy` (outside the guards) | Crea tu cuenta, Ajustes › Información legal | Read; Escribirnos (email) |
-| — | Exportar movimientos | `export` | Ajustes › Exportar movimientos | Period (5 presets) → Exportar CSV (share sheet) |
+| — | Exportar movimientos | `export` | Ajustes › Exportar movimientos | Period (5 presets) · Formato CSV / PDF → Exportar (share sheet) |
 | — | Borrar tu cuenta | `delete-account` (outside the guards) | Ajustes › Cuenta, Setup | What is deleted (partner too) → tick → Borrar cuenta (red); code by email if the sign-in is older than 10 min |
 | — | Iniciar sesión (Clerk) | `(onboarding)/sign-in` | Welcome "¿Ya tienes cuenta?" | Email, password, ¿Olvidaste tu contraseña? · Google · Apple |
 | — | ¿Olvidaste tu contraseña? | `(onboarding)/forgot-password` | Iniciar sesión | Code by email + new password → signed in |
