@@ -55,6 +55,11 @@ Phone ──supabase-js with accessToken: () => getToken()──▶ Supabase (th
 - Deletes are soft (`deleted_at`) and every change goes to `audit_log`.
 - Writes that touch an expense and its shares run in one Postgres function (one transaction):
   `create_household`, `join_household`, `upsert_expense`, `delete_expense`, `record_settlement`, `regenerate_join_code`.
+- **Account deletion** (`delete_account()`, Ajustes › Cuenta) is the one hard delete: it erases the couple's
+  household (cascading to members, expenses, shares, settlements, budgets) and its `audit_log` rows, plus the caller's
+  profile, push tokens and join attempts. The app first confirms a recent sign-in (Clerk reverification, a code by
+  email), then calls it, then deletes the Clerk user ([src/lib/deleteAccount.ts](../src/lib/deleteAccount.ts)). The
+  partner's phone notices the couple is gone on its next fetch and returns to Welcome with a notice.
 
 | Currency | Display (es) | Decimals |
 | --- | --- | --- |

@@ -394,7 +394,10 @@ function SignOut({ email }: { email: string | null }) {
           </View>
         </View>
       ) : (
-        <NavButton label={m.settings.signOut} kind="secondary" onPress={() => setConfirming(true)} />
+        <>
+          <NavButton label={m.settings.signOut} kind="secondary" onPress={() => setConfirming(true)} />
+          <NavButton label={m.settings.deleteAccount} kind="secondary" href="/delete-account" />
+        </>
       )}
     </Card>
   );

@@ -85,6 +85,7 @@ Settings ▸ Cerrar sesión ─▶ Clerk signOut ─▶ Welcome (query cache cle
 | Screens: Iniciar sesión, Crea tu cuenta, ¿Olvidaste tu contraseña? | [src/app/(onboarding)/](../src/app/(onboarding)/), [src/ui/Auth.tsx](../src/ui/Auth.tsx) |
 | Términos y condiciones (es / en / de, Spanish binding; Colombian law), open signed out and from Ajustes › Información legal | [src/app/terms.tsx](../src/app/terms.tsx), [src/i18n/legal/](../src/i18n/legal/), [src/ui/LegalScreen.tsx](../src/ui/LegalScreen.tsx) |
 | Política de privacidad (Ley 1581 de 2012 / Decreto 1377 de 2013; controller in Bucaramanga; Clerk in the US, Supabase in Ireland; deleting an account deletes the couple's space), accepted with the terms at sign-up | [src/app/privacy.tsx](../src/app/privacy.tsx), [src/i18n/legal/](../src/i18n/legal/) |
+| Borrar cuenta (Ajustes › Cuenta, and Setup for an account without a couple): confirm a recent sign-in with a code by email, erase the couple's space for both (`delete_account()`), then the Clerk user; the partner lands on Welcome with a notice | [src/app/delete-account.tsx](../src/app/delete-account.tsx), [src/lib/deleteAccount.ts](../src/lib/deleteAccount.ts), [src/api/account.ts](../src/api/account.ts), [supabase/migrations/20261020000000_delete_account.sql](../supabase/migrations/20261020000000_delete_account.sql) |
 | Browser comes back to `amedias://sso-callback` | [src/app/sso-callback.tsx](../src/app/sso-callback.tsx) |
 | User ids are `text` Clerk ids; RLS and RPCs use `requesting_user_id()` = `auth.jwt()->>'sub'` | [supabase/migrations/](../supabase/migrations/) |
 | Supabase trusts Clerk (`[auth.third_party.clerk]`, domain from `CLERK_DOMAIN`) | [supabase/config.toml](../supabase/config.toml) |
@@ -105,6 +106,9 @@ fails on anything the app cannot handle.
 5. **Integrations › Supabase:** activate it (adds `role: authenticated` to session tokens) and copy the Clerk
    domain. Put it in `[auth.third_party.clerk] domain` in `supabase/config.toml` (local), and in Supabase ›
    Authentication › Sign In / Providers › Third-party auth › Clerk (hosted).
+6. **User & authentication › Restrictions / Account deletion:** "Allow users to delete their accounts" **on**
+   (Borrar cuenta calls `user.delete()`). Clerk asks for a sign-in from the last 10 minutes first; the app handles
+   that with a code by email (Sessions › Reverification window).
 
 **Proofs that run without Clerk** (`npm test`)
 
@@ -124,6 +128,10 @@ fails on anything the app cannot handle.
 - [ ] New user → Setup → Invite shows a 6-character code; partner joins with it and sees the same couple.
 - [ ] A signed-in user already in a couple opens straight to Home.
 - [ ] Sign-out returns to Welcome and no data from the previous couple is visible.
+- [ ] Borrar cuenta (hosted, after `npx supabase db push`): with an old session it asks for the email code; then
+  both the Clerk user and the couple's rows are gone, and the deleting phone shows "Tu cuenta se borró" on Welcome.
+- [ ] The partner's phone, on its next refresh, returns to Welcome with "Tu pareja borró su cuenta…" and can start
+  a new couple.
 
 ### Phase 2 — Core MVP (built; acceptance checks open)
 

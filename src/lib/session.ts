@@ -10,6 +10,8 @@ export const DEV_BYPASS_AUTH = process.env.EXPO_PUBLIC_DEV_BYPASS_AUTH === '1';
 /** Which onboarding step comes after signing in: create a couple, or join one with a code. */
 export type NextStep = 'setup' | 'join';
 
+export type SessionNotice = 'accountDeleted' | 'coupleDeleted';
+
 interface SessionState {
   loading: boolean;
   /** Clerk user id (`user_…`) of whoever is signed in; the same value RLS reads from the token's `sub`. */
@@ -21,6 +23,10 @@ interface SessionState {
   householdId: string | null;
   /** Where to go once the app's screens unlock; the root layout follows it after the guard switches. */
   pendingRoute: Href | null;
+  /** Shown on Welcome: this account was deleted, or the partner deleted theirs and the couple's space with it. */
+  notice: SessionNotice | null;
+  /** True while Borrar cuenta runs, so the couple vanishing mid-way isn't taken for the partner's deletion. */
+  deleting: boolean;
   setHousehold: (id: string | null, then?: Href) => void;
 }
 
@@ -31,6 +37,8 @@ export const useSessionStore = create<SessionState>((set) => ({
   email: null,
   householdId: null,
   pendingRoute: null,
+  notice: null,
+  deleting: false,
   setHousehold: (householdId, then) => set({ householdId, pendingRoute: then ?? null }),
 }));
 

@@ -9,7 +9,7 @@ import { TextField } from './Form';
 import { NavButton, Screen } from './Screen';
 import { font, radius, space, touch } from './tokens';
 import { makeStyles, useTheme } from './theme';
-import { useI18n } from '@/i18n';
+import { useI18n, type Messages } from '@/i18n';
 
 /** Blue text button, e.g. "¿Olvidaste tu contraseña?". With href it navigates, replacing the current screen. */
 export function TextLink({ label, href, onPress, disabled }: { label: string; href?: Href; onPress?: () => void; disabled?: boolean }) {
@@ -113,6 +113,8 @@ export function CodeStep({
   extra,
   canSubmit = true,
   submitLabel,
+  submitKind = 'primary',
+  errorMessage = authErrorMessage,
 }: {
   title: string;
   lead: string;
@@ -122,6 +124,10 @@ export function CodeStep({
   extra?: ReactNode;
   canSubmit?: boolean;
   submitLabel?: string;
+  /** danger: the code confirms a deletion (Borrar cuenta). */
+  submitKind?: 'primary' | 'danger';
+  /** How a failed onVerify reads; sign-in errors by default. */
+  errorMessage?: (error: unknown, m: Messages) => string;
 }) {
   const { m } = useI18n();
   const { color, type } = useTheme();
@@ -138,7 +144,7 @@ export function CodeStep({
     try {
       await onVerify(value);
     } catch (e) {
-      setError(authErrorMessage(e, m));
+      setError(errorMessage(e, m));
     } finally {
       setBusy(false);
     }
@@ -167,7 +173,7 @@ export function CodeStep({
       title={title}
       lead={lead}
       back="back"
-      footer={<NavButton label={submitLabel ?? m.authUi.continue} onPress={() => verify(code)} disabled={code.length < CODE_LENGTH || !canSubmit} loading={busy} />}
+      footer={<NavButton label={submitLabel ?? m.authUi.continue} kind={submitKind} onPress={() => verify(code)} disabled={code.length < CODE_LENGTH || !canSubmit} loading={busy} />}
     >
       <TextField
         ref={input}

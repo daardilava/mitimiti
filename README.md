@@ -220,7 +220,8 @@ These are not style preferences. Breaking one is a bug.
 - **The balance is never stored**, always computed. When a split leaves an odd unit, the payer keeps it.
 - **User ids are Clerk ids** (`text`, `user_…`), not `uuid`. In SQL use `requesting_user_id()`, never `auth.uid()`.
 - **Expense writes are atomic:** an expense and its shares change in one Postgres function.
-- **Soft deletes and an audit trail:** `deleted_at`, plus a row in `audit_log` for every change.
+- **Soft deletes and an audit trail:** `deleted_at`, plus a row in `audit_log` for every change. The one exception is
+  deleting an account (`delete_account()`), which erases the couple's rows for the right to erasure.
 - **`spent_on` is a `date`**, never a timestamp, so time zones never move an expense to another day.
 - **Exactly two members per couple.**
 - **Design:** colours only from `useTheme()`, styles from `makeStyles()`. No raw hex. Every screen works in
