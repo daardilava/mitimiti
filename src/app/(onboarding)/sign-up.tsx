@@ -100,6 +100,10 @@ export default function SignUp() {
         {m.signUp.termsBefore}{' '}
         <Text style={{ color: color.me, fontFamily: font.bodyBold }} accessibilityRole="link" onPress={() => router.push('/terms')}>
           {m.signUp.termsLink}
+        </Text>{' '}
+        {m.signUp.privacyBetween}{' '}
+        <Text style={{ color: color.me, fontFamily: font.bodyBold }} accessibilityRole="link" onPress={() => router.push('/privacy')}>
+          {m.signUp.privacyLink}
         </Text>
       </Checkbox>
 

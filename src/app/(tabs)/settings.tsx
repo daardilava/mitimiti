@@ -106,6 +106,7 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
 
       <Card title={m.settings.legal}>
         <NavButton label={m.terms.title} kind="secondary" href="/terms" />
+        <NavButton label={m.privacy.title} kind="secondary" href="/privacy" />
       </Card>
 
       <SignOut email={email} />

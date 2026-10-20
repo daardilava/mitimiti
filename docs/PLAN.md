@@ -84,6 +84,7 @@ Settings ▸ Cerrar sesión ─▶ Clerk signOut ─▶ Welcome (query cache cle
 | Password sign-in (+ code on a new device), sign-up (+ code to verify the email), password reset, Google / Apple via `useSSO`, sign-out | [src/api/auth.ts](../src/api/auth.ts), [src/lib/authFlow.ts](../src/lib/authFlow.ts) |
 | Screens: Iniciar sesión, Crea tu cuenta, ¿Olvidaste tu contraseña? | [src/app/(onboarding)/](../src/app/(onboarding)/), [src/ui/Auth.tsx](../src/ui/Auth.tsx) |
 | Términos y condiciones (es / en / de, Spanish binding; Colombian law), open signed out and from Ajustes › Información legal | [src/app/terms.tsx](../src/app/terms.tsx), [src/i18n/legal/](../src/i18n/legal/), [src/ui/LegalScreen.tsx](../src/ui/LegalScreen.tsx) |
+| Política de privacidad (Ley 1581 de 2012 / Decreto 1377 de 2013; controller in Bucaramanga; Clerk in the US, Supabase in Ireland; deleting an account deletes the couple's space), accepted with the terms at sign-up | [src/app/privacy.tsx](../src/app/privacy.tsx), [src/i18n/legal/](../src/i18n/legal/) |
 | Browser comes back to `amedias://sso-callback` | [src/app/sso-callback.tsx](../src/app/sso-callback.tsx) |
 | User ids are `text` Clerk ids; RLS and RPCs use `requesting_user_id()` = `auth.jwt()->>'sub'` | [supabase/migrations/](../supabase/migrations/) |
 | Supabase trusts Clerk (`[auth.third_party.clerk]`, domain from `CLERK_DOMAIN`) | [supabase/config.toml](../supabase/config.toml) |
