@@ -4,6 +4,7 @@ import { BricolageGrotesque_700Bold } from '@expo-google-fonts/bricolage-grotesq
 import { DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold, useFonts } from '@expo-google-fonts/dm-sans';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider as NavigationThemeProvider, type Theme as NavigationTheme } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useMemo } from 'react';
@@ -16,6 +17,11 @@ const queryClient = new QueryClient({
 });
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
+
+// The splash (app.json › expo-splash-screen) stays up until the fonts and the session are ready, so no blank frame
+// shows between it and the first screen; then it fades out. Module scope, as the Expo docs recommend.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.setOptions({ duration: 300, fade: true });
 
 export default function RootLayout() {
   // Sample-data mode never talks to Clerk, so it runs without a key.
@@ -78,7 +84,12 @@ function App() {
     if (!hasHousehold) queryClient.clear();
   }, [hasHousehold]);
 
-  if (!fontsLoaded || loading) return null;
+  const ready = fontsLoaded && !loading;
+  useEffect(() => {
+    if (ready) SplashScreen.hide();
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
