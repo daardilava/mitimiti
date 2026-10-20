@@ -102,7 +102,9 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
         <Coming title={m.settings.newExpenseAlert} detail={m.settings.newExpenseAlertDetail(couple.partner.name)} />
       </Card>
 
-      <Card title={m.settings.exportCsv} badge={m.settings.soon} detail={m.settings.exportCsvDetail} />
+      <Card title={m.settings.exportCsv} detail={m.settings.exportCsvDetail}>
+        <NavButton label={m.settings.exportOpen} kind="secondary" href="/export" />
+      </Card>
 
       <Card title={m.settings.legal}>
         <NavButton label={m.terms.title} kind="secondary" href="/terms" />

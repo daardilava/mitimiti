@@ -72,7 +72,8 @@
             "backgroundColor": "#16181D"
           }
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "scheme": "amedias",
     "experiments": {

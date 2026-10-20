@@ -40,6 +40,18 @@ export function toInputText(amountMinor: number, currency: Currency): string {
   return currency === 'EUR' ? text.replace('.', ',') : text;
 }
 
+/**
+ * A plain number for spreadsheets (CSV export): 184000 · 1234.50, or 1234,50 with a decimal comma. No symbol, no
+ * grouping, sign kept. Integer arithmetic only, so cents never pick up float noise.
+ */
+export function toDecimalText(amountMinor: number, currency: Currency, decimalSeparator: '.' | ',' = '.'): string {
+  const factor = MINOR_FACTOR[currency];
+  const sign = amountMinor < 0 ? '-' : '';
+  const abs = Math.abs(amountMinor);
+  if (factor === 1) return sign + String(abs);
+  return `${sign}${Math.floor(abs / factor)}${decimalSeparator}${String(abs % factor).padStart(2, '0')}`;
+}
+
 function groupDigits(digits: string, separator: string): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
 }
