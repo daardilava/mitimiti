@@ -47,7 +47,7 @@ phones. When they settle up outside the app, they record the payment and the bal
 | Monthly summary | Shared total by category, who paid, each person's share, personal spending | Built |
 | Budgets | Monthly limit per category, warning at 80 %, over-limit state | Built |
 | Settings | Names, avatar, default split, currency, appearance (light / dark), language (es / en / de) | Built |
-| Export | The expenses and payments of a period as a CSV for spreadsheets, through the share sheet | Built (PDF next) |
+| Export | The expenses and payments of a period as a CSV for spreadsheets, or a PDF report with totals and the balance, through the share sheet | Built |
 | Notifications | Partner activity, Sunday reminder | Planned (v1.1) |
 | Offline logging, recurring expenses | Save without signal; rent and subscriptions each month | Planned (v1.2) |
 

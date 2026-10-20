@@ -3,23 +3,26 @@ import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 import { balanceKeys, useSettlements } from '@/api/balance';
 import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
-import { shareTextFile } from '@/api/exportFile';
+import { sharePdf, shareTextFile } from '@/api/exportFile';
 import { buildCsv, EXPORT_PRESETS, exportFileName, exportRows, exportSummary, presetRange, type ExportPreset } from '@/lib/exportData';
-import { Chip, Field } from '@/ui/Form';
+import { buildPdfHtml } from '@/lib/exportPdf';
+import { Chip, Field, RadioCard } from '@/ui/Form';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { space } from '@/ui/tokens';
 import { useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
 
-// Exportar movimientos · from Ajustes. Pick a period; the expenses and payments go out as a CSV through the share sheet.
+// Exportar movimientos · from Ajustes. Pick a period and a format: a CSV for spreadsheets, or a PDF report with totals
+// and the balance. Either goes out through the share sheet.
 export default function Export() {
-  const { m } = useI18n();
+  const { m, d } = useI18n();
   const { color, type } = useTheme();
   const client = useQueryClient();
   const couple = useCouple();
   const expenses = useExpenses();
   const settlements = useSettlements();
   const [preset, setPreset] = useState<ExportPreset>('thisMonth');
+  const [format, setFormat] = useState<'csv' | 'pdf'>('csv');
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -40,13 +43,18 @@ export default function Export() {
     );
   }
 
-  const exportCsv = async () => {
+  const exportFile = async () => {
     setBusy(true);
     setFailed(false);
     try {
-      await shareTextFile(exportFileName(range, 'csv', m), buildCsv(rows, couple.data!, m), 'csv', m.exportData.title);
+      const name = exportFileName(range, format, m);
+      if (format === 'csv') await shareTextFile(name, buildCsv(rows, couple.data!, m), 'csv', m.exportData.title);
+      else {
+        const html = buildPdfHtml({ rows, range, couple: couple.data!, allExpenses: expenses.data!, allPayments: settlements.data!, m, d });
+        await sharePdf(name, html, m.exportData.title);
+      }
     } catch (e) {
-      console.warn('[export] csv failed', e);
+      console.warn(`[export] ${format} failed`, e);
       setFailed(true);
     } finally {
       setBusy(false);
@@ -65,7 +73,7 @@ export default function Export() {
               {m.exportData.failed}
             </Text>
           )}
-          <NavButton label={m.exportData.exportCsv} onPress={exportCsv} disabled={rows.length === 0} loading={busy} />
+          <NavButton label={format === 'csv' ? m.exportData.exportCsv : m.exportData.exportPdf} onPress={exportFile} disabled={rows.length === 0} loading={busy} />
         </View>
       }
     >
@@ -79,6 +87,13 @@ export default function Export() {
       <Text style={[type.body, { color: color.textSecondary }]} accessibilityLiveRegion="polite">
         {rows.length === 0 ? m.exportData.empty : exportSummary(rows, m)}
       </Text>
+
+      <Field label={m.exportData.format}>
+        <View style={{ gap: space[3] }} accessibilityRole="radiogroup">
+          <RadioCard title={m.exportData.csvTitle} detail={m.exportData.csvDetail} selected={format === 'csv'} onPress={() => setFormat('csv')} />
+          <RadioCard title={m.exportData.pdfTitle} detail={m.exportData.pdfDetail} selected={format === 'pdf'} onPress={() => setFormat('pdf')} />
+        </View>
+      </Field>
     </Screen>
   );
 }
