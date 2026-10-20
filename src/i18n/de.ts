@@ -1,5 +1,6 @@
 // German. Typed as Messages: the type checker refuses to build if a message is missing or has other parameters.
 // Voice: informal "du" for the person and "ihr" for the couple, as is usual in consumer apps; neutral, no blame.
+import { termsDe } from './legal/terms.de';
 import type { Messages } from './es';
 
 const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
@@ -175,7 +176,7 @@ export const de: Messages = {
 
   terms: {
     title: 'AGB',
-    todo: 'Der Rechtstext von a medias: welche Daten wir speichern, dass die App nur Zahlungen erfasst und nie Geld bewegt, und wie man das Konto löscht.',
+    ...termsDe,
   },
 
   setup: {
@@ -429,6 +430,7 @@ export const de: Messages = {
     copied: 'Kopiert',
     copyCode: 'Code kopieren',
     account: 'Konto',
+    legal: 'Rechtliches',
     signedInAs: (email) => `Angemeldet als ${email}`,
     signOutConfirm: 'Auf diesem Telefon abmelden? Deine Ausgaben bleiben gespeichert; du siehst sie wieder, wenn du dich anmeldest.',
     cancel: 'Abbrechen',

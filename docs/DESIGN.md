@@ -10,6 +10,7 @@ External source of truth: *a medias — UI design* (13 screens + design system "
 | --- | --- | --- | --- | --- |
 | 1 | Welcome — "Cuentas claras entre los dos." | `(onboarding)/welcome` | Launch, sign-out | Crear nuestra cuenta · Tengo un código de invitación |
 | — | Crea tu cuenta (Clerk) | `(onboarding)/sign-up` | Welcome (either button) | Name, email, password, terms → code by email · Google · Apple |
+| — | Términos y condiciones | `terms` (outside the guards) | Crea tu cuenta, Ajustes › Información legal | Read; Escribirnos (email) |
 | — | Iniciar sesión (Clerk) | `(onboarding)/sign-in` | Welcome "¿Ya tienes cuenta?" | Email, password, ¿Olvidaste tu contraseña? · Google · Apple |
 | — | ¿Olvidaste tu contraseña? | `(onboarding)/forgot-password` | Iniciar sesión | Code by email + new password → signed in |
 | 2 | Create account — "Armemos su cuenta" (Paso 1 de 2) | `(onboarding)/setup` | Sign-in | Names, currency, usual split → Continuar |

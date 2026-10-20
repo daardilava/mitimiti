@@ -1,5 +1,6 @@
 // English. Typed as Messages: the type checker refuses to build if a message is missing or has other parameters.
 // Voice: "you" for the person and the couple; neutral, no blame.
+import { termsEn } from './legal/terms.en';
 import type { Messages } from './es';
 
 export const en: Messages = {
@@ -172,7 +173,7 @@ export const en: Messages = {
 
   terms: {
     title: 'Terms and conditions',
-    todo: 'The legal text for a medias: what data we keep, that the app only records payments and never moves money, and how to delete your account.',
+    ...termsEn,
   },
 
   setup: {
@@ -426,6 +427,7 @@ export const en: Messages = {
     copied: 'Copied',
     copyCode: 'Copy code',
     account: 'Account',
+    legal: 'Legal',
     signedInAs: (email) => `Signed in as ${email}`,
     signOutConfirm: 'Log out on this phone? Your expenses stay saved; you’ll see them again when you log in.',
     cancel: 'Cancel',

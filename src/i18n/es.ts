@@ -2,6 +2,8 @@
 // type checker refuses to build while any message is missing there or takes different parameters.
 // Voice: "tú" for the person, "ustedes" for the couple; neutral, no blame.
 
+import { termsEs } from './legal/terms.es';
+
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export const es = {
@@ -188,7 +190,7 @@ export const es = {
 
   terms: {
     title: 'Términos y condiciones',
-    todo: 'El texto legal de a medias: qué datos guardamos, que la app solo registra pagos y nunca mueve dinero, y cómo borrar la cuenta.',
+    ...termsEs,
   },
 
   setup: {
@@ -447,6 +449,7 @@ export const es = {
     copied: 'Copiado',
     copyCode: 'Copiar código',
     account: 'Cuenta',
+    legal: 'Información legal',
     signedInAs: (email: string) => `Sesión iniciada como ${email}`,
     signOutConfirm: '¿Cerrar sesión en este teléfono? Tus gastos quedan guardados; vuelves a verlos al entrar.',
     cancel: 'Cancelar',

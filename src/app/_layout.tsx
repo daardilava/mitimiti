@@ -99,6 +99,8 @@ function App() {
             <Stack.Screen name="(onboarding)" />
           </Stack.Protected>
           <Stack.Screen name="sso-callback" />
+          {/* Legal texts: opened from Crea tu cuenta (signed out) and from Ajustes (signed in). */}
+          <Stack.Screen name="terms" />
         </Stack>
       </NavigationThemeProvider>
     </QueryClientProvider>
