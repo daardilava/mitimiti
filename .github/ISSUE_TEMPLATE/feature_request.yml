@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement or a new feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or missing today, for the couple using the app?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should happen? Screens, copy, edge cases.
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Roadmap phase (docs/PLAN.md)
+      options: [Current phase, v1.1, v1.2, Later, Not sure]

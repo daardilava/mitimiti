@@ -1,0 +1,9 @@
+# Only GitHub Actions versions are bumped automatically. npm packages are upgraded by hand with
+# `npx expo install --fix`, because Expo pins SDK-compatible versions that a plain bump would break.
+# Dependabot security alerts still cover npm packages.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
