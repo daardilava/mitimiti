@@ -1,5 +1,6 @@
 // German. Typed as Messages: the type checker refuses to build if a message is missing or has other parameters.
 // Voice: informal "du" for the person and "ihr" for the couple, as is usual in consumer apps; neutral, no blame.
+import { privacyDe } from './legal/privacy.de';
 import { termsDe } from './legal/terms.de';
 import type { Messages } from './es';
 
@@ -156,9 +157,11 @@ export const de: Messages = {
     fullNamePlaceholder: 'z. B. Diego Ardila',
     passwordPlaceholder: (min) => `Mindestens ${min} Zeichen`,
     passwordMissing: (n) => (n === 1 ? 'Noch 1 Zeichen.' : `Noch ${n} Zeichen.`),
-    terms: 'Ich akzeptiere die AGB',
+    terms: 'Ich akzeptiere die AGB und die Datenschutzerklärung',
     termsBefore: 'Ich akzeptiere die',
     termsLink: 'AGB',
+    privacyBetween: 'und die',
+    privacyLink: 'Datenschutzerklärung',
     submit: 'Registrieren',
     haveAccount: 'Schon ein Konto?',
     signIn: 'Anmelden',
@@ -177,6 +180,11 @@ export const de: Messages = {
   terms: {
     title: 'AGB',
     ...termsDe,
+  },
+
+  privacy: {
+    title: 'Datenschutzerklärung',
+    ...privacyDe,
   },
 
   setup: {

@@ -2,6 +2,7 @@
 // type checker refuses to build while any message is missing there or takes different parameters.
 // Voice: "tú" for the person, "ustedes" for the couple; neutral, no blame.
 
+import { privacyEs } from './legal/privacy.es';
 import { termsEs } from './legal/terms.es';
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -170,9 +171,11 @@ export const es = {
     fullNamePlaceholder: 'Ej. Diego Ardila',
     passwordPlaceholder: (min: number) => `Mínimo ${min} caracteres`,
     passwordMissing: (n: number) => (n === 1 ? 'Te falta 1 carácter.' : `Te faltan ${n} caracteres.`),
-    terms: 'Acepto los términos y condiciones',
+    terms: 'Acepto los términos y condiciones y la política de privacidad',
     termsBefore: 'Acepto los',
     termsLink: 'términos y condiciones',
+    privacyBetween: 'y la',
+    privacyLink: 'política de privacidad',
     submit: 'Registrarme',
     haveAccount: '¿Ya tienes cuenta?',
     signIn: 'Inicia sesión',
@@ -191,6 +194,11 @@ export const es = {
   terms: {
     title: 'Términos y condiciones',
     ...termsEs,
+  },
+
+  privacy: {
+    title: 'Política de privacidad',
+    ...privacyEs,
   },
 
   setup: {

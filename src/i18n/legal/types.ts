@@ -5,6 +5,8 @@
 export const LEGAL_CONTACT = {
   owner: 'Diego Armando Ardila Vargas',
   email: 'diegoab2010@gmail.com',
+  /** Domicile of the data controller (Decreto 1377 de 2013). */
+  city: 'Bucaramanga, Santander, Colombia',
 } as const;
 
 /** Change `effective` in every language whenever a text changes. */

@@ -1,5 +1,6 @@
 // English. Typed as Messages: the type checker refuses to build if a message is missing or has other parameters.
 // Voice: "you" for the person and the couple; neutral, no blame.
+import { privacyEn } from './legal/privacy.en';
 import { termsEn } from './legal/terms.en';
 import type { Messages } from './es';
 
@@ -153,9 +154,11 @@ export const en: Messages = {
     fullNamePlaceholder: 'E.g. Diego Ardila',
     passwordPlaceholder: (min) => `At least ${min} characters`,
     passwordMissing: (n) => (n === 1 ? '1 more character.' : `${n} more characters.`),
-    terms: 'I accept the terms and conditions',
+    terms: 'I accept the terms and conditions and the privacy policy',
     termsBefore: 'I accept the',
     termsLink: 'terms and conditions',
+    privacyBetween: 'and the',
+    privacyLink: 'privacy policy',
     submit: 'Sign up',
     haveAccount: 'Already have an account?',
     signIn: 'Log in',
@@ -174,6 +177,11 @@ export const en: Messages = {
   terms: {
     title: 'Terms and conditions',
     ...termsEn,
+  },
+
+  privacy: {
+    title: 'Privacy Policy',
+    ...privacyEn,
   },
 
   setup: {
