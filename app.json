@@ -9,7 +9,18 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.amedias.app",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "CFBundleLocalizations": [
+          "es",
+          "en",
+          "de",
+          "es",
+          "en",
+          "de"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -66,6 +77,12 @@
     "scheme": "amedias",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4c3c3e27-80bb-41ae-a3a2-dc00768e600b"
+      }
     }
   }
 }
