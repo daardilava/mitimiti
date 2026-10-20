@@ -1,5 +1,6 @@
 // Sample month from the canvas prototype (COP). Used while DEV_BYPASS_AUTH is on,
 // until each screen reads from the API.
+import type { AvatarId } from './avatars';
 import type { Currency } from './money';
 import type { ExpenseLike, SettlementLike } from './splits';
 import type { CategoryId } from '@/ui/tokens';
@@ -7,6 +8,8 @@ import type { CategoryId } from '@/ui/tokens';
 export const ME = 'diego';
 export const PARTNER = 'ana';
 export const names: Record<string, string> = { [ME]: 'Diego', [PARTNER]: 'Ana' };
+/** Mutable: Ajustes › Tu avatar edits it while DEV_BYPASS_AUTH is on. Ana starts with one, Diego with the initial. */
+export const avatars: Record<string, AvatarId | null> = { [ME]: null, [PARTNER]: 'fox' };
 export const sampleCurrency: Currency = 'COP';
 
 export interface SampleExpense extends ExpenseLike {
@@ -30,7 +33,10 @@ export const sampleExpenses: SampleExpense[] = [
   { id: 'e3', description: 'Arriendo de octubre', category: 'casa', amountMinor: 2_400_000, paidBy: ME, splitMode: 'pct', splitPct: 60, spentOn: '2026-10-01' },
 ];
 
-export const sampleSettlements: SettlementLike[] = [{ fromUser: PARTNER, toUser: ME, amountMinor: 300_000 }];
+// Mutable: src/api/balance.ts adds to it while DEV_BYPASS_AUTH is on.
+export const sampleSettlements: (SettlementLike & { method?: 'transfer' | 'cash' | 'other'; paidOn?: string })[] = [
+  { fromUser: PARTNER, toUser: ME, amountMinor: 300_000, method: 'transfer', paidOn: '2026-10-03' },
+];
 
 // Mutable: src/api/household.ts edits it in place while DEV_BYPASS_AUTH is on.
 export const sampleHousehold = {
@@ -43,3 +49,14 @@ export const sampleHousehold = {
   invitedName: names[PARTNER] as string | null,
   members: [{ userId: ME, displayName: names[ME], role: 'owner' as 'owner' | 'member' }],
 };
+
+// Monthly limits from the design (screen 12): they add up to $5.300.000. Mutable while DEV_BYPASS_AUTH is on.
+export const sampleBudgets: { category: CategoryId; month: string; limitMinor: number }[] = [
+  { category: 'super', month: '2026-10-01', limitMinor: 1_200_000 },
+  { category: 'comida', month: '2026-10-01', limitMinor: 600_000 },
+  { category: 'casa', month: '2026-10-01', limitMinor: 2_500_000 },
+  { category: 'servicios', month: '2026-10-01', limitMinor: 300_000 },
+  { category: 'ocio', month: '2026-10-01', limitMinor: 400_000 },
+  { category: 'transporte', month: '2026-10-01', limitMinor: 200_000 },
+  { category: 'otros', month: '2026-10-01', limitMinor: 100_000 },
+];

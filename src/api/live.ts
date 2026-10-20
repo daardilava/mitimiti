@@ -1,4 +1,4 @@
-// Keeps both phones in step: Supabase Realtime announces every change to the couple's expenses and payments,
+// Keeps both phones in step: Supabase Realtime announces every change to the couple's expenses, payments and budgets,
 // and coming back to the app refetches in case the socket slept in the background. RLS decides what each phone hears.
 import { focusManager, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -6,6 +6,7 @@ import { AppState, Platform } from 'react-native';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { balanceKeys } from './balance';
+import { budgetKeys } from './budgets';
 import { coupleKey, expenseKeys } from './expenses';
 
 /** Mount once while the app's tabs are shown. */
@@ -27,6 +28,7 @@ export function useLiveHousehold() {
       .channel(`household:${householdId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses', filter }, refresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settlements', filter }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'budgets', filter }, () => client.invalidateQueries({ queryKey: budgetKeys.all }))
       .subscribe();
     return () => {
       supabase.removeChannel(channel);

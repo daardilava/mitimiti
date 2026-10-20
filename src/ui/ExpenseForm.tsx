@@ -3,16 +3,16 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { type Couple, type Expense, type ExpenseInput } from '@/api/expenses';
-import { chipDate, daysAgo } from '@/lib/dates';
+import { daysAgo } from '@/lib/dates';
 import { CURRENCY_SYMBOL, formatMoney, parseMoneyInput, toInputText } from '@/lib/money';
 import { expenseEffect, splitShares, type SplitMode } from '@/lib/splits';
 import { Avatar } from './Avatar';
 import { Icon, type IconName } from './Icon';
-import { categories, color, font, radius, space, touch, type, type CategoryId } from './tokens';
+import { font, radius, space, touch, type CategoryId, noFocusRing } from './tokens';
+import { makeStyles, useTheme } from './theme';
+import { useI18n } from '@/i18n';
 
 const PCT_CHIPS = [30, 40, 50, 60, 70];
-/** Household default for 'pct' until §8 reads households.default_pct. */
-const DEFAULT_PCT = 60;
 
 interface ExpenseFormProps {
   title: string;
@@ -26,15 +26,19 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, onSave }: ExpenseFormProps) {
+  const { m, d: dl } = useI18n();
+  const { color, type, categories } = useTheme();
+  const styles = useStyles();
   const { me, partner, currency } = couple;
   const [amountText, setAmountText] = useState(initial ? toInputText(initial.amountMinor, currency) : '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [paidBy, setPaidBy] = useState(initial?.paidBy ?? me.id);
   const [category, setCategory] = useState<CategoryId>(initial?.category ?? 'super');
-  const [splitMode, setSplitMode] = useState<SplitMode>(initial?.splitMode ?? 'half');
+  // New expenses start from the couple's default (Ajustes › División predeterminada).
+  const [splitMode, setSplitMode] = useState<SplitMode>(initial?.splitMode ?? couple.defaultSplit);
   // The chips read "me / partner"; the database stores the payer's percentage.
   const [myPct, setMyPct] = useState(() => {
-    if (initial?.splitMode !== 'pct' || initial.splitPct == null) return DEFAULT_PCT;
+    if (initial?.splitMode !== 'pct' || initial.splitPct == null) return couple.myDefaultPct;
     return initial.paidBy === me.id ? initial.splitPct : 100 - initial.splitPct;
   });
   const [spentOn, setSpentOn] = useState(initial?.spentOn ?? daysAgo(0));
@@ -50,23 +54,23 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
   const fmt = (n: number) => formatMoney(n, currency);
   const preview =
     amountMinor <= 0
-      ? 'Escribe el monto para ver cómo queda'
+      ? m.expenseForm.previewEmpty
       : effect > 0
-        ? `Con esto, ${partner.name} te debe ${fmt(effect)} más`
+        ? m.expenseForm.previewOwedToYou(partner.name, fmt(effect))
         : effect < 0
-          ? `Con esto, le debes ${fmt(effect)} más a ${partner.name}`
-          : 'No cambia el saldo entre ustedes';
+          ? m.expenseForm.previewYouOwe(fmt(effect), partner.name)
+          : m.expenseForm.previewNone;
   const previewColor = effect > 0 ? color.positiveText : effect < 0 ? color.negative : color.textSecondary;
 
   const splitOptions: { id: SplitMode; title: string; sub: string }[] = [
     {
       id: 'half',
-      title: 'Mitad y mitad',
-      sub: amountMinor > 0 ? `Cada quien pone ${fmt(splitShares({ ...draft, splitMode: 'half' }).partner)}` : 'Cada quien pone la mitad',
+      title: m.expenseForm.half,
+      sub: amountMinor > 0 ? m.expenseForm.halfEach(fmt(splitShares({ ...draft, splitMode: 'half' }).partner)) : m.expenseForm.halfEachEmpty,
     },
-    { id: 'pct', title: 'Por porcentaje', sub: `${me.name} ${myPct}% · ${partner.name} ${100 - myPct}%` },
-    { id: 'other', title: `Todo le toca a ${otherName}`, sub: `${otherName} le debe el total a ${payerName}` },
-    { id: 'personal', title: `Personal de ${payerName}`, sub: 'Se registra, pero no cambia el saldo' },
+    { id: 'pct', title: m.expenseForm.pct, sub: `${me.name} ${myPct}% · ${partner.name} ${100 - myPct}%` },
+    { id: 'other', title: m.expenseForm.other(otherName), sub: m.expenseForm.otherDetail(otherName, payerName) },
+    { id: 'personal', title: m.expenseForm.personal(payerName), sub: m.expenseForm.personalDetail },
   ];
 
   const pctChips = PCT_CHIPS.includes(myPct) ? PCT_CHIPS : [...PCT_CHIPS, myPct].sort((a, b) => a - b);
@@ -93,7 +97,7 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Cerrar" onPress={() => router.back()} style={styles.iconButton}>
+          <Pressable accessibilityRole="button" accessibilityLabel={m.ui.close} onPress={() => router.back()} style={styles.iconButton}>
             <Icon name="close" size={22} color={color.ink} />
           </Pressable>
           <Text style={type.bar} accessibilityRole="header">
@@ -104,12 +108,12 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
         <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.field}>
             <Text nativeID="amount-label" style={styles.label}>
-              Monto
+              {m.expenseForm.amount}
             </Text>
             <View style={styles.amountRow}>
               <Text style={[type.screenTitle, { color: color.textSecondary }]}>{CURRENCY_SYMBOL[currency]}</Text>
               <TextInput
-                accessibilityLabel={`Monto en ${currency}`}
+                accessibilityLabel={m.expenseForm.amountA11y(currency)}
                 aria-labelledby="amount-label"
                 value={amountText}
                 onChangeText={setAmountText}
@@ -125,12 +129,12 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Descripción</Text>
+            <Text style={styles.label}>{m.expenseForm.description}</Text>
             <TextInput
-              accessibilityLabel="Descripción"
+              accessibilityLabel={m.expenseForm.description}
               value={description}
               onChangeText={setDescription}
-              placeholder="Ej. Súper, cena, gasolina"
+              placeholder={m.expenseForm.descriptionPlaceholder}
               placeholderTextColor={color.disabled}
               maxLength={80}
               style={styles.textInput}
@@ -138,7 +142,7 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>¿Quién pagó?</Text>
+            <Text style={styles.label}>{m.expenseForm.whoPaid}</Text>
             <View style={styles.row}>
               {[me, partner].map((p) => {
                 const on = paidBy === p.id;
@@ -147,14 +151,14 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
                     key={p.id || 'partner'}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: on, disabled: !p.id }}
-                    accessibilityLabel={`Pagó ${p.name}`}
-                    accessibilityHint={p.id ? undefined : 'Disponible cuando tu pareja se una'}
+                    accessibilityLabel={m.expenseForm.paidBy(p.name)}
+                    accessibilityHint={p.id ? undefined : m.expenseForm.partnerNotYet}
                     // Until the partner joins they have no account, so only you can be the payer.
                     disabled={!p.id}
                     onPress={() => setPaidBy(p.id)}
                     style={[styles.option, styles.payer, on && styles.optionOn, !p.id && { opacity: 0.5 }]}
                   >
-                    <Avatar name={p.name} isMe={p.id === me.id} size={36} />
+                    <Avatar name={p.name} isMe={p.id === me.id} avatar={p.avatar} size={36} />
                     <Text style={[type.row, { fontFamily: font.bodyBold, flexShrink: 1 }]} numberOfLines={1}>
                       {p.name}
                     </Text>
@@ -165,7 +169,7 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Categoría</Text>
+            <Text style={styles.label}>{m.expenseForm.category}</Text>
             {categoryRows.map((rowIds) => (
               <View key={rowIds[0]} style={styles.row}>
                 {rowIds.map((id) => {
@@ -194,7 +198,7 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>¿Cómo se divide?</Text>
+            <Text style={styles.label}>{m.expenseForm.howSplit}</Text>
             {splitOptions.map((o) => {
               const on = splitMode === o.id;
               return (
@@ -231,10 +235,10 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Fecha</Text>
+            <Text style={styles.label}>{m.expenseForm.date}</Text>
             <View style={styles.chips}>
               {dateChips.map((d) => (
-                <Chip key={d} label={chipDate(d)} on={spentOn === d} onPress={() => setSpentOn(d)} />
+                <Chip key={d} label={dl.chipDate(d)} on={spentOn === d} onPress={() => setSpentOn(d)} />
               ))}
             </View>
           </View>
@@ -257,7 +261,7 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
             onPress={save}
             style={[styles.primary, !canSave && styles.disabled]}
           >
-            <Text style={[type.row, { color: color.surface, fontFamily: font.bodyBold }]}>{saving ? 'Guardando…' : saveLabel}</Text>
+            <Text style={[type.row, { color: color.onPrimary, fontFamily: font.bodyBold }]}>{saving ? m.expenseForm.saving : saveLabel}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -266,9 +270,11 @@ export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, 
 }
 
 function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+  const { color, type } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="radio" accessibilityState={{ checked: on }} accessibilityLabel={label} onPress={onPress} style={[styles.chip, on && styles.chipOn]}>
-      <Text style={[type.label, { fontFamily: font.bodyBold, fontSize: 14, color: on ? color.surface : color.ink }]}>{label}</Text>
+      <Text style={[type.label, { fontFamily: font.bodyBold, fontSize: 14, color: on ? color.onPrimary : color.ink }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -279,7 +285,7 @@ function chunk<T>(items: T[], size: number): T[][] {
   return rows;
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.surface },
   flex: { flex: 1 },
   header: {
@@ -296,7 +302,8 @@ const styles = StyleSheet.create({
   field: { gap: space[2] },
   label: { ...type.label, color: color.textSecondary },
   amountRow: { flexDirection: 'row', alignItems: 'center', gap: 6, borderBottomWidth: 2, borderBottomColor: color.ink, paddingBottom: 6 },
-  amountInput: { ...type.hero, flex: 1, minWidth: 0, color: color.ink, padding: 0, minHeight: touch },
+  // The underline is the field's border; no focus ring on top of it on web.
+  amountInput: { ...type.hero, flex: 1, minWidth: 0, color: color.ink, padding: 0, minHeight: touch, ...noFocusRing },
   textInput: {
     ...type.body,
     height: 52,
@@ -331,4 +338,4 @@ const styles = StyleSheet.create({
   preview: { ...type.label, fontFamily: font.bodyBold, fontSize: 14, textAlign: 'center' },
   primary: { height: 52, borderRadius: radius.control, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
   disabled: { opacity: 0.4 },
-});
+}));

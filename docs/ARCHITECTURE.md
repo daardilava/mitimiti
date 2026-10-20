@@ -42,7 +42,7 @@ Phone ──supabase-js with accessToken: () => getToken()──▶ Supabase (th
 | Table | Key columns |
 | --- | --- |
 | households | id, name, currency, join_code, default_split, created_at |
-| members | household_id, user_id (**text**, Clerk id), display_name, role |
+| members | household_id, user_id (**text**, Clerk id), display_name, role, avatar (character id or null; set via `update_couple_settings`) |
 | expenses | id, household_id, paid_by, amount_minor, category, description, spent_on (date), split_mode, split_pct, created_by, updated_by, deleted_at |
 | expense_shares | expense_id, user_id, share_minor |
 | settlements | id, household_id, from_user, to_user, amount_minor, method, paid_on, created_by, deleted_at |
@@ -67,13 +67,18 @@ Phone ──supabase-js with accessToken: () => getToken()──▶ Supabase (th
 | Path | What |
 | --- | --- |
 | `src/app/` | Expo Router routes, one file per screen. `(onboarding)` for signed-out, `(tabs)` for the main app |
-| `src/api/` | Calls to Clerk and Supabase (`auth.ts`, `household.ts`, `expenses.ts`, `balance.ts`); `live.ts` keeps both phones in sync (Realtime + refetch on focus) |
+| `src/api/` | Calls to Clerk and Supabase (`auth.ts`, `household.ts`, `expenses.ts`, `balance.ts`, `budgets.ts`); `live.ts` keeps both phones in sync (Realtime + refetch on focus) |
 | `src/lib/money.ts` | Format and parse COP / EUR / USD; amounts are integers in minor units |
 | `src/lib/splits.ts` | Split modes and balance; mirrors `write_shares()` and `balance_view` in SQL |
 | `src/lib/session.ts` | Clerk auth state (`userId`) and the route guard's inputs |
 | `src/lib/authFlow.ts` | Password sign-in / sign-up / reset steps and Spanish auth errors, testable without React |
+| `src/lib/activity.ts` | Movimientos: a day / week / month of expenses and payments, filtered, searched and grouped by day; per-day spending for the chart |
+| `src/lib/coupleSettings.ts` | Ajustes: each person's share of the default split, settings error messages |
+| `src/lib/budgets.ts` | Presupuestos: limits that carry over, status per category (80 % warning), − / + steps |
+| `src/lib/summary.ts` | Resumen: a month by category, who paid, each one's share, personal total |
+| `src/lib/settle.ts` | Saldar cuentas: who pays whom, half / full, never more than owed, confirmation wording |
 | `src/lib/balance.ts` | Balance wording ("Ana te debe", "Te deben $X") and the month's shared spending by who paid |
 | `src/lib/joinCode.ts`, `dates.ts` | Invite code validation; date labels ("Ayer", "Lunes 12 de octubre") |
-| `src/ui/` | Design tokens, `Icon`, `Screen`, `Avatar`, form pieces, auth pieces, `ExpenseRow` and shared buttons |
-| `supabase/` | Local config, migrations, and SQL tests (`supabase/tests`) |
+| `src/ui/` | Design tokens, `Icon`, `Screen`, `Avatar`, form pieces, auth pieces, `ExpenseRow` / `PaymentRow`, `SearchField`, `SpendChart`, `PeriodNav` and shared buttons |
+| `supabase/` | Local config, migrations, and SQL tests on PGlite (`supabase/tests`: RLS and RPCs, and app ↔ database split parity) |
 | `scripts/check-clerk.mjs` | `npm run clerk:check` |

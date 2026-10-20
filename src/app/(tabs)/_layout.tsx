@@ -2,7 +2,8 @@ import { router, Tabs } from 'expo-router';
 import { View, type ColorValue } from 'react-native';
 import { useLiveHousehold } from '@/api/live';
 import { Icon, type IconName } from '@/ui/Icon';
-import { color, type } from '@/ui/tokens';
+import { useTheme } from '@/ui/theme';
+import { useI18n } from '@/i18n';
 
 function tabIcon(name: IconName) {
   return function TabIcon({ color: tint }: { color: ColorValue }) {
@@ -11,6 +12,8 @@ function tabIcon(name: IconName) {
 }
 
 export default function TabsLayout() {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
   useLiveHousehold();
   return (
     <Tabs
@@ -22,16 +25,16 @@ export default function TabsLayout() {
         tabBarStyle: { height: 80, borderTopColor: color.line },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: tabIcon('house') }} />
-      <Tabs.Screen name="activity" options={{ title: 'Movimientos', tabBarIcon: tabIcon('list') }} />
+      <Tabs.Screen name="index" options={{ title: m.tabs.home, tabBarIcon: tabIcon('house') }} />
+      <Tabs.Screen name="activity" options={{ title: m.tabs.activity, tabBarIcon: tabIcon('list') }} />
       <Tabs.Screen
         name="add"
         options={{
           title: '',
-          tabBarAccessibilityLabel: 'Agregar gasto',
+          tabBarAccessibilityLabel: m.tabs.add,
           tabBarIcon: () => (
             <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="plus" color={color.surface} size={26} />
+              <Icon name="plus" color={color.onPrimary} size={26} />
             </View>
           ),
         }}
@@ -43,8 +46,8 @@ export default function TabsLayout() {
           },
         }}
       />
-      <Tabs.Screen name="summary" options={{ title: 'Resumen', tabBarIcon: tabIcon('chart') }} />
-      <Tabs.Screen name="settings" options={{ title: 'Ajustes', tabBarIcon: tabIcon('settings') }} />
+      <Tabs.Screen name="summary" options={{ title: m.tabs.summary, tabBarIcon: tabIcon('chart') }} />
+      <Tabs.Screen name="settings" options={{ title: m.tabs.settings, tabBarIcon: tabIcon('settings') }} />
     </Tabs>
   );
 }

@@ -3,10 +3,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DEV_BYPASS_AUTH, useSessionStore, type NextStep } from '@/lib/session';
 import { NavButton } from '@/ui/Screen';
-import { color, font, space, touch, type } from '@/ui/tokens';
+import { font, space, touch } from '@/ui/tokens';
+import { makeStyles, useTheme } from '@/ui/theme';
+import { useI18n } from '@/i18n';
 
 // 01 · Bienvenida
 export default function Welcome() {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
   const signedIn = useSessionStore((s) => s.userId !== null) || DEV_BYPASS_AUTH;
   // Both paths need a signed-in person: new people create an account first, then continue to the chosen one.
   const to = (next: NextStep): Href => (signedIn ? `/${next}` : { pathname: '/sign-up', params: { next } });
@@ -20,21 +25,21 @@ export default function Welcome() {
           <View style={[styles.circle, styles.overlap, { backgroundColor: color.partner }]} />
         </View>
         <Text style={[type.hero, styles.light, { lineHeight: 48 }]} accessibilityRole="header">
-          Cuentas claras entre los dos.
+          {m.welcome.title}
         </Text>
         <Text style={[type.body, { color: color.onInk, fontSize: 17, lineHeight: 27 }]}>
-          Registren lo que gastan juntos, vean al momento quién le debe a quién y salden con un toque.
+          {m.welcome.lead}
         </Text>
       </View>
       <View style={{ gap: space[3] }}>
-        <NavButton href={to('setup')} label="Crear nuestra cuenta" kind="secondary" />
-        <NavButton href={to('join')} label="Tengo un código de invitación" kind="outline" />
+        <NavButton href={to('setup')} label={m.welcome.create} kind="inverse" />
+        <NavButton href={to('join')} label={m.welcome.haveCode} kind="outline" />
         {!signedIn && (
           <View style={styles.signIn}>
-            <Text style={[type.body, { color: color.onInk, fontSize: 15 }]}>¿Ya tienes cuenta?</Text>
+            <Text style={[type.body, { color: color.onInk, fontSize: 15 }]}>{m.welcome.haveAccount}</Text>
             <Link href="/sign-in" asChild>
               <Pressable accessibilityRole="link" hitSlop={12} style={{ minHeight: touch, justifyContent: 'center' }}>
-                <Text style={[type.row, styles.light, { fontFamily: font.bodyBold, fontSize: 15, textDecorationLine: 'underline' }]}>Inicia sesión</Text>
+                <Text style={[type.row, styles.light, { fontFamily: font.bodyBold, fontSize: 15, textDecorationLine: 'underline' }]}>{m.welcome.signIn}</Text>
               </Pressable>
             </Link>
           </View>
@@ -44,12 +49,12 @@ export default function Welcome() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: color.ink, padding: space[6], gap: space[6] },
+const useStyles = makeStyles(({ color }) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: color.hero, padding: space[6], gap: space[6] },
   hero: { flex: 1, justifyContent: 'center', gap: space[6] },
-  light: { color: color.surface },
+  light: { color: color.onHero },
   logo: { flexDirection: 'row', height: 88 },
   circle: { width: 88, height: 88, borderRadius: 44 },
   overlap: { marginLeft: -36, opacity: 0.92 },
   signIn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[1] },
-});
+}));

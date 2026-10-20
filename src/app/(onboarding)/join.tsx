@@ -7,9 +7,11 @@ import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { TextField } from '@/ui/Form';
 import { NavButton, Screen } from '@/ui/Screen';
 import { font, radius } from '@/ui/tokens';
+import { useI18n } from '@/i18n';
 
 // 04 · Unirse con código
 export default function Join() {
+  const { m } = useI18n();
   const signedIn = useSessionStore((s) => s.userId !== null) || DEV_BYPASS_AUTH;
   const join = useJoinHousehold();
   const [code, setCode] = useState('');
@@ -19,11 +21,11 @@ export default function Join() {
   const status = joinCodeStatus(code);
   const hint =
     status.kind === 'incomplete'
-      ? `Faltan ${status.missing} ${status.missing === 1 ? 'carácter' : 'caracteres'}`
+      ? m.join.missing(status.missing)
       : status.kind === 'ready'
-        ? 'Listo'
+        ? m.join.ready
         : undefined;
-  const error = status.kind === 'ambiguous' ? 'Los códigos no llevan 0, O, 1 ni I. Revisa esa letra.' : join.isError ? joinErrorMessage(join.error) : null;
+  const error = status.kind === 'ambiguous' ? m.join.ambiguous : join.isError ? joinErrorMessage(join.error, m) : null;
 
   const onChange = (text: string) => {
     setCode(normalizeJoinCode(text));
@@ -32,16 +34,16 @@ export default function Join() {
 
   return (
     <Screen
-      title="Únete a tu pareja"
-      lead="Pídele el código de 6 caracteres que aparece en su app, en Ajustes › Código de pareja."
+      title={m.join.title}
+      lead={m.join.lead}
       back="back"
-      footer={<NavButton label="Unirme" onPress={() => join.mutate(code)} disabled={status.kind !== 'ready'} loading={join.isPending} />}
+      footer={<NavButton label={m.join.submit} onPress={() => join.mutate(code)} disabled={status.kind !== 'ready'} loading={join.isPending} />}
     >
       <TextField
-        label="Código de invitación"
+        label={m.join.label}
         value={code}
         onChangeText={onChange}
-        placeholder="Ej. AM482X"
+        placeholder={m.join.placeholder}
         autoCapitalize="characters"
         autoCorrect={false}
         autoComplete="off"

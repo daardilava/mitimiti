@@ -1,44 +1,11 @@
-/// <reference types="node" />
-// Runs the real migrations on an in-process Postgres (PGlite) with a small stand-in for what Supabase provides:
-// the anon / authenticated roles, auth.jwt() reading the verified token's claims, and its default grants.
+// Row Level Security and the couple RPCs with Clerk users, on the real migrations (see ./db.ts).
 // Each query runs as someone holding a Clerk session token (sub = 'user_…', role = 'authenticated').
-import { PGlite } from '@electric-sql/pglite';
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import type { PGlite } from '@electric-sql/pglite';
 import { beforeAll, describe, expect, it } from 'vitest';
-
-const migrations = join(__dirname, '..', 'migrations');
-
-const SUPABASE_STUB = `
-  create role anon nologin;
-  create role authenticated nologin;
-  create schema auth;
-  grant usage on schema auth to anon, authenticated;
-  -- Supabase's auth.jwt(): the claims of the token PostgREST verified (here, a Clerk session token).
-  create function auth.jwt() returns jsonb language sql stable as $$
-    select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb
-  $$;
-  grant execute on function auth.jwt() to anon, authenticated;
-  create publication supabase_realtime;
-  grant usage on schema public to anon, authenticated;
-  alter default privileges in schema public grant all on tables to anon, authenticated;
-  alter default privileges in schema public grant all on sequences to anon, authenticated;
-  alter default privileges in schema public grant execute on functions to anon, authenticated;
-`;
+import { createTestDb, type As } from './db';
 
 let db: PGlite;
-
-/** Runs `sql` the way PostgREST would for a request carrying this Clerk user's token (null = signed out). */
-async function as<T = Record<string, unknown>>(userId: string | null, sql: string, params: unknown[] = []): Promise<T[]> {
-  const claims = userId ? { sub: userId, role: 'authenticated' } : { role: 'anon' };
-  await db.query(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify(claims)]);
-  await db.exec(`set role ${userId ? 'authenticated' : 'anon'}`);
-  try {
-    return (await db.query<T>(sql, params)).rows;
-  } finally {
-    await db.exec('reset role');
-  }
-}
+let as: As;
 
 const DIEGO = 'user_2diegoAAAAAAAAAAAAAAAAAAA';
 const ANA = 'user_2anaBBBBBBBBBBBBBBBBBBBBB';
@@ -48,11 +15,7 @@ let householdId: string;
 let joinCode: string;
 
 beforeAll(async () => {
-  db = new PGlite();
-  await db.exec(SUPABASE_STUB);
-  for (const file of readdirSync(migrations).filter((f) => f.endsWith('.sql')).sort()) {
-    await db.exec(readFileSync(join(migrations, file), 'utf8'));
-  }
+  ({ db, as } = await createTestDb());
 }, 60_000);
 
 describe('couple account with Clerk users', () => {
@@ -102,6 +65,10 @@ describe('couple account with Clerk users', () => {
     expect(await as(DIEGO, `select count(*)::int as n from expenses`)).toEqual([{ n: 1 }]);
   });
 
+  it('refuses a payment larger than what is owed', async () => {
+    await expect(as(ANA, `select record_settlement(50001, 'transfer')`)).rejects.toThrow(/amount_exceeds_balance/);
+  });
+
   it('records a settle-up from whoever owes and audits it with the Clerk id', async () => {
     await as(ANA, `select record_settlement(50000, 'transfer')`);
     const [t] = await as<{ from_user: string; to_user: string }>(DIEGO, `select from_user, to_user from settlements`);
@@ -110,6 +77,21 @@ describe('couple account with Clerk users', () => {
     expect(balance.map((b) => b.net_minor)).toEqual(['0', '0']);
     const actors = await as<{ actor: string }>(DIEGO, `select distinct actor from audit_log order by actor`);
     expect(actors.map((a) => a.actor).sort()).toEqual([ANA, DIEGO].sort());
+  });
+
+  it('refuses a payment when they are even', async () => {
+    await expect(as(DIEGO, `select record_settlement(1, 'cash')`)).rejects.toThrow(/nothing_owed/);
+  });
+
+  it('lets the person who is owed record the payment too, still from the one who owes', async () => {
+    await as(DIEGO, `select upsert_expense(null, $1, 20000, 'comida', 'Almuerzo', '2026-10-14', 'half')`, [DIEGO]);
+    const [t] = await as<{ from_user: string; to_user: string; amount_minor: string; method: string }>(
+      DIEGO,
+      `select from_user, to_user, amount_minor::text, method from record_settlement(4000, 'cash')`,
+    );
+    expect(t).toEqual({ from_user: ANA, to_user: DIEGO, amount_minor: '4000', method: 'cash' });
+    const [mine] = await as<{ net_minor: string }>(DIEGO, `select net_minor::text from balance_view where user_id = $1`, [DIEGO]);
+    expect(mine.net_minor).toBe('6000'); // 10.000 owed for the lunch, 4.000 paid
   });
 
   it('publishes expenses and settlements to Realtime, so the partner sees changes live', async () => {

@@ -43,3 +43,19 @@ export function toInputText(amountMinor: number, currency: Currency): string {
 function groupDigits(digits: string, separator: string): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
 }
+
+/**
+ * Short amounts for chart axes: $200 mil · $1,5 M · 1,2 mil € · US$1.2K. Only for labels, never for totals.
+ * `units` are the language's words for thousand / million (es: mil / M, en: K / M, de: Tsd. / Mio.); US$ keeps K / M.
+ */
+export function formatMoneyCompact(amountMinor: number, currency: Currency, units: { thousand: string; million: string } = { thousand: 'mil', million: 'M' }): string {
+  const major = Math.abs(amountMinor) / MINOR_FACTOR[currency];
+  const words = currency === 'USD' ? { thousand: 'K', million: 'M' } : units;
+  const [value, unit] = major >= 1_000_000 ? [major / 1_000_000, words.million] : major >= 1_000 ? [major / 1_000, words.thousand] : [major, ''];
+  const rounded = Math.round(value * 10) / 10;
+  const digits = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  const number = currency === 'USD' ? digits : digits.replace('.', ',');
+  if (currency === 'COP') return unit ? `$${number} ${unit}` : `$${number}`;
+  if (currency === 'EUR') return unit ? `${number} ${unit} €` : `${number} €`;
+  return `US$${number}${unit}`;
+}

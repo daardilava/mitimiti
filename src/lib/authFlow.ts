@@ -1,5 +1,6 @@
 // The steps of signing in, signing up and resetting a password, without React or native modules, so Vitest covers them.
 // src/api/auth.ts feeds these with Clerk's real useSignIn() / useSignUp() resources (Core 3 "future" API).
+import { es, type Messages } from '../i18n/es';
 
 type Result = Promise<{ error: unknown }>;
 
@@ -143,51 +144,52 @@ export function clerkErrorCode(error: unknown): string | null {
   return e?.errors?.[0]?.code ?? e?.code ?? null;
 }
 
-/** Spanish message for a Clerk error. */
-export function authErrorMessage(error: unknown): string {
+/** A Clerk error in the app's language. */
+export function authErrorMessage(error: unknown, m: Messages = es): string {
+  const e = m.authErrors;
   if (error instanceof AuthFlowError) {
-    return 'Tu cuenta necesita un paso más que la app aún no muestra. Intenta con Google o escríbenos.';
+    return e.incomplete;
   }
   switch (clerkErrorCode(error)) {
     case 'form_password_incorrect':
-      return 'La contraseña no es correcta. Inténtalo de nuevo o recupérala.';
+      return e.passwordIncorrect;
     case 'form_identifier_not_found':
-      return 'No encontramos una cuenta con ese correo. ¿Quieres registrarte?';
+      return e.noAccount;
     case 'form_identifier_exists':
-      return 'Ya hay una cuenta con ese correo. Inicia sesión.';
+      return e.accountExists;
     case 'form_password_pwned':
-      return 'Esa contraseña apareció en una filtración de datos. Elige otra.';
+      return e.passwordPwned;
     case 'form_password_length_too_short':
     case 'form_password_validation_failed':
     case 'form_password_not_strong_enough':
-      return `Usa una contraseña más segura, de al menos ${PASSWORD_MIN} caracteres.`;
+      return e.passwordWeak(PASSWORD_MIN);
     case 'form_code_incorrect':
-      return 'Ese código no es correcto. Revísalo e inténtalo de nuevo.';
+      return e.codeIncorrect;
     case 'verification_expired':
     case 'verification_failed':
-      return 'El código venció. Pide uno nuevo.';
+      return e.codeExpired;
     case 'too_many_requests':
     case 'user_locked':
-      return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+      return e.tooManyAttempts;
     case 'form_param_format_invalid':
     case 'form_param_nil':
-      return 'Revisa que el correo esté bien escrito.';
+      return e.checkEmail;
     case 'strategy_for_user_invalid':
-      return 'Esta cuenta entra con Google o Apple. Usa ese botón.';
+      return e.useSocial;
     case 'not_allowed_access':
     case 'sign_up_restricted':
     case 'oauth_access_denied':
-      return 'Esta forma de entrar no está disponible para esta cuenta.';
+      return e.notAllowed;
     case 'session_exists':
     case 'identifier_already_signed_in':
-      return 'Ya tienes una sesión abierta. Cierra la app y vuelve a abrirla.';
+      return e.sessionExists;
     // Clerk rejects a field or strategy its dashboard has turned off (e.g. passwords): a setup problem, not the person's.
     case 'form_param_unknown':
     case 'form_param_value_invalid':
-      return 'Esta forma de entrar no está activada todavía. Usa Google mientras la configuramos.';
+      return e.notEnabled;
     default:
       // Shown in the Expo terminal so an unexpected Clerk answer can be traced instead of guessed.
       console.warn('[auth] unrecognised error', clerkErrorCode(error), error);
-      return 'No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.';
+      return e.generic;
   }
 }

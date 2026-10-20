@@ -23,7 +23,7 @@ External source of truth: *a medias — UI design* (13 screens + design system "
 | 10 | Payment recorded | `settle/done` | Settle up | Volver al inicio · Ver movimientos |
 | 11 | Summary (Resumen) | `(tabs)/summary` | Tab | See budgets |
 | 12 | Budgets (Presupuestos) | `budgets` | Home, Summary | − / + in steps of $50.000 |
-| 13 | Settings (Ajustes) | `(tabs)/settings` | Tab | Names, couple code, default split, currency, reminders, Export CSV, Cerrar sesión |
+| 13 | Settings (Ajustes) | `(tabs)/settings` | Tab | Tu avatar (12 characters or the initial, `src/ui/AvatarArt.tsx`), names, couple code, default split, currency, reminders, Export CSV, Cerrar sesión |
 
 The `+` in the tab bar always opens a new expense. Screens marked **Por construir** are routed placeholders;
 each names the feature section that builds it.
@@ -33,15 +33,32 @@ each names the feature section that builds it.
 Implemented in [src/ui/tokens.ts](../src/ui/tokens.ts). Near-black ink for action, blue for you, orange for
 your partner, green only for what is settled. Red and green are never the only cue: always with text.
 
+### Light and dark mode
+
+- The app follows the phone (`userInterfaceStyle: "automatic"` in `app.json`; `expo-system-ui` makes Android honour
+  it). **Ajustes › Apariencia** can fix it to Claro or Oscuro on that phone; the choice is stored on the device and
+  passed to `Appearance.setColorScheme`, so keyboards and alerts match.
+- `tokens.ts` has a light palette (the UI kit below) and a dark one with the **same token names**, plus dark
+  category colours. The UI kit only defines light; the dark palette keeps its hues: lighter blue / orange / green /
+  red for text and marks on near-black, deeper tints for tiles and notices.
+- Tokens by job, so each mode can treat them differently: `ink` (text, primary buttons; light in dark mode) with
+  `onPrimary` on it; `hero` (balance, Presupuestos' month, Welcome; stays dark in both) with `onHero` / `onInk`;
+  `positive` (fills) vs `positiveText`; `danger` (delete button) vs `negative` (text, bars); `scrim`.
+- Buttons on hero cards use `kind="inverse"` (white with dark text in both modes).
+- [src/ui/__tests__/tokens.test.ts](../src/ui/__tests__/tokens.test.ts) checks ~30 text and mark pairs per mode
+  against WCAG (4.5:1 text, 3:1 icons and bars) and every category icon on its tile. Known exception from the UI
+  kit: light orange is 2.6:1 on white, so the partner's marks always come with a legend and amounts.
+- Screens read colours with `useTheme()` and build styles with `makeStyles()` ([src/ui/theme.tsx](../src/ui/theme.tsx)).
+
 | Token | Hex | Use |
 | --- | --- | --- |
-| Ink | `#16181D` | Text, primary button, balance card |
+| Ink | `#16181D` | Text, primary button (the balance card is `hero`, same hex in light mode) |
 | Background | `#F2F4F3` | App background |
 | Surface | `#FFFFFF` | Cards, sheets, fields |
 | Line | `#E3E6E8` | Card borders, dividers |
 | Text secondary | `#5B606B` | Labels, metadata |
 | Disabled | `#9AA0A8` | Off radios / switches; inactive tab `#6B7079` |
-| You / bg | `#1F4FB8` / `#DCE5FA` | What you pay or owe; your avatar |
+| You / bg | `#1F4FB8` / `#DCE5FA` | What you pay or owe; your avatar's initial (until a character is picked) |
 | Partner / bg | `#E8873A` / `#FBE1CC` (text `#8A3A0C`) | What your partner pays or owes; their avatar |
 | Positive | `#0F7B6C` | "Te deben", payments, budget OK |
 | Negative | `#B4232C` | "Debes", over budget, delete |

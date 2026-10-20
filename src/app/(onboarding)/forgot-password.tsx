@@ -7,10 +7,13 @@ import { useContinueAfterSignIn, type NextStep } from '@/lib/session';
 import { CodeStep } from '@/ui/Auth';
 import { PasswordField, TextField } from '@/ui/Form';
 import { NavButton, Screen } from '@/ui/Screen';
-import { color, type } from '@/ui/tokens';
+import { useTheme } from '@/ui/theme';
+import { useI18n } from '@/i18n';
 
 // ¿Olvidaste tu contraseña? · a code by email, then a new password; saving it signs you in.
 export default function ForgotPassword() {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
   const params = useLocalSearchParams<{ next?: NextStep; email?: string }>();
   useContinueAfterSignIn(params.next);
   const reset = usePasswordReset();
@@ -29,7 +32,7 @@ export default function ForgotPassword() {
       await reset.start(email);
       setSent(true);
     } catch (e) {
-      setError(authErrorMessage(e));
+      setError(authErrorMessage(e, m));
     } finally {
       setBusy(false);
     }
@@ -38,18 +41,18 @@ export default function ForgotPassword() {
   if (sent) {
     return (
       <CodeStep
-        title="Nueva contraseña"
-        lead={`Escribe el código que te enviamos a ${normalizeEmail(email)} y elige tu nueva contraseña.`}
+        title={m.forgotPassword.codeTitle}
+        lead={m.forgotPassword.codeLead(normalizeEmail(email))}
         onVerify={(code) => reset.finish(code, password)}
         onResend={() => reset.start(email)}
         canSubmit={password.length >= PASSWORD_MIN}
-        submitLabel="Guardar y entrar"
+        submitLabel={m.forgotPassword.save}
         extra={
           <PasswordField
-            label="Nueva contraseña"
+            label={m.forgotPassword.newPassword}
             value={password}
             onChangeText={setPassword}
-            placeholder={`Mínimo ${PASSWORD_MIN} caracteres`}
+            placeholder={m.signUp.passwordPlaceholder(PASSWORD_MIN)}
             textContentType="newPassword"
             autoComplete="new-password"
           />
@@ -60,17 +63,17 @@ export default function ForgotPassword() {
 
   return (
     <Screen
-      title="¿Olvidaste tu contraseña?"
-      lead="Te enviamos un código a tu correo para que elijas una nueva."
+      title={m.forgotPassword.title}
+      lead={m.forgotPassword.lead}
       back="back"
-      footer={<NavButton label="Enviarme un código" onPress={send} disabled={!isEmail(email)} loading={busy} />}
+      footer={<NavButton label={m.forgotPassword.send} onPress={send} disabled={!isEmail(email)} loading={busy} />}
     >
       <TextField
-        label="Correo"
+        label={m.signIn.email}
         icon="mail"
         value={email}
         onChangeText={(t) => { setEmail(t); setError(null); }}
-        placeholder="tu@correo.com"
+        placeholder={m.signIn.emailPlaceholder}
         keyboardType="email-address"
         textContentType="emailAddress"
         autoComplete="email"

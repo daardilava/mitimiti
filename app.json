@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.amedias.app",
@@ -31,7 +31,24 @@
       "expo-font",
       "expo-secure-store",
       "expo-web-browser",
-      "@clerk/expo"
+      "@clerk/expo",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": [
+              "es",
+              "en",
+              "de"
+            ],
+            "android": [
+              "es",
+              "en",
+              "de"
+            ]
+          }
+        }
+      ]
     ],
     "scheme": "amedias",
     "experiments": {

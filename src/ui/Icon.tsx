@@ -15,6 +15,12 @@ const paths: Record<string, React.ReactNode> = {
     </>
   ),
   back: <Path d="M15 5l-7 7 7 7" />,
+  forward: <Path d="M9 5l7 7-7 7" />,
+  calendar: <Path d="M5 5.5h14a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1zM4 10h16M8 3v4M16 3v4" />,
+  arrowRight:<Path d="M4 12h15M13.5 6.5L19 12l-5.5 5.5" />,
+  bank: <Path d="M3 9.5L12 4l9 5.5M5.5 10.5v7M10 10.5v7M14 10.5v7M18.5 10.5v7M3.5 20h17" />,
+  cash: <Path d="M3.5 7h17a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM6 10v4M18 10v4" />,
+  search: <Path d="M10.5 17.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM15.5 15.5L20.5 20.5" />,
   close: <Path d="M6 6l12 12M18 6L6 18" />,
   check: <Path d="M5 12.5l4.5 4.5L19 7.5" />,
   cart: (

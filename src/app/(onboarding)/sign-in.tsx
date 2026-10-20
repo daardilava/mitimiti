@@ -7,10 +7,14 @@ import { useContinueAfterSignIn, type NextStep } from '@/lib/session';
 import { CodeStep, SocialButtons, SwitchAuth, TextLink } from '@/ui/Auth';
 import { PasswordField, TextField } from '@/ui/Form';
 import { NavButton, Screen } from '@/ui/Screen';
-import { color, space, type } from '@/ui/tokens';
+import { space } from '@/ui/tokens';
+import { useTheme } from '@/ui/theme';
+import { useI18n } from '@/i18n';
 
 // Iniciar sesión · email and password, or Google / Apple. Before 02 and 04.
 export default function SignIn() {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
   const { next } = useLocalSearchParams<{ next?: NextStep }>();
   useContinueAfterSignIn(next);
   const signIn = usePasswordSignIn();
@@ -32,7 +36,7 @@ export default function SignIn() {
     try {
       if ((await signIn.start(email, password)) === 'verify-device') setVerifyingDevice(true);
     } catch (e) {
-      setError(authErrorMessage(e));
+      setError(authErrorMessage(e, m));
     } finally {
       setBusy(false);
     }
@@ -41,8 +45,8 @@ export default function SignIn() {
   if (verifyingDevice) {
     return (
       <CodeStep
-        title="Confirma que eres tú"
-        lead={`Es la primera vez que entras desde este dispositivo. Te enviamos un código a ${email.trim()}.`}
+        title={m.signIn.deviceTitle}
+        lead={m.signIn.deviceLead(email.trim())}
         onVerify={signIn.confirmDevice}
         onResend={signIn.resendDeviceCode}
       />
@@ -50,13 +54,13 @@ export default function SignIn() {
   }
 
   return (
-    <Screen title="Hola de nuevo" lead="Entra para ver sus gastos y quién le debe a quién." back="back">
+    <Screen title={m.signIn.title} lead={m.signIn.lead} back="back">
       <TextField
-        label="Correo"
+        label={m.signIn.email}
         icon="mail"
         value={email}
         onChangeText={(t) => { setEmail(t); setError(null); }}
-        placeholder="tu@correo.com"
+        placeholder={m.signIn.emailPlaceholder}
         keyboardType="email-address"
         textContentType="emailAddress"
         autoComplete="email"
@@ -66,17 +70,17 @@ export default function SignIn() {
       />
       <View>
         <PasswordField
-          label="Contraseña"
+          label={m.signIn.password}
           value={password}
           onChangeText={(t) => { setPassword(t); setError(null); }}
-          placeholder="Tu contraseña"
+          placeholder={m.signIn.passwordPlaceholder}
           textContentType="password"
           autoComplete="current-password"
           returnKeyType="go"
           onSubmitEditing={submit}
         />
         <View style={{ alignItems: 'flex-end' }}>
-          <TextLink label="¿Olvidaste tu contraseña?" href={{ pathname: '/forgot-password', params: { ...params, email: email.trim() } }} />
+          <TextLink label={m.signIn.forgot} href={{ pathname: '/forgot-password', params: { ...params, email: email.trim() } }} />
         </View>
       </View>
 
@@ -85,12 +89,12 @@ export default function SignIn() {
           {error}
         </Text>
       )}
-      <NavButton label="Iniciar sesión" onPress={submit} disabled={!valid || socialBusy} loading={busy} />
+      <NavButton label={m.signIn.submit} onPress={submit} disabled={!valid || socialBusy} loading={busy} />
 
       <SocialButtons disabled={busy} onBusy={setSocialBusy} />
 
       <View style={{ marginTop: space[4] }}>
-        <SwitchAuth question="¿No tienes cuenta?" label="Regístrate" href={{ pathname: '/sign-up', params }} />
+        <SwitchAuth question={m.signIn.noAccount} label={m.signIn.signUp} href={{ pathname: '/sign-up', params }} />
       </View>
     </Screen>
   );

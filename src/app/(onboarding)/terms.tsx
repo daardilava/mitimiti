@@ -1,10 +1,12 @@
 import { Screen, Todo } from '@/ui/Screen';
+import { useI18n } from '@/i18n';
 
 // Términos y condiciones · linked from Crea tu cuenta.
 export default function Terms() {
+  const { m } = useI18n();
   return (
-    <Screen title="Términos y condiciones" back="back">
-      <Todo feature="§1 Couple account">El texto legal de a medias: qué datos guardamos, que la app solo registra pagos y nunca mueve dinero, y cómo borrar la cuenta.</Todo>
+    <Screen title={m.terms.title} back="back">
+      <Todo feature="§1 Couple account">{m.terms.todo}</Todo>
     </Screen>
   );
 }

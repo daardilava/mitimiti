@@ -7,10 +7,14 @@ import { authErrorMessage, useOAuth, type Provider } from '@/api/auth';
 import { CODE_LENGTH } from '@/lib/authFlow';
 import { TextField } from './Form';
 import { NavButton, Screen } from './Screen';
-import { color, font, radius, space, touch, type } from './tokens';
+import { font, radius, space, touch } from './tokens';
+import { makeStyles, useTheme } from './theme';
+import { useI18n } from '@/i18n';
 
 /** Blue text button, e.g. "¿Olvidaste tu contraseña?". With href it navigates, replacing the current screen. */
 export function TextLink({ label, href, onPress, disabled }: { label: string; href?: Href; onPress?: () => void; disabled?: boolean }) {
+  const { color, type } = useTheme();
+  const styles = useStyles();
   // Link asChild rejects style arrays, so flatten.
   const link = (
     <Pressable accessibilityRole="link" onPress={onPress} disabled={disabled} hitSlop={12} style={StyleSheet.flatten([styles.textLink, disabled && { opacity: 0.4 }])}>
@@ -28,6 +32,8 @@ export function TextLink({ label, href, onPress, disabled }: { label: string; hr
 
 /** "¿No tienes cuenta? Regístrate" under the form. */
 export function SwitchAuth({ question, label, href }: { question: string; label: string; href: Href }) {
+  const { color, type } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.switch}>
       <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]}>{question}</Text>
@@ -38,6 +44,9 @@ export function SwitchAuth({ question, label, href }: { question: string; label:
 
 /** Google and Apple, side by side under "o continúa con". Errors show under the buttons. */
 export function SocialButtons({ disabled, onBusy }: { disabled?: boolean; onBusy?: (busy: boolean) => void }) {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
   const signInWith = useOAuth();
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +58,7 @@ export function SocialButtons({ disabled, onBusy }: { disabled?: boolean; onBusy
     try {
       await signInWith(provider);
     } catch (e) {
-      setError(authErrorMessage(e));
+      setError(authErrorMessage(e, m));
     } finally {
       setBusy(null);
       onBusy?.(false);
@@ -60,7 +69,7 @@ export function SocialButtons({ disabled, onBusy }: { disabled?: boolean; onBusy
     <View style={{ gap: space[3] }}>
       <View style={styles.divider} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <View style={styles.rule} />
-        <Text style={[type.label, { color: color.textSecondary }]}>o continúa con</Text>
+        <Text style={[type.label, { color: color.textSecondary }]}>{m.authUi.orContinueWith}</Text>
         <View style={styles.rule} />
       </View>
       <View style={styles.socialRow}>
@@ -77,10 +86,13 @@ export function SocialButtons({ disabled, onBusy }: { disabled?: boolean; onBusy
 }
 
 function SocialButton({ provider, label, busy, disabled, onPress }: { provider: Provider; label: string; busy: boolean; disabled: boolean; onPress: () => void }) {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Continuar con ${label}`}
+      accessibilityLabel={m.authUi.continueWith(label)}
       accessibilityState={{ disabled, busy }}
       disabled={disabled}
       onPress={onPress}
@@ -100,7 +112,7 @@ export function CodeStep({
   onResend,
   extra,
   canSubmit = true,
-  submitLabel = 'Continuar',
+  submitLabel,
 }: {
   title: string;
   lead: string;
@@ -111,6 +123,9 @@ export function CodeStep({
   canSubmit?: boolean;
   submitLabel?: string;
 }) {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,7 +138,7 @@ export function CodeStep({
     try {
       await onVerify(value);
     } catch (e) {
-      setError(authErrorMessage(e));
+      setError(authErrorMessage(e, m));
     } finally {
       setBusy(false);
     }
@@ -137,7 +152,7 @@ export function CodeStep({
       setResent(true);
       input.current?.focus();
     } catch (e) {
-      setError(authErrorMessage(e));
+      setError(authErrorMessage(e, m));
     }
   };
 
@@ -152,11 +167,11 @@ export function CodeStep({
       title={title}
       lead={lead}
       back="back"
-      footer={<NavButton label={submitLabel} onPress={() => verify(code)} disabled={code.length < CODE_LENGTH || !canSubmit} loading={busy} />}
+      footer={<NavButton label={submitLabel ?? m.authUi.continue} onPress={() => verify(code)} disabled={code.length < CODE_LENGTH || !canSubmit} loading={busy} />}
     >
       <TextField
         ref={input}
-        label="Código"
+        label={m.authUi.code}
         value={code}
         onChangeText={onChange}
         placeholder="000000"
@@ -165,7 +180,7 @@ export function CodeStep({
         autoComplete="one-time-code"
         maxLength={CODE_LENGTH}
         error={extra ? null : error}
-        hint={resent ? 'Te enviamos un código nuevo.' : undefined}
+        hint={resent ? m.authUi.newCodeSent : undefined}
         style={styles.code}
         autoFocus
       />
@@ -175,7 +190,7 @@ export function CodeStep({
           {error}
         </Text>
       )}
-      {onResend && <TextLink label="Reenviar código" onPress={resend} disabled={busy} />}
+      {onResend && <TextLink label={m.authUi.resendCode} onPress={resend} disabled={busy} />}
     </Screen>
   );
 }
@@ -192,6 +207,7 @@ function GoogleLogo() {
 }
 
 function AppleLogo() {
+  const { color } = useTheme();
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24" accessibilityElementsHidden>
       <Path
@@ -202,7 +218,7 @@ function AppleLogo() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(({ color }) => StyleSheet.create({
   textLink: { minHeight: touch, justifyContent: 'center' },
   switch: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[1], flexWrap: 'wrap' },
   divider: { flexDirection: 'row', alignItems: 'center', gap: space[3], marginTop: space[2] },
@@ -221,4 +237,4 @@ const styles = StyleSheet.create({
     backgroundColor: color.surface,
   },
   code: { height: 64, fontFamily: font.display, fontSize: 28, letterSpacing: 10, textAlign: 'center', borderRadius: radius.option },
-});
+}));

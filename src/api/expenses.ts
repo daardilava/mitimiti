@@ -1,9 +1,11 @@
 // Expense reads and writes. With EXPO_PUBLIC_DEV_BYPASS_AUTH=1 they work on the in-memory sample
 // month from src/lib/sample.ts; otherwise they go to Supabase (tables for reads, RPCs for writes).
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toAvatarId, type AvatarId } from '@/lib/avatars';
+import { myDefaultPct, type MemberRole } from '@/lib/coupleSettings';
 import type { Currency } from '@/lib/money';
 import { balanceKeys } from './balance';
-import { ME, names, PARTNER, sampleCurrency, sampleExpenses } from '@/lib/sample';
+import { avatars, ME, names, PARTNER, sampleExpenses, sampleHousehold } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import type { SplitMode } from '@/lib/splits';
 import { supabase } from '@/lib/supabase';
@@ -28,6 +30,8 @@ export type ExpenseInput = Omit<Expense, 'id'> & { id?: string };
 export interface Person {
   id: string;
   name: string;
+  /** The character picked in Ajustes; null shows the initial. */
+  avatar: AvatarId | null;
 }
 
 export interface Couple {
@@ -36,32 +40,60 @@ export interface Couple {
   partner: Person;
   partnerJoined: boolean;
   currency: Currency;
+  myRole: MemberRole;
+  /** How new expenses are split unless changed (Ajustes › División predeterminada). */
+  defaultSplit: 'half' | 'pct';
+  /** My share (%) when the default is proportional. */
+  myDefaultPct: number;
 }
 
 // ─── Plain functions ──────────────────────────────────────────────────────
 
 export async function getCouple(): Promise<Couple> {
   if (DEV_BYPASS_AUTH) {
-    return { me: { id: ME, name: names[ME] }, partner: { id: PARTNER, name: names[PARTNER] }, partnerJoined: true, currency: sampleCurrency };
+    const h = sampleHousehold;
+    return {
+      me: { id: ME, name: names[ME], avatar: avatars[ME] },
+      partner: { id: PARTNER, name: names[PARTNER], avatar: avatars[PARTNER] },
+      partnerJoined: true,
+      currency: h.currency,
+      myRole: 'owner',
+      defaultSplit: h.defaultSplit,
+      myDefaultPct: h.defaultPct,
+    };
   }
   const { householdId, userId: myId } = useSessionStore.getState();
   if (!householdId || !myId) throw new Error('not_in_household');
   const [household, members] = await Promise.all([
-    supabase.from('households').select('currency, invited_name').eq('id', householdId).single(),
-    supabase.from('members').select('user_id, display_name').eq('household_id', householdId),
+    supabase.from('households').select('currency, invited_name, default_split, default_pct').eq('id', householdId).single(),
+    listMembers(householdId),
   ]);
   if (household.error) throw household.error;
   if (members.error) throw members.error;
-  const rows = members.data as { user_id: string; display_name: string }[];
+  const rows = members.data as { user_id: string; display_name: string; role: MemberRole; avatar: string | null }[];
   const mine = rows.find((m) => m.user_id === myId);
   const theirs = rows.find((m) => m.user_id !== myId);
-  const h = household.data as { currency: Currency; invited_name: string | null };
+  const h = household.data as { currency: Currency; invited_name: string | null; default_split: 'half' | 'pct'; default_pct: number };
+  const myRole = mine?.role ?? 'owner';
   return {
-    me: { id: myId, name: mine?.display_name || 'Tú' },
-    partner: { id: theirs?.user_id ?? '', name: theirs?.display_name || h.invited_name || 'Tu pareja' },
+    me: { id: myId, name: mine?.display_name || 'Tú', avatar: toAvatarId(mine?.avatar) },
+    partner: { id: theirs?.user_id ?? '', name: theirs?.display_name || h.invited_name || 'Tu pareja', avatar: toAvatarId(theirs?.avatar) },
     partnerJoined: !!theirs,
     currency: h.currency,
+    myRole,
+    defaultSplit: h.default_split,
+    myDefaultPct: myDefaultPct(myRole, h.default_pct),
   };
+}
+
+/**
+ * The couple's members with their avatars. Until 20261019000000_member_avatar.sql is applied, members has no avatar
+ * column (Postgres 42703); then everyone shows their initial instead of the screen failing to load.
+ */
+async function listMembers(householdId: string) {
+  const withAvatar = await supabase.from('members').select('user_id, display_name, role, avatar').eq('household_id', householdId);
+  if (withAvatar.error?.code !== '42703') return withAvatar;
+  return supabase.from('members').select('user_id, display_name, role').eq('household_id', householdId);
 }
 
 export async function listExpenses(): Promise<Expense[]> {

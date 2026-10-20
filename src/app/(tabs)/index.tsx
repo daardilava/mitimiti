@@ -1,20 +1,29 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { balanceKeys, useMyBalance, useSettlements } from '@/api/balance';
-import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
+import { useBudgets } from '@/api/budgets';
+import { coupleKey, expenseKeys, useCouple, useExpenses, type Expense } from '@/api/expenses';
 import { balanceBasis, balanceHeadline, monthSpend, sharedCount } from '@/lib/balance';
-import { isoDate, monthName, monthOf, monthTitle } from '@/lib/dates';
-import { formatMoney } from '@/lib/money';
+import { isoDate, monthOf } from '@/lib/dates';
+import { budgetStatus, daysLeftInMonth, daysLeftLabel, monthBudget, type BudgetTone } from '@/lib/budgets';
+import { formatMoney, type Currency } from '@/lib/money';
 import { TextLink } from '@/ui/Auth';
 import { Avatar } from '@/ui/Avatar';
 import { ExpenseRow } from '@/ui/ExpenseRow';
-import { NavButton, Screen, Todo } from '@/ui/Screen';
-import { color, font, radius, space, type } from '@/ui/tokens';
+import { NavButton, Pending, Screen } from '@/ui/Screen';
+import { Icon } from '@/ui/Icon';
+import { font, radius, space, type Palette } from '@/ui/tokens';
+import { makeStyles, useTheme } from '@/ui/theme';
+import { useI18n } from '@/i18n';
 
 const RECENT = 4;
 
 // 05 · Inicio: the live balance, this month's shared spending by who paid, and the latest expenses.
 export default function Home() {
+  const { m, d } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
   const client = useQueryClient();
   const couple = useCouple();
   const expenses = useExpenses();
@@ -27,43 +36,35 @@ export default function Home() {
 
   if (!couple.data || !expenses.data || balance.data === undefined || !settlements.data) {
     return (
-      <Screen title="Inicio">
-        {failed ? (
-          <View style={{ gap: space[4], marginTop: space[8] }}>
-            <Text style={[type.body, { color: color.textSecondary, textAlign: 'center' }]}>No se pudo cargar. Revisa tu conexión.</Text>
-            <NavButton
-              label="Reintentar"
-              kind="secondary"
-              onPress={() => [coupleKey, expenseKeys.all, balanceKeys.balance, balanceKeys.settlements].forEach((queryKey) => client.invalidateQueries({ queryKey }))}
-            />
-          </View>
-        ) : (
-          <ActivityIndicator color={color.ink} style={{ marginTop: space[8] }} />
-        )}
+      <Screen title={m.home.title}>
+        <Pending
+          failed={failed}
+          onRetry={() => [coupleKey, expenseKeys.all, balanceKeys.balance, balanceKeys.settlements].forEach((queryKey) => client.invalidateQueries({ queryKey }))}
+        />
       </Screen>
     );
   }
 
   const { me, partner, currency } = couple.data;
   const net = balance.data;
-  const headline = balanceHeadline(net, partner.name);
+  const headline = balanceHeadline(net, partner.name, m);
   const month = monthSpend(expenses.data, monthOf(isoDate(today)), me.id);
   const recent = expenses.data.slice(0, RECENT);
   const fmt = (minor: number) => formatMoney(minor, currency);
 
   return (
     <Screen
-      title="Inicio"
+      title={m.home.title}
       header={
         <View style={styles.header}>
           <View style={styles.avatars} aria-hidden>
-            <Avatar name={me.name} isMe size={40} />
+            <Avatar name={me.name} isMe avatar={me.avatar} size={40} />
             <View style={styles.overlap}>
-              <Avatar name={partner.name} isMe={false} size={40} />
+              <Avatar name={partner.name} isMe={false} avatar={partner.avatar} size={40} />
             </View>
           </View>
           <View>
-            <Text style={[type.label, { color: color.textSecondary, fontSize: 15 }]}>{monthTitle(today)}</Text>
+            <Text style={[type.label, { color: color.textSecondary, fontSize: 15 }]}>{d.monthTitle(today)}</Text>
             <Text style={type.heading} accessibilityRole="header">
               {me.name} y {partner.name}
             </Text>
@@ -73,20 +74,20 @@ export default function Home() {
     >
       <View style={styles.balance} accessible accessibilityLabel={`${headline} ${fmt(net)}`}>
         <Text style={[type.row, { color: color.onInk, fontSize: 17 }]}>{headline}</Text>
-        <Text style={[type.balance, styles.tabular, { color: color.surface }]} adjustsFontSizeToFit numberOfLines={1}>
+        <Text style={[type.balance, styles.tabular, { color: color.onHero }]} adjustsFontSizeToFit numberOfLines={1}>
           {fmt(net)}
         </Text>
-        <Text style={[type.body, { color: color.onInkMuted, fontSize: 15, lineHeight: 22 }]}>{balanceBasis(sharedCount(expenses.data), settlements.data.length)}</Text>
+        <Text style={[type.body, { color: color.onInkMuted, fontSize: 15, lineHeight: 22 }]}>{balanceBasis(sharedCount(expenses.data), settlements.data.length, m)}</Text>
         {net !== 0 && (
           <View style={{ marginTop: space[2] }}>
-            <NavButton href="/settle" label="Saldar cuentas" kind="secondary" />
+            <NavButton href="/settle" label={m.home.settle} kind="inverse" />
           </View>
         )}
       </View>
 
       <View style={styles.card}>
         <View style={styles.cardTitle}>
-          <Text style={[type.row, { fontFamily: font.bodyBold, flex: 1 }]}>Gastado juntos en {monthName(today)}</Text>
+          <Text style={[type.row, { fontFamily: font.bodyBold, flex: 1 }]}>{m.home.spentTogether(d.monthName(today))}</Text>
           <Text style={[type.heading, styles.tabular]}>{fmt(month.totalMinor)}</Text>
         </View>
         {month.totalMinor > 0 ? (
@@ -101,22 +102,22 @@ export default function Home() {
             </View>
           </>
         ) : (
-          <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]}>Aún no hay gastos compartidos este mes.</Text>
+          <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]}>{m.home.noSharedThisMonth}</Text>
         )}
       </View>
 
-      <Todo feature="v1.1 Budgets">Presupuesto del mes: barra con el porcentaje usado y los días que quedan.</Todo>
+      <BudgetCard expenses={expenses.data} month={monthOf(isoDate(today))} today={today} currency={currency} />
 
       <View style={styles.sectionTitle}>
-        <Text style={[type.heading, { flex: 1 }]}>Recientes</Text>
-        {expenses.data.length > RECENT && <TextLink label="Ver todos" href="/activity" />}
+        <Text style={[type.heading, { flex: 1 }]}>{m.home.recent}</Text>
+        {expenses.data.length > RECENT && <TextLink label={m.home.seeAll} href="/activity" />}
       </View>
       <View style={styles.card}>
         {recent.length > 0 ? (
           recent.map((e) => <ExpenseRow key={e.id} expense={e} couple={couple.data} />)
         ) : (
           <Text style={[type.body, { color: color.textSecondary, textAlign: 'center', paddingVertical: space[4] }]}>
-            Aún no hay gastos. Toca + para agregar el primero.
+            {m.home.noExpenses}
           </Text>
         )}
       </View>
@@ -124,13 +125,63 @@ export default function Home() {
   );
 }
 
+const budgetBar = (c: Palette): Record<BudgetTone, string> => ({ ok: c.positive, warning: c.warning, over: c.negative, none: c.line });
+
+/** "Presupuesto del mes 72 % ›": the month against the limits; opens Presupuestos. Hidden while budgets load. */
+function BudgetCard({ expenses, month, today, currency }: { expenses: Expense[]; month: string; today: Date; currency: Currency }) {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
+  const budgets = useBudgets();
+  if (!budgets.data) return null;
+  const b = monthBudget(expenses, budgets.data, month, currency, m);
+  const fmt = (n: number) => formatMoney(n, currency);
+  const status = budgetStatus(b.spentMinor, b.totalLimitMinor, currency, m);
+
+  return (
+    <Link href="/budgets" asChild>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={b.totalLimitMinor > 0 ? m.home.budgetA11y(b.pct, m.ui.amountOf(fmt(b.spentMinor), fmt(b.totalLimitMinor)), status.text) : m.home.budgetSetUpA11y}
+        style={styles.card}
+      >
+        <View style={styles.cardTitle}>
+          <Text style={[type.row, { fontFamily: font.bodyBold, flex: 1 }]}>{m.home.budgetTitle}</Text>
+          {b.totalLimitMinor > 0 && <Text style={[type.row, styles.tabular, { color: color.textSecondary }]}>{b.pct}%</Text>}
+          <Icon name="forward" size={20} color={color.textSecondary} />
+        </View>
+        {b.totalLimitMinor > 0 ? (
+          <>
+            <View style={styles.bar}>
+              <View style={{ width: `${Math.min(b.spentMinor / b.totalLimitMinor, 1) * 100}%`, backgroundColor: budgetBar(color)[status.tone] }} />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: space[3] }}>
+              <Text style={[type.body, styles.tabular, { color: color.textSecondary, fontSize: 15 }]}>
+                {m.ui.amountOf(fmt(b.spentMinor), fmt(b.totalLimitMinor))}
+              </Text>
+              <Text style={[type.body, { color: status.tone === 'ok' ? color.textSecondary : status.tone === 'over' ? color.negative : color.warningText, fontSize: 15 }]}>
+                {status.tone === 'ok' ? daysLeftLabel(daysLeftInMonth(today), m) : status.text}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]}>{m.home.budgetSetUp}</Text>
+        )}
+      </Pressable>
+    </Link>
+  );
+}
+
 function Paid({ name, amount, dot }: { name: string; amount: string; dot: string }) {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
   return (
     <View style={{ flex: 1, gap: 2 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
         <View style={[styles.dot, { backgroundColor: dot }]} />
         <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]} numberOfLines={1}>
-          Pagó {name}
+          {m.chart.paidBy(name)}
         </Text>
       </View>
       <Text style={[type.row, styles.tabular, { fontFamily: font.bodyBold, fontSize: 17 }]}>{amount}</Text>
@@ -138,11 +189,11 @@ function Paid({ name, amount, dot }: { name: string; amount: string; dot: string
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(({ color }) => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingTop: space[2] },
   avatars: { flexDirection: 'row' },
   overlap: { marginLeft: -10, borderRadius: 22, borderWidth: 2, borderColor: color.background },
-  balance: { backgroundColor: color.ink, borderRadius: radius.sheet, padding: 22, gap: space[2] },
+  balance: { backgroundColor: color.hero, borderRadius: radius.sheet, padding: 22, gap: space[2] },
   tabular: { fontVariant: ['tabular-nums'] },
   card: { backgroundColor: color.surface, borderRadius: radius.card, borderWidth: 1, borderColor: color.line, padding: space[4], gap: space[3] },
   cardTitle: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
@@ -150,4 +201,4 @@ const styles = StyleSheet.create({
   legend: { flexDirection: 'row', gap: space[4] },
   dot: { width: 10, height: 10, borderRadius: 5 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', marginTop: space[2] },
-});
+}));

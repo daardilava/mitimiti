@@ -1,33 +1,32 @@
 // What Home (and later Activity) says about the balance and each expense. Pure, so Vitest covers the wording.
 // The balance number itself comes from balance_view in SQL; splits.ts mirrors that math.
+import { es, type Messages } from '../i18n/es';
 import { formatMoney, type Currency } from './money';
 import { monthOf } from './dates';
 import { expenseEffect, type ExpenseLike } from './splits';
 
 /** "Ana te debe" · "Le debes a Ana" · "Están a mano". Positive net: the partner owes me. */
-export function balanceHeadline(netMinor: number, partnerName: string): string {
-  if (netMinor > 0) return `${partnerName} te debe`;
-  if (netMinor < 0) return `Le debes a ${partnerName}`;
-  return 'Están a mano';
+export function balanceHeadline(netMinor: number, partnerName: string, m: Messages = es): string {
+  if (netMinor > 0) return m.balance.owesYou(partnerName);
+  if (netMinor < 0) return m.balance.youOwe(partnerName);
+  return m.balance.even;
 }
 
 /** "Considera 9 gastos compartidos y 1 pago registrados" — what the balance is made of. */
-export function balanceBasis(sharedExpenses: number, payments: number): string {
-  if (sharedExpenses === 0 && payments === 0) return 'Aún no hay gastos compartidos.';
-  const e = `${sharedExpenses} ${sharedExpenses === 1 ? 'gasto compartido' : 'gastos compartidos'}`;
-  if (payments === 0) return `Considera ${e}`;
-  return `Considera ${e} y ${payments} ${payments === 1 ? 'pago registrado' : 'pagos registrados'}`;
+export function balanceBasis(sharedExpenses: number, payments: number, m: Messages = es): string {
+  if (sharedExpenses === 0 && payments === 0) return m.balance.noShared;
+  return m.balance.basis(sharedExpenses, payments);
 }
 
 export type Tone = 'positive' | 'negative' | 'neutral';
 
 /** The line under an expense's amount: how it moves my balance. "Te deben $142.500" · "Debes $120.000" · "Personal". */
-export function expenseEffectLabel(e: ExpenseLike, me: string, currency: Currency): { text: string; tone: Tone } {
-  if (e.splitMode === 'personal') return { text: 'Personal', tone: 'neutral' };
+export function expenseEffectLabel(e: ExpenseLike, me: string, currency: Currency, m: Messages = es): { text: string; tone: Tone } {
+  if (e.splitMode === 'personal') return { text: m.balance.personal, tone: 'neutral' };
   const effect = expenseEffect(e, me);
-  if (effect > 0) return { text: `Te deben ${formatMoney(effect, currency)}`, tone: 'positive' };
-  if (effect < 0) return { text: `Debes ${formatMoney(effect, currency)}`, tone: 'negative' };
-  return { text: 'Sin efecto', tone: 'neutral' };
+  if (effect > 0) return { text: m.balance.owedToYou(formatMoney(effect, currency)), tone: 'positive' };
+  if (effect < 0) return { text: m.balance.youOweAmount(formatMoney(effect, currency)), tone: 'negative' };
+  return { text: m.balance.noEffect, tone: 'neutral' };
 }
 
 export interface MonthSpend {

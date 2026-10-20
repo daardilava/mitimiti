@@ -7,7 +7,9 @@ Supabase (Postgres + RLS + Realtime) for data. UI copy in Spanish; code, comment
 
 ## Current focus
 
-**Phase 2 — Core MVP** (Live balance on Home built; Activity next). Phase 1 (Auth) is built; its acceptance
+**Phase 3 — Settle + summary** (Settle up, Monthly summary, split tests, Ajustes and Presupuestos done — gate *Balance is right*
+passes; polish next). Phases 1–2 are built; their acceptance
+checks are still open. Phase 1 (Auth) is built; its acceptance
 checks are still open. One feature at a time; don't start work from a later phase unless asked.
 Phase scope, status and acceptance checks: [docs/PLAN.md](docs/PLAN.md). When a task finishes a check
 there, tick it (`- [x]`) in the same change.
@@ -35,7 +37,9 @@ Section numbers like `§4` in code refer to the external *a medias — Project P
 - Deletes are soft (`deleted_at`); every change is written to `audit_log`.
 - `spent_on` is a `date`, never a timestamp.
 - Exactly two members per couple. No groups, no moving money, no web app (Expo web is for dev only).
-- Design: use tokens from `src/ui/tokens.ts`, never raw hex. One primary button per screen.
+- Design: colours come from `useTheme()` and styles from `makeStyles()` (`src/ui/theme.tsx`), never raw hex and
+  never a static palette: every screen works in light and dark mode. New colour pairs go in
+  `src/ui/__tests__/tokens.test.ts` (WCAG contrast, both modes). One primary button per screen.
   Green only for payments/settled, red only for delete/over. Colour is never the only cue — always add text.
   Touch targets ≥ 44 × 44.
 - Neutral, no-blame language in Spanish UI copy.
@@ -58,7 +62,8 @@ npm test                  # Vitest: money, splits, join codes, dates, auth flow,
 ```
 
 New logic in `src/lib/` gets a test in `src/lib/__tests__/`. New SQL/RLS behaviour gets a case in
-`supabase/tests/`. Once a migration has been applied to the hosted Supabase project, never edit it:
+`supabase/tests/` (shared PGlite setup in `supabase/tests/db.ts`). Any change to split or balance math, in
+`src/lib/splits.ts` or in SQL, must keep `supabase/tests/splits_parity.test.ts` passing. Once a migration has been applied to the hosted Supabase project, never edit it:
 add a new file under `supabase/migrations/`.
 
 ## Layout
@@ -66,6 +71,6 @@ add a new file under `supabase/migrations/`.
 - `src/app/` — Expo Router routes, one file per screen. `(onboarding)` signed-out, `(tabs)` main app
 - `src/api/` — calls to Clerk and Supabase
 - `src/lib/` — pure logic (money, splits, session, authFlow, joinCode, dates) + tests
-- `src/ui/` — tokens, Icon, Screen, Avatar, form pieces
+- `src/ui/` — tokens (light + dark palettes), theme (`useTheme`, `makeStyles`), Icon, Screen, Avatar, form pieces
 - `supabase/` — config, migrations, SQL tests
 - Never commit `.env`; add new variables to `.env.example`.

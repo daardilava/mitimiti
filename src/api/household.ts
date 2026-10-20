@@ -2,10 +2,13 @@
 // With EXPO_PUBLIC_DEV_BYPASS_AUTH=1 everything works on sampleHousehold in memory.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { es, type Messages } from '@/i18n/es';
+import type { AvatarId } from '@/lib/avatars';
 import type { Currency } from '@/lib/money';
-import { sampleHousehold } from '@/lib/sample';
+import { avatars, ME, names, PARTNER, sampleExpenses, sampleHousehold, sampleSettlements } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
+import { coupleKey } from './expenses';
 
 export type DefaultSplit = 'half' | 'pct';
 
@@ -105,21 +108,63 @@ export async function regenerateJoinCode(): Promise<string> {
   return data as string;
 }
 
-export function joinErrorMessage(error: unknown): string {
+/** Any of these left out stays as it is. `myPct` is my own share of the proportional default. */
+export interface CoupleSettingsInput {
+  myName?: string;
+  /** Only before the partner joins; afterwards their name is theirs to change. */
+  partnerName?: string;
+  defaultSplit?: DefaultSplit;
+  myPct?: number;
+  currency?: Currency;
+  /** My own character; null goes back to the initial. */
+  avatar?: AvatarId | null;
+}
+
+/** Saves Ajustes through update_couple_settings, which validates every field (see its migration). */
+export async function updateCoupleSettings(input: CoupleSettingsInput): Promise<void> {
+  if (DEV_BYPASS_AUTH) {
+    if (input.currency && input.currency !== sampleHousehold.currency && (sampleExpenses.length > 0 || sampleSettlements.length > 0)) {
+      throw new Error('currency_locked');
+    }
+    if (input.myName !== undefined) names[ME] = input.myName.trim();
+    if (input.partnerName !== undefined) names[PARTNER] = input.partnerName.trim();
+    if (input.avatar !== undefined) avatars[ME] = input.avatar;
+    Object.assign(sampleHousehold, {
+      ...(input.defaultSplit && { defaultSplit: input.defaultSplit }),
+      ...(input.myPct !== undefined && { defaultPct: input.myPct }),
+      ...(input.currency && { currency: input.currency }),
+    });
+    return;
+  }
+  const { error } = await supabase.rpc('update_couple_settings', {
+    p_my_name: input.myName ?? null,
+    p_partner_name: input.partnerName ?? null,
+    p_default_split: input.defaultSplit ?? null,
+    p_my_pct: input.myPct ?? null,
+    p_currency: input.currency ?? null,
+    // Only sent when changing it ('' = back to the initial), so the other settings still save on a database
+    // without the avatar migration.
+    ...(input.avatar !== undefined && { p_avatar: input.avatar ?? '' }),
+  });
+  if (error) throw error;
+}
+
+export function joinErrorMessage(error: unknown, m: Messages = es): string {
+  const e = m.joinErrors;
   const reason = error instanceof JoinHouseholdError ? error.reason : null;
   switch (reason) {
     case 'invalid_code':
-      return 'Ese código no existe. Revisa que esté bien escrito.';
+      return e.invalidCode;
     case 'expired_code':
-      return 'Ese código venció. Pídele a tu pareja uno nuevo en Ajustes › Código de pareja.';
+      return e.expiredCode;
     case 'household_full':
-      return 'Esa cuenta ya tiene a sus dos personas.';
+      return e.householdFull;
     case 'too_many_attempts':
-      return 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
+      return e.tooManyAttempts;
     case 'already_in_household':
-      return 'Ya perteneces a una cuenta.';
+      return e.alreadyInHousehold;
     default:
-      return 'No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.';
+      return e.generic;
   }
 }
 
@@ -144,6 +189,15 @@ export function useJoinHousehold() {
   return useMutation({
     mutationFn: joinHousehold,
     onSuccess: (id) => useSessionStore.getState().setHousehold(id, '/'),
+  });
+}
+
+/** After saving, every screen that shows names, the default split or the currency refetches. */
+export function useUpdateCoupleSettings() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: updateCoupleSettings,
+    onSettled: () => Promise.all([client.invalidateQueries({ queryKey: coupleKey }), client.invalidateQueries({ queryKey: householdKey })]),
   });
 }
 

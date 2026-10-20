@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoney, parseMoneyInput, toInputText } from '../money';
+import { formatMoney, formatMoneyCompact, parseMoneyInput, toInputText } from '../money';
 
 describe('formatMoney', () => {
   it('formats COP without decimals and with dot grouping', () => {
@@ -49,5 +49,16 @@ describe('toInputText', () => {
     for (const [minor, currency] of [[337_950, 'COP'], [78_650, 'EUR'], [1_999, 'USD']] as const) {
       expect(parseMoneyInput(toInputText(minor, currency), currency)).toBe(minor);
     }
+  });
+});
+
+describe('formatMoneyCompact', () => {
+  it('shortens axis labels per currency', () => {
+    expect(formatMoneyCompact(0, 'COP')).toBe('$0');
+    expect(formatMoneyCompact(200_000, 'COP')).toBe('$200 mil');
+    expect(formatMoneyCompact(1_500_000, 'COP')).toBe('$1,5 M');
+    expect(formatMoneyCompact(120_000, 'EUR')).toBe('1,2 mil €');
+    expect(formatMoneyCompact(250_000, 'USD')).toBe('US$2.5K');
+    expect(formatMoneyCompact(50_00, 'USD')).toBe('US$50');
   });
 });

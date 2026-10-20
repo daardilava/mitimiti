@@ -16,6 +16,8 @@ interface SessionState {
   userId: string | null;
   /** First name from the sign-up form or Google / Apple, to prefill "Tu nombre". */
   suggestedName: string | null;
+  /** The signed-in account's email, shown in Ajustes next to Cerrar sesión. */
+  email: string | null;
   householdId: string | null;
   /** Where to go once the app's screens unlock; the root layout follows it after the guard switches. */
   pendingRoute: Href | null;
@@ -26,6 +28,7 @@ export const useSessionStore = create<SessionState>((set) => ({
   loading: !DEV_BYPASS_AUTH,
   userId: null,
   suggestedName: null,
+  email: null,
   householdId: null,
   pendingRoute: null,
   setHousehold: (householdId, then) => set({ householdId, pendingRoute: then ?? null }),
@@ -37,10 +40,11 @@ export function useSessionSync() {
   const { user } = useUser();
   const signedInAs = isLoaded && isSignedIn ? userId : null;
   const suggestedName = signedInAs ? suggestedFirstName(user) : null;
+  const email = signedInAs ? (user?.primaryEmailAddress?.emailAddress ?? null) : null;
 
   useEffect(() => {
-    useSessionStore.setState({ suggestedName });
-  }, [suggestedName]);
+    useSessionStore.setState({ suggestedName, email });
+  }, [suggestedName, email]);
 
   useEffect(() => {
     if (!isLoaded) return;
