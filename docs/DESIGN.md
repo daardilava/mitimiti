@@ -12,6 +12,7 @@ External source of truth: *a medias — UI design* (13 screens + design system "
 | — | Crea tu cuenta (Clerk) | `(onboarding)/sign-up` | Welcome (either button) | Name, email, password, terms → code by email · Google · Apple |
 | — | Términos y condiciones | `terms` (outside the guards) | Crea tu cuenta, Ajustes › Información legal | Read; Escribirnos (email) |
 | — | Política de privacidad | `privacy` (outside the guards) | Crea tu cuenta, Ajustes › Información legal | Read; Escribirnos (email) |
+| — | Exportar movimientos | `export` | Ajustes › Exportar movimientos | Period (5 presets) → Exportar CSV (share sheet) |
 | — | Borrar tu cuenta | `delete-account` (outside the guards) | Ajustes › Cuenta, Setup | What is deleted (partner too) → tick → Borrar cuenta (red); code by email if the sign-in is older than 10 min |
 | — | Iniciar sesión (Clerk) | `(onboarding)/sign-in` | Welcome "¿Ya tienes cuenta?" | Email, password, ¿Olvidaste tu contraseña? · Google · Apple |
 | — | ¿Olvidaste tu contraseña? | `(onboarding)/forgot-password` | Iniciar sesión | Code by email + new password → signed in |
@@ -26,7 +27,7 @@ External source of truth: *a medias — UI design* (13 screens + design system "
 | 10 | Payment recorded | `settle/done` | Settle up | Volver al inicio · Ver movimientos |
 | 11 | Summary (Resumen) | `(tabs)/summary` | Tab | See budgets |
 | 12 | Budgets (Presupuestos) | `budgets` | Home, Summary | − / + in steps of $50.000 |
-| 13 | Settings (Ajustes) | `(tabs)/settings` | Tab | Tu avatar (12 characters or the initial, `src/ui/AvatarArt.tsx`), names, couple code, default split, currency, reminders, Export CSV, Cerrar sesión |
+| 13 | Settings (Ajustes) | `(tabs)/settings` | Tab | Tu avatar (12 characters or the initial, `src/ui/AvatarArt.tsx`), names, couple code, default split, currency, reminders, Exportar movimientos, Información legal, Cerrar sesión, Borrar cuenta |
 
 The `+` in the tab bar always opens a new expense. Screens marked **Por construir** are routed placeholders;
 each names the feature section that builds it.

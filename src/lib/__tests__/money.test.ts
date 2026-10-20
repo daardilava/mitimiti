@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoney, formatMoneyCompact, parseMoneyInput, toInputText } from '../money';
+import { formatMoney, formatMoneyCompact, parseMoneyInput, toDecimalText, toInputText } from '../money';
 
 describe('formatMoney', () => {
   it('formats COP without decimals and with dot grouping', () => {
@@ -60,5 +60,21 @@ describe('formatMoneyCompact', () => {
     expect(formatMoneyCompact(120_000, 'EUR')).toBe('1,2 mil €');
     expect(formatMoneyCompact(250_000, 'USD')).toBe('US$2.5K');
     expect(formatMoneyCompact(50_00, 'USD')).toBe('US$50');
+  });
+});
+
+describe('toDecimalText', () => {
+  it('writes plain numbers a spreadsheet can sum: no symbol, no grouping', () => {
+    expect(toDecimalText(2_400_000, 'COP')).toBe('2400000');
+    expect(toDecimalText(123_450, 'EUR')).toBe('1234.50');
+    expect(toDecimalText(123_450, 'EUR', ',')).toBe('1234,50');
+    expect(toDecimalText(5, 'USD')).toBe('0.05');
+    expect(toDecimalText(100, 'USD')).toBe('1.00');
+    expect(toDecimalText(0, 'EUR')).toBe('0.00');
+  });
+
+  it('keeps the sign', () => {
+    expect(toDecimalText(-1_050, 'EUR', ',')).toBe('-10,50');
+    expect(toDecimalText(-184_000, 'COP')).toBe('-184000');
   });
 });

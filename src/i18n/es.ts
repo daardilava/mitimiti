@@ -224,6 +224,37 @@ export const es = {
     },
   },
 
+  exportData: {
+    title: 'Exportar movimientos',
+    lead: 'Elige el periodo. Se crea un archivo con los gastos y los pagos, para abrir en Excel, Google Sheets o Numbers.',
+    period: 'Periodo',
+    presets: { thisMonth: 'Este mes', lastMonth: 'Mes pasado', last3Months: 'Últimos 3 meses', thisYear: 'Este año', all: 'Todo' },
+    /** "12 gastos y 2 pagos" */
+    summary: (expenses: number, payments: number) =>
+      `${expenses} ${expenses === 1 ? 'gasto' : 'gastos'} y ${payments} ${payments === 1 ? 'pago' : 'pagos'}`,
+    empty: 'No hay movimientos en este periodo. Elige otro.',
+    exportCsv: 'Exportar CSV',
+    failed: 'No se pudo crear el archivo. Inténtalo de nuevo.',
+    /** File name, without date or extension. */
+    fileName: 'a-medias-movimientos',
+    /** Column headers and values of the CSV file. */
+    csv: {
+      date: 'Fecha',
+      type: 'Tipo',
+      description: 'Descripción',
+      category: 'Categoría',
+      paidBy: 'Pagó',
+      amount: 'Monto',
+      currency: 'Moneda',
+      split: 'División',
+      shareOf: (name: string) => `Parte de ${name}`,
+      expense: 'Gasto',
+      payment: 'Pago',
+      /** "Diego 60 % · Ana 40 %" */
+      splitPct: (payer: string, payerPct: number, other: string, otherPct: number) => `${payer} ${payerPct} % · ${other} ${otherPct} %`,
+    },
+  },
+
   setup: {
     title: 'Armemos su cuenta',
     step: 'Paso 1 de 2',
@@ -463,8 +494,9 @@ export const es = {
     settleReminderDetail: 'Cada domingo, si hay saldo pendiente',
     newExpenseAlert: 'Avisarme de gastos nuevos',
     newExpenseAlertDetail: (name: string) => `Cuando ${name} registre uno`,
-    exportCsv: 'Exportar movimientos (CSV)',
-    exportCsvDetail: 'Todos los gastos y pagos de un rango de fechas, para abrir en una hoja de cálculo.',
+    exportCsv: 'Exportar movimientos',
+    exportCsvDetail: 'Los gastos y pagos de un periodo, en un archivo para abrir en una hoja de cálculo.',
+    exportOpen: 'Exportar',
     avatar: 'Tu avatar',
     avatarDetail: (partner: string) => `${partner} lo ve junto a tu nombre.`,
     avatarInitial: 'Inicial',
