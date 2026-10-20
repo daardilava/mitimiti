@@ -48,6 +48,19 @@
             ]
           }
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FBF4EA",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#16181D"
+          }
+        }
       ]
     ],
     "scheme": "amedias",

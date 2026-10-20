@@ -36,6 +36,10 @@ each names the feature section that builds it.
 Implemented in [src/ui/tokens.ts](../src/ui/tokens.ts). Near-black ink for action, blue for you, orange for
 your partner, green only for what is settled. Red and green are never the only cue: always with text.
 
+**Splash:** the Welcome logo (two circles, `assets/splash-icon.png`) on `#FBF4EA` in light mode and `#16181D` in dark,
+configured in `app.json` › `expo-splash-screen`. It stays up until fonts and the session are ready, then fades
+(`src/app/_layout.tsx`). Expo Go shows the app icon instead; check it in a development or release build.
+
 ### Light and dark mode
 
 - The app follows the phone (`userInterfaceStyle: "automatic"` in `app.json`; `expo-system-ui` makes Android honour
