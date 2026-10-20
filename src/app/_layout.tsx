@@ -102,6 +102,8 @@ function App() {
           {/* Legal texts: opened from Crea tu cuenta (signed out) and from Ajustes (signed in). */}
           <Stack.Screen name="terms" />
           <Stack.Screen name="privacy" />
+          {/* Borrar cuenta: from Ajustes, and from Setup for an account without a couple. */}
+          <Stack.Screen name="delete-account" />
         </Stack>
       </NavigationThemeProvider>
     </QueryClientProvider>

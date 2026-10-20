@@ -1,10 +1,11 @@
-import { Redirect } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { createHouseholdSchema, useCreateHousehold, type DefaultSplit } from '@/api/household';
 import { shareLabel } from '@/lib/coupleSettings';
 import { CURRENCIES, type Currency } from '@/lib/money';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
+import { TextLink } from '@/ui/Auth';
 import { Chip, Field, RadioCard, Stepper, TextField } from '@/ui/Form';
 import { NavButton, Screen } from '@/ui/Screen';
 import { space } from '@/ui/tokens';
@@ -78,6 +79,9 @@ export default function Setup() {
           </RadioCard>
         </View>
       </Field>
+
+      {/* Every account can be deleted from inside the app, also one that never made a couple. */}
+      <TextLink label={m.settings.deleteAccount} onPress={() => router.push('/delete-account')} />
     </Screen>
   );
 }

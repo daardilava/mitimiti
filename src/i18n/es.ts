@@ -139,6 +139,8 @@ export const es = {
   },
 
   welcome: {
+    accountDeleted: 'Tu cuenta se borró. Gracias por usar a medias.',
+    coupleDeleted: 'Tu pareja borró su cuenta y, con ella, el espacio que compartían. Pueden empezar uno nuevo cuando quieran.',
     title: 'Cuentas claras entre los dos.',
     lead: 'Registren lo que gastan juntos, vean al momento quién le debe a quién y salden con un toque.',
     create: 'Crear nuestra cuenta',
@@ -199,6 +201,27 @@ export const es = {
   privacy: {
     title: 'Política de privacidad',
     ...privacyEs,
+  },
+
+  deleteAccount: {
+    title: 'Borrar tu cuenta',
+    lead: 'Esto no se puede deshacer. Se borra para siempre:',
+    yourAccount: (email: string) => `Tu cuenta de a medias (${email}) y tu inicio de sesión.`,
+    yourAccountNoEmail: 'Tu cuenta de a medias y tu inicio de sesión.',
+    sharedSpace: (partner: string) => `El espacio que compartes con ${partner}: todos los gastos, pagos, presupuestos y su historial.`,
+    soloSpace: 'El espacio de la pareja y todo lo que registraste.',
+    partnerToo: (partner: string) => `También se borra para ${partner}. Su cuenta sigue, pero empezará de cero.`,
+    keepNote: 'Si quieren conservar algo, anótenlo antes de continuar.',
+    confirm: (partner: string) => `Entiendo que se borra todo, también para ${partner}.`,
+    confirmSolo: 'Entiendo que se borra todo.',
+    delete: 'Borrar cuenta',
+    codeTitle: 'Confirma que eres tú',
+    codeLead: (email: string) => `Te enviamos un código a ${email}. Escríbelo para borrar tu cuenta.`,
+    errors: {
+      data: 'No se pudo borrar. Revisa tu conexión e inténtalo de nuevo; no se borró nada.',
+      login: 'Tus datos ya se borraron, pero no pudimos cerrar tu cuenta de inicio de sesión. Inténtalo de nuevo.',
+      noEmail: 'No pudimos enviarte un código para confirmar. Escríbenos y borramos tu cuenta.',
+    },
   },
 
   setup: {
@@ -458,6 +481,7 @@ export const es = {
     copyCode: 'Copiar código',
     account: 'Cuenta',
     legal: 'Información legal',
+    deleteAccount: 'Borrar cuenta',
     signedInAs: (email: string) => `Sesión iniciada como ${email}`,
     signOutConfirm: '¿Cerrar sesión en este teléfono? Tus gastos quedan guardados; vuelves a verlos al entrar.',
     cancel: 'Cancelar',

@@ -125,6 +125,8 @@ export const de: Messages = {
   },
 
   welcome: {
+    accountDeleted: 'Dein Konto wurde gelöscht. Danke, dass du a medias genutzt hast.',
+    coupleDeleted: 'Dein Partner oder deine Partnerin hat das Konto gelöscht und damit euren gemeinsamen Bereich. Ihr könnt jederzeit neu anfangen.',
     title: 'Klare Verhältnisse zu zweit.',
     lead: 'Erfasst, was ihr gemeinsam ausgebt, seht sofort, wer wem was schuldet, und gleicht mit einem Tipp aus.',
     create: 'Unser Konto erstellen',
@@ -185,6 +187,27 @@ export const de: Messages = {
   privacy: {
     title: 'Datenschutzerklärung',
     ...privacyDe,
+  },
+
+  deleteAccount: {
+    title: 'Konto löschen',
+    lead: 'Das lässt sich nicht rückgängig machen. Für immer gelöscht wird:',
+    yourAccount: (email) => `Dein a-medias-Konto (${email}) und deine Anmeldung.`,
+    yourAccountNoEmail: 'Dein a-medias-Konto und deine Anmeldung.',
+    sharedSpace: (partner) => `Der Bereich, den du mit ${partner} teilst: alle Ausgaben, Zahlungen, Budgets und ihr Verlauf.`,
+    soloSpace: 'Der Bereich des Paares und alles, was du erfasst hast.',
+    partnerToo: (partner) => `Er wird auch für ${partner} gelöscht. Das Konto bleibt, fängt aber bei null an.`,
+    keepNote: 'Wenn ihr etwas behalten wollt, notiert es, bevor du weitermachst.',
+    confirm: (partner) => `Ich verstehe, dass alles gelöscht wird, auch für ${partner}.`,
+    confirmSolo: 'Ich verstehe, dass alles gelöscht wird.',
+    delete: 'Konto löschen',
+    codeTitle: 'Bestätige, dass du es bist',
+    codeLead: (email) => `Wir haben dir einen Code an ${email} geschickt. Gib ihn ein, um dein Konto zu löschen.`,
+    errors: {
+      data: 'Löschen hat nicht geklappt. Prüfe deine Verbindung und versuche es noch einmal; es wurde nichts gelöscht.',
+      login: 'Deine Daten sind schon gelöscht, aber dein Anmeldekonto konnten wir nicht schließen. Versuche es noch einmal.',
+      noEmail: 'Wir konnten dir keinen Code zur Bestätigung schicken. Schreib uns, dann löschen wir dein Konto.',
+    },
   },
 
   setup: {
@@ -439,6 +462,7 @@ export const de: Messages = {
     copyCode: 'Code kopieren',
     account: 'Konto',
     legal: 'Rechtliches',
+    deleteAccount: 'Konto löschen',
     signedInAs: (email) => `Angemeldet als ${email}`,
     signOutConfirm: 'Auf diesem Telefon abmelden? Deine Ausgaben bleiben gespeichert; du siehst sie wieder, wenn du dich anmeldest.',
     cancel: 'Abbrechen',

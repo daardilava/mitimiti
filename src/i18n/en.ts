@@ -122,6 +122,8 @@ export const en: Messages = {
   },
 
   welcome: {
+    accountDeleted: 'Your account was deleted. Thanks for using a medias.',
+    coupleDeleted: 'Your partner deleted their account, and with it the space you shared. You can start a new one any time.',
     title: 'Clear accounts between the two of you.',
     lead: 'Log what you spend together, see at a glance who owes whom, and settle up with one tap.',
     create: 'Create our account',
@@ -182,6 +184,27 @@ export const en: Messages = {
   privacy: {
     title: 'Privacy Policy',
     ...privacyEn,
+  },
+
+  deleteAccount: {
+    title: 'Delete your account',
+    lead: 'This can’t be undone. Deleted forever:',
+    yourAccount: (email) => `Your a medias account (${email}) and your sign-in.`,
+    yourAccountNoEmail: 'Your a medias account and your sign-in.',
+    sharedSpace: (partner) => `The space you share with ${partner}: every expense, payment, budget and their history.`,
+    soloSpace: 'The couple’s space and everything you recorded.',
+    partnerToo: (partner) => `It’s deleted for ${partner} too. Their account stays, but they’ll start from scratch.`,
+    keepNote: 'If you want to keep anything, write it down before you continue.',
+    confirm: (partner) => `I understand everything is deleted, for ${partner} too.`,
+    confirmSolo: 'I understand everything is deleted.',
+    delete: 'Delete account',
+    codeTitle: 'Confirm it’s you',
+    codeLead: (email) => `We sent a code to ${email}. Enter it to delete your account.`,
+    errors: {
+      data: 'Couldn’t delete. Check your connection and try again; nothing was deleted.',
+      login: 'Your data is already deleted, but we couldn’t close your sign-in account. Try again.',
+      noEmail: 'We couldn’t send you a code to confirm. Write to us and we’ll delete your account.',
+    },
   },
 
   setup: {
@@ -436,6 +459,7 @@ export const en: Messages = {
     copyCode: 'Copy code',
     account: 'Account',
     legal: 'Legal',
+    deleteAccount: 'Delete account',
     signedInAs: (email) => `Signed in as ${email}`,
     signOutConfirm: 'Log out on this phone? Your expenses stay saved; you’ll see them again when you log in.',
     cancel: 'Cancel',

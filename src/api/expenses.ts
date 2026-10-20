@@ -68,7 +68,13 @@ export async function getCouple(): Promise<Couple> {
     supabase.from('households').select('currency, invited_name, default_split, default_pct').eq('id', householdId).single(),
     listMembers(householdId),
   ]);
-  if (household.error) throw household.error;
+  if (household.error) {
+    // No row: the couple no longer exists (the partner deleted their account). Back to Welcome, saying why.
+    if (household.error.code === 'PGRST116' && !useSessionStore.getState().deleting) {
+      useSessionStore.setState({ householdId: null, notice: 'coupleDeleted' });
+    }
+    throw household.error;
+  }
   if (members.error) throw members.error;
   const rows = members.data as { user_id: string; display_name: string; role: MemberRole; avatar: string | null }[];
   const mine = rows.find((m) => m.user_id === myId);

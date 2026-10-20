@@ -34,7 +34,8 @@ Section numbers like `§4` in code refer to the external *a medias — Project P
 - **User ids are Clerk ids (`text`, `user_…`), not `uuid`.** In SQL use `requesting_user_id()`
   (= `auth.jwt()->>'sub'`), never `auth.uid()`. Supabase Auth is not used for sign-in.
 - Writes touching an expense and its shares go through one Postgres function (one transaction).
-- Deletes are soft (`deleted_at`); every change is written to `audit_log`.
+- Deletes are soft (`deleted_at`); every change is written to `audit_log`. The one exception is `delete_account()`
+  (Borrar cuenta): the right to erasure removes the couple's rows, audit trail included.
 - `spent_on` is a `date`, never a timestamp.
 - Exactly two members per couple. No groups, no moving money, no web app (Expo web is for dev only).
 - Design: colours come from `useTheme()` and styles from `makeStyles()` (`src/ui/theme.tsx`), never raw hex and
