@@ -39,8 +39,9 @@ export async function sharePdf(name: string, html: string, dialogTitle: string):
     report.print();
     return;
   }
-  // A4 in points (72 per inch): 595 × 842. expo-print saves it in the cache under a random name.
-  const { uri } = await Print.printToFileAsync({ html, width: 595, height: 842 });
+  // A4 in points (72 per inch): 595 × 842. Android takes the margins from the HTML's @page (16 mm, 18 mm at the
+  // bottom); iOS ignores @page and takes them here, in points. expo-print saves it in the cache under a random name.
+  const { uri } = await Print.printToFileAsync({ html, width: 595, height: 842, margins: { top: 45, right: 45, bottom: 51, left: 45 } });
   const file = new File(uri);
   await file.move(new File(Paths.cache, name), { overwrite: true });
   await share(file, 'pdf', dialogTitle);

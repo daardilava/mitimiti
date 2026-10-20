@@ -81,7 +81,7 @@ Phone ──supabase-js with accessToken: () => getToken()──▶ Supabase (th
 | `src/lib/coupleSettings.ts` | Ajustes: each person's share of the default split, settings error messages |
 | `src/lib/budgets.ts` | Presupuestos: limits that carry over, status per category (80 % warning), − / + steps |
 | `src/lib/summary.ts` | Resumen: a month by category, who paid, each one's share, personal total |
-| `src/lib/exportData.ts` | Exportar movimientos: period presets, rows with each one's share, CSV in the language's dialect (`;` + decimal comma for es/de), formula-safe fields; `src/lib/exportPdf.ts` builds the PDF report as HTML (totals, balance at the period's end, HTML-escaped); `src/api/exportFile.ts` writes the CSV, prints the PDF (`expo-print`, A4) and opens the share sheet |
+| `src/lib/exportData.ts` | Exportar movimientos: period presets, rows with each one's share, CSV in the language's dialect (`;` + decimal comma for es/de), formula-safe fields; `src/lib/exportPdf.ts` builds the PDF statement as HTML: the balance first, then how it got there (opening + the period's expenses + its payments = closing), key figures, who paid against their share, spending by category (percents always total 100), and the movements grouped by month; HTML-escaped; `src/api/exportFile.ts` writes the CSV, prints the PDF (`expo-print`, A4) and opens the share sheet |
 | `src/lib/settle.ts` | Saldar cuentas: who pays whom, half / full, never more than owed, confirmation wording |
 | `src/lib/balance.ts` | Balance wording ("Ana te debe", "Te deben $X") and the month's shared spending by who paid |
 | `src/lib/joinCode.ts`, `dates.ts` | Invite code validation; date labels ("Ayer", "Lunes 12 de octubre") |
