@@ -104,6 +104,10 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
 
       <Card title={m.settings.exportCsv} badge={m.settings.soon} detail={m.settings.exportCsvDetail} />
 
+      <Card title={m.settings.legal}>
+        <NavButton label={m.terms.title} kind="secondary" href="/terms" />
+      </Card>
+
       <SignOut email={email} />
     </Screen>
   );
