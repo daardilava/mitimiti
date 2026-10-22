@@ -40,10 +40,14 @@ export async function sharePdf(name: string, html: string, dialogTitle: string):
     return;
   }
   // A4 in points (72 per inch): 595 × 842. Android takes the margins from the HTML's @page (16 mm, 18 mm at the
-  // bottom); iOS ignores @page and takes them here, in points. expo-print saves it in the cache under a random name.
-  const { uri } = await Print.printToFileAsync({ html, width: 595, height: 842, margins: { top: 45, right: 45, bottom: 51, left: 45 } });
-  const file = new File(uri);
-  await file.move(new File(Paths.cache, name), { overwrite: true });
+  // bottom); iOS ignores @page and takes them here, in points.
+  // expo-print saves the PDF under a random name in its own folder, which the app may not move or read (Android in
+  // Expo Go rejects File.move with "Missing 'READ' permission"). So take its bytes and write our own, named file.
+  const { base64 } = await Print.printToFileAsync({ html, width: 595, height: 842, margins: { top: 45, right: 45, bottom: 51, left: 45 }, base64: true });
+  if (!base64) throw new Error('pdf_empty');
+  const file = new File(Paths.cache, name);
+  file.create({ overwrite: true });
+  file.write(base64, { encoding: 'base64' });
   await share(file, 'pdf', dialogTitle);
 }
 

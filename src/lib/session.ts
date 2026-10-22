@@ -39,7 +39,8 @@ export const useSessionStore = create<SessionState>((set) => ({
   pendingRoute: null,
   notice: null,
   deleting: false,
-  setHousehold: (householdId, then) => set({ householdId, pendingRoute: then ?? null }),
+  // A new couple (created or joined) makes the Welcome notice about the old one stale.
+  setHousehold: (householdId, then) => set({ householdId, pendingRoute: then ?? null, ...(householdId ? { notice: null } : {}) }),
 }));
 
 /** Keeps the store in sync with Clerk and the user's couple. Mount once, inside ClerkProvider. */
@@ -66,7 +67,8 @@ export function useSessionSync() {
         if (error) console.warn('[session] household lookup failed', error.message);
         householdId = data?.household_id ?? null;
       }
-      if (!stale) useSessionStore.setState({ loading: false, userId: signedInAs, householdId });
+      // Someone signing in starts fresh: the "account deleted" notice was for whoever was here before.
+      if (!stale) useSessionStore.setState({ loading: false, userId: signedInAs, householdId, ...(signedInAs ? { notice: null } : {}) });
     })();
 
     return () => {
