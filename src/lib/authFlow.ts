@@ -58,8 +58,9 @@ export async function signInWithPassword(signIn: AuthSignIn, email: string, pass
   throw new AuthFlowError(signIn.status);
 }
 
+/** Safe to call again: a code Clerk already accepted (a double tap, or a retry after finishing failed) just finishes. */
 export async function verifyDevice(signIn: AuthSignIn, code: string): Promise<void> {
-  await must(signIn.mfa.verifyEmailCode({ code }));
+  if (signIn.status !== 'complete') await mustVerify(signIn.mfa.verifyEmailCode({ code }));
   await finish(signIn);
 }
 
@@ -90,8 +91,9 @@ export async function signUpWithPassword(signUp: AuthSignUp, v: SignUpInput): Pr
   await must(signUp.verifications.sendEmailCode());
 }
 
+/** Safe to call again, like verifyDevice. */
 export async function verifySignUp(signUp: AuthSignUp, code: string): Promise<void> {
-  await must(signUp.verifications.verifyEmailCode({ code }));
+  if (signUp.status !== 'complete') await mustVerify(signUp.verifications.verifyEmailCode({ code }));
   if (signUp.status !== 'complete') throw new AuthFlowError(signUp.status);
   await must(signUp.finalize());
 }
@@ -121,6 +123,12 @@ async function finish(signIn: AuthSignIn): Promise<void> {
 async function must(result: Result): Promise<void> {
   const { error } = await result;
   if (error) throw error;
+}
+
+/** Like must, for a code check: "already verified" means a previous call got through, so it is not a failure. */
+async function mustVerify(result: Result): Promise<void> {
+  const { error } = await result;
+  if (error && clerkErrorCode(error) !== 'verification_already_verified') throw error;
 }
 
 /** The first name to prefill in "Tu nombre": from the sign-up form, or from Google / Apple. */

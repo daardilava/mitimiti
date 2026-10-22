@@ -118,6 +118,28 @@ describe('sign in with password', () => {
     await verifyDevice(signIn, CODE);
     expect(signIn.finalize).toHaveBeenCalledOnce();
   });
+
+  it('can be retried after the code went through but finishing failed, without sending the code again', async () => {
+    const signIn = fakeSignIn({ newDevice: true });
+    await signInWithPassword(signIn, 'diego@example.com', 'correcta-123');
+    signIn.finalize.mockResolvedValueOnce({ error: apiError('network_error') as never });
+    expect(clerkErrorCode(await errorOf(verifyDevice(signIn, CODE)))).toBe('network_error');
+
+    await verifyDevice(signIn, CODE);
+    expect(signIn.mfa.verifyEmailCode).toHaveBeenCalledOnce();
+    expect(signIn.finalize).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats "already verified" as the code having got through (a double submit)', async () => {
+    const signIn = fakeSignIn({ newDevice: true });
+    await signInWithPassword(signIn, 'diego@example.com', 'correcta-123');
+    signIn.mfa.verifyEmailCode.mockImplementationOnce(async () => {
+      signIn.status = 'complete';
+      return { error: apiError('verification_already_verified') as never };
+    });
+    await verifyDevice(signIn, CODE);
+    expect(signIn.finalize).toHaveBeenCalledOnce();
+  });
 });
 
 describe('sign up with password', () => {
@@ -144,6 +166,25 @@ describe('sign up with password', () => {
 
     await verifySignUp(signUp, CODE);
     expect(signUp.finalize).toHaveBeenCalledOnce();
+  });
+
+  it('can be retried after the code went through, and "already verified" is not an error', async () => {
+    const signUp = fakeSignUp();
+    await signUpWithPassword(signUp, input);
+    signUp.finalize.mockResolvedValueOnce({ error: apiError('network_error') as never });
+    expect(clerkErrorCode(await errorOf(verifySignUp(signUp, CODE)))).toBe('network_error');
+    await verifySignUp(signUp, CODE);
+    expect(signUp.verifications.verifyEmailCode).toHaveBeenCalledOnce();
+    expect(signUp.finalize).toHaveBeenCalledTimes(2);
+
+    const again = fakeSignUp();
+    await signUpWithPassword(again, input);
+    again.verifications.verifyEmailCode.mockImplementationOnce(async () => {
+      again.status = 'complete';
+      return { error: apiError('verification_already_verified') as never };
+    });
+    await verifySignUp(again, CODE);
+    expect(again.finalize).toHaveBeenCalledOnce();
   });
 
   it('points an existing email to sign-in instead', async () => {
