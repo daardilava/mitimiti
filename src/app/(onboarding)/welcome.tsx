@@ -1,5 +1,4 @@
 import { Link, type Href } from 'expo-router';
-import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DEV_BYPASS_AUTH, useSessionStore, type NextStep } from '@/lib/session';
@@ -17,9 +16,10 @@ export default function Welcome() {
   const signedIn = useSessionStore((s) => s.userId !== null) || DEV_BYPASS_AUTH;
   // Both paths need a signed-in person: new people create an account first, then continue to the chosen one.
   const to = (next: NextStep): Href => (signedIn ? `/${next}` : { pathname: '/sign-up', params: { next } });
-  // Why someone is back here: their account was deleted, or their partner's deletion took the couple with it.
+  // Why someone is back here: their account was deleted, or their partner's deletion took the couple with it. The
+  // session store clears it once something new happens (a sign-in, a new couple), not when this screen unmounts:
+  // navigation and React's development double-mount remount it, which erased the notice before anyone saw it.
   const notice = useSessionStore((s) => s.notice);
-  useEffect(() => () => useSessionStore.setState({ notice: null }), []);
 
   return (
     <SafeAreaView style={styles.safe}>
