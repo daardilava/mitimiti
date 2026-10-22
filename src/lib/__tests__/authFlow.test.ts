@@ -65,9 +65,10 @@ function fakeSignIn({ newDevice = false } = {}) {
   return s satisfies AuthSignIn;
 }
 
-function fakeSignUp({ statusAfterVerify = 'complete', taken = [] as string[] } = {}) {
+function fakeSignUp({ statusAfterVerify = 'complete', taken = [] as string[], missingFields = [] as string[] } = {}) {
   const s = {
     status: null as string | null,
+    missingFields,
     password: vi.fn(async ({ emailAddress }: { emailAddress: string }) => {
       if (taken.includes(emailAddress)) return { error: apiError('form_identifier_exists') };
       s.status = 'missing_requirements';
@@ -118,6 +119,28 @@ describe('sign in with password', () => {
     await verifyDevice(signIn, CODE);
     expect(signIn.finalize).toHaveBeenCalledOnce();
   });
+
+  it('can be retried after the code went through but finishing failed, without sending the code again', async () => {
+    const signIn = fakeSignIn({ newDevice: true });
+    await signInWithPassword(signIn, 'diego@example.com', 'correcta-123');
+    signIn.finalize.mockResolvedValueOnce({ error: apiError('network_error') as never });
+    expect(clerkErrorCode(await errorOf(verifyDevice(signIn, CODE)))).toBe('network_error');
+
+    await verifyDevice(signIn, CODE);
+    expect(signIn.mfa.verifyEmailCode).toHaveBeenCalledOnce();
+    expect(signIn.finalize).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats "already verified" as the code having got through (a double submit)', async () => {
+    const signIn = fakeSignIn({ newDevice: true });
+    await signInWithPassword(signIn, 'diego@example.com', 'correcta-123');
+    signIn.mfa.verifyEmailCode.mockImplementationOnce(async () => {
+      signIn.status = 'complete';
+      return { error: apiError('verification_already_verified') as never };
+    });
+    await verifyDevice(signIn, CODE);
+    expect(signIn.finalize).toHaveBeenCalledOnce();
+  });
 });
 
 describe('sign up with password', () => {
@@ -146,16 +169,47 @@ describe('sign up with password', () => {
     expect(signUp.finalize).toHaveBeenCalledOnce();
   });
 
+  it('can be retried after the code went through, and "already verified" is not an error', async () => {
+    const signUp = fakeSignUp();
+    await signUpWithPassword(signUp, input);
+    signUp.finalize.mockResolvedValueOnce({ error: apiError('network_error') as never });
+    expect(clerkErrorCode(await errorOf(verifySignUp(signUp, CODE)))).toBe('network_error');
+    await verifySignUp(signUp, CODE);
+    expect(signUp.verifications.verifyEmailCode).toHaveBeenCalledOnce();
+    expect(signUp.finalize).toHaveBeenCalledTimes(2);
+
+    const again = fakeSignUp();
+    await signUpWithPassword(again, input);
+    again.verifications.verifyEmailCode.mockImplementationOnce(async () => {
+      again.status = 'complete';
+      return { error: apiError('verification_already_verified') as never };
+    });
+    await verifySignUp(again, CODE);
+    expect(again.finalize).toHaveBeenCalledOnce();
+  });
+
   it('points an existing email to sign-in instead', async () => {
     const error = await errorOf(signUpWithPassword(fakeSignUp({ taken: ['ana@example.com'] }), input));
     expect(authErrorMessage(error)).toMatch(/Inicia sesión/);
   });
 
-  it('stops when Clerk still wants something the app does not ask for', async () => {
-    const signUp = fakeSignUp({ statusAfterVerify: 'missing_requirements' });
+  it('stops when Clerk still wants something the app does not ask for, and says what', async () => {
+    // A Clerk Dashboard that requires a username: the code is accepted, but the sign-up can't finish.
+    const signUp = fakeSignUp({ statusAfterVerify: 'missing_requirements', missingFields: ['username'] });
     await signUpWithPassword(signUp, input);
-    expect(await errorOf(verifySignUp(signUp, CODE))).toBeInstanceOf(AuthFlowError);
+    const error = await errorOf(verifySignUp(signUp, CODE));
+    expect(error).toBeInstanceOf(AuthFlowError);
+    expect((error as AuthFlowError).missing).toEqual(['username']);
     expect(signUp.finalize).not.toHaveBeenCalled();
+
+    const warn = vi.mocked(console.warn);
+    warn.mockClear();
+    expect(authErrorMessage(error)).toMatch(/un paso más/);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('missing: username'));
+
+    // Trying again with the same code gives the same clear answer, not "already verified".
+    signUp.verifications.verifyEmailCode.mockResolvedValueOnce({ error: apiError('verification_already_verified') as never });
+    expect(await errorOf(verifySignUp(signUp, CODE))).toBeInstanceOf(AuthFlowError);
   });
 });
 

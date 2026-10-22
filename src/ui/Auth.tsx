@@ -137,8 +137,13 @@ export function CodeStep({
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
   const input = useRef<TextInput>(null);
+  // `busy` only updates on the next render; Android can fire onChangeText twice for the same text before that, which
+  // sent the code twice ("verification_already_verified"). A ref blocks the second call synchronously.
+  const inFlight = useRef(false);
 
   const verify = async (value: string) => {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -146,6 +151,7 @@ export function CodeStep({
     } catch (e) {
       setError(errorMessage(e, m));
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };
@@ -164,8 +170,9 @@ export function CodeStep({
 
   const onChange = (text: string) => {
     const digits = text.replace(/\D/g, '').slice(0, CODE_LENGTH);
+    // Only when the six digits change: the keyboard repeating the same text is not a new code.
+    if (!extra && digits.length === CODE_LENGTH && digits !== code) verify(digits);
     setCode(digits);
-    if (!extra && digits.length === CODE_LENGTH && !busy) verify(digits);
   };
 
   return (
