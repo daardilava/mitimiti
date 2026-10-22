@@ -1,9 +1,10 @@
-import { Redirect } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { joinErrorMessage, useJoinHousehold } from '@/api/household';
 import { joinCodeStatus, normalizeJoinCode, JOIN_CODE_LENGTH } from '@/lib/joinCode';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
+import { TextLink } from '@/ui/Auth';
 import { TextField } from '@/ui/Form';
 import { NavButton, Screen } from '@/ui/Screen';
 import { font, radius } from '@/ui/tokens';
@@ -56,6 +57,8 @@ export default function Join() {
         style={styles.code}
         autoFocus
       />
+      {/* No code after all: start the couple instead. */}
+      <TextLink label={m.welcome.create} onPress={() => router.replace('/setup')} />
     </Screen>
   );
 }

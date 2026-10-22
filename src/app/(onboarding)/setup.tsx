@@ -80,6 +80,8 @@ export default function Setup() {
         </View>
       </Field>
 
+      {/* Signing in (email, Google, Apple) lands here; whoever was invited enters their partner's code instead. */}
+      <TextLink label={m.welcome.haveCode} onPress={() => router.replace('/join')} />
       {/* Every account can be deleted from inside the app, also one that never made a couple. */}
       <TextLink label={m.settings.deleteAccount} onPress={() => router.push('/delete-account')} />
     </Screen>
