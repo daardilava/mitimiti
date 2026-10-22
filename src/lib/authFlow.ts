@@ -31,6 +31,8 @@ export interface AuthSignUp {
     verifyEmailCode: (params: { code: string }) => Result;
   };
   finalize: () => Result;
+  /** What Clerk still wants before the sign-up can finish, e.g. ['username'] when the dashboard requires one. */
+  readonly missingFields?: readonly string[];
 }
 
 export const PASSWORD_MIN = 8;
@@ -94,7 +96,7 @@ export async function signUpWithPassword(signUp: AuthSignUp, v: SignUpInput): Pr
 /** Safe to call again, like verifyDevice. */
 export async function verifySignUp(signUp: AuthSignUp, code: string): Promise<void> {
   if (signUp.status !== 'complete') await mustVerify(signUp.verifications.verifyEmailCode({ code }));
-  if (signUp.status !== 'complete') throw new AuthFlowError(signUp.status);
+  if (signUp.status !== 'complete') throw new AuthFlowError(signUp.status, signUp.missingFields);
   await must(signUp.finalize());
 }
 
@@ -139,10 +141,17 @@ export function suggestedFirstName(user: { unsafeMetadata?: Record<string, unkno
   return first ? first.slice(0, 40) : null;
 }
 
-/** A sign-in or sign-up that Clerk accepted but could not finish, e.g. a step the app does not show. */
+/**
+ * A sign-in or sign-up that Clerk accepted but could not finish, e.g. a step the app does not show. `missing` names
+ * what Clerk wants (e.g. ['username']): almost always a Clerk Dashboard setting the app doesn't support, which
+ * `npm run clerk:check` reports.
+ */
 export class AuthFlowError extends Error {
-  constructor(readonly status: string | null) {
-    super(`auth_incomplete:${status}`);
+  constructor(
+    readonly status: string | null,
+    readonly missing: readonly string[] = [],
+  ) {
+    super(`auth_incomplete:${status}${missing.length ? `:${missing.join(',')}` : ''}`);
   }
 }
 
@@ -156,6 +165,8 @@ export function clerkErrorCode(error: unknown): string | null {
 export function authErrorMessage(error: unknown, m: Messages = es): string {
   const e = m.authErrors;
   if (error instanceof AuthFlowError) {
+    // The person reads a neutral message; the terminal says exactly what Clerk is waiting for, and where to fix it.
+    console.warn(`[auth] Clerk could not finish (${error.status}); missing: ${error.missing.join(', ') || 'unknown'}. Run npm run clerk:check.`);
     return e.incomplete;
   }
   switch (clerkErrorCode(error)) {

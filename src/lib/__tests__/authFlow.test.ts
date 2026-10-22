@@ -65,9 +65,10 @@ function fakeSignIn({ newDevice = false } = {}) {
   return s satisfies AuthSignIn;
 }
 
-function fakeSignUp({ statusAfterVerify = 'complete', taken = [] as string[] } = {}) {
+function fakeSignUp({ statusAfterVerify = 'complete', taken = [] as string[], missingFields = [] as string[] } = {}) {
   const s = {
     status: null as string | null,
+    missingFields,
     password: vi.fn(async ({ emailAddress }: { emailAddress: string }) => {
       if (taken.includes(emailAddress)) return { error: apiError('form_identifier_exists') };
       s.status = 'missing_requirements';
@@ -192,11 +193,23 @@ describe('sign up with password', () => {
     expect(authErrorMessage(error)).toMatch(/Inicia sesión/);
   });
 
-  it('stops when Clerk still wants something the app does not ask for', async () => {
-    const signUp = fakeSignUp({ statusAfterVerify: 'missing_requirements' });
+  it('stops when Clerk still wants something the app does not ask for, and says what', async () => {
+    // A Clerk Dashboard that requires a username: the code is accepted, but the sign-up can't finish.
+    const signUp = fakeSignUp({ statusAfterVerify: 'missing_requirements', missingFields: ['username'] });
     await signUpWithPassword(signUp, input);
-    expect(await errorOf(verifySignUp(signUp, CODE))).toBeInstanceOf(AuthFlowError);
+    const error = await errorOf(verifySignUp(signUp, CODE));
+    expect(error).toBeInstanceOf(AuthFlowError);
+    expect((error as AuthFlowError).missing).toEqual(['username']);
     expect(signUp.finalize).not.toHaveBeenCalled();
+
+    const warn = vi.mocked(console.warn);
+    warn.mockClear();
+    expect(authErrorMessage(error)).toMatch(/un paso más/);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('missing: username'));
+
+    // Trying again with the same code gives the same clear answer, not "already verified".
+    signUp.verifications.verifyEmailCode.mockResolvedValueOnce({ error: apiError('verification_already_verified') as never });
+    expect(await errorOf(verifySignUp(signUp, CODE))).toBeInstanceOf(AuthFlowError);
   });
 });
 

@@ -69,7 +69,7 @@ export function useOAuth() {
           return true;
         }
         // Back from the browser without a session: either cancelled, or Clerk wants more sign-up fields.
-        if (signUp?.status === 'missing_requirements') throw new AuthFlowError('missing_requirements');
+        if (signUp?.status === 'missing_requirements') throw new AuthFlowError('missing_requirements', signUp.missingFields);
         return false;
       } finally {
         if (Platform.OS === 'android') await WebBrowser.coolDownAsync();
