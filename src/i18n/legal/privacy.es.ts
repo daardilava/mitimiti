@@ -6,7 +6,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email, city } = LEGAL_CONTACT;
 
 export const privacyEs: LegalDoc = {
-  effective: 'Vigente desde el 20 de octubre de 2026',
+  effective: 'Vigente desde el 23 de octubre de 2026',
   intro:
     'Esta política explica qué datos personales guarda MitiMiti, para qué, con quién los comparte, cuánto tiempo los conserva y cómo puedes conocerlos, corregirlos o pedir que se borren.',
   sections: [
@@ -21,6 +21,7 @@ export const privacyEs: LegalDoc = {
         'De la pareja: el nombre de cada uno (incluido el nombre con el que invitas a tu pareja antes de que se una), el avatar, la moneda, la división predeterminada y el código de invitación.',
         'Lo que ustedes registran: cada gasto (monto, descripción, categoría, fecha, quién pagó y cómo se divide), cada pago entre ustedes (monto, medio y fecha) y los presupuestos.',
         'Un historial de cambios: quién creó, editó o borró cada gasto o pago, y cuándo. También guardamos los intentos de unirse con un código, para evitar abusos.',
+        'Si la pareja compra Premium: la tienda (Apple o Google) procesa el pago y nosotros no vemos tu tarjeta ni tus datos de pago. Recibimos, a través de RevenueCat, el estado de la suscripción asociado a tu cuenta: el producto, la tienda, si es una prueba, las fechas de compra, renovación y fin, y los avisos de la tienda sobre esa compra.',
         'En tu teléfono quedan tu sesión, en el almacenamiento seguro del sistema, y tus preferencias de idioma y apariencia.',
         'No pedimos datos sensibles. No guardamos datos bancarios ni de tarjetas, tu ubicación, tus contactos ni tus fotos. Te pedimos no escribir datos sensibles en las descripciones de los gastos.',
       ],
@@ -29,6 +30,7 @@ export const privacyEs: LegalDoc = {
       heading: '3. Para qué los usamos',
       paragraphs: [
         'Para crear tu cuenta y protegerla; para mostrarte a ti y a tu pareja lo que registran y calcular el saldo; para mantener sincronizados los dos teléfonos; para prevenir fraudes y abusos; para responder tus preguntas; para avisarte de cambios en la app o en estos textos, y para cumplir obligaciones legales.',
+        'Si compras Premium, usamos el estado de la suscripción para saber si la pareja lo tiene, mostrarlo en Ajustes a los dos y abrir las funciones que incluye.',
         'No vendemos tus datos, no los usamos para publicidad y no creamos perfiles tuyos para terceros.',
       ],
     },
@@ -44,6 +46,7 @@ export const privacyEs: LegalDoc = {
       paragraphs: [
         'Con tu pareja: ve todo lo que se comparte en su espacio, incluido tu nombre y tu avatar.',
         'Con los proveedores que nos ayudan a prestar el servicio, que solo usan tus datos para eso y bajo nuestras instrucciones: Clerk (inicio de sesión, Estados Unidos) y Supabase (base de datos, alojada en Irlanda, Unión Europea). Si entras con Google o Apple, también ellos participan en el inicio de sesión.',
+        'Si compran Premium: RevenueCat (gestión de suscripciones, Estados Unidos) recibe tu identificador de cuenta y el estado de la compra, y Apple o Google procesan el pago como responsables de su propia tienda, según sus políticas.',
         'Con autoridades, solo cuando la ley nos obligue.',
       ],
     },
@@ -65,6 +68,7 @@ export const privacyEs: LegalDoc = {
       paragraphs: [
         'Mientras tengas una cuenta. Un gasto o pago que borras deja de verse, pero se conserva marcado como borrado mientras exista su pareja, para que el historial de cambios sea completo.',
         'Si borras tu cuenta, borramos tu cuenta de inicio de sesión, tu perfil y todo el espacio de la pareja: sus gastos, pagos, presupuestos e historial, también para tu pareja. La app te lo advierte antes de confirmar.',
+        'Los avisos de compra que guardamos de ti se borran con tu cuenta. RevenueCat, Apple y Google conservan sus propios registros de la compra según sus políticas y las obligaciones legales que tengan (por ejemplo, contables).',
         'Las copias de seguridad de nuestros proveedores pueden conservar esos datos hasta 30 días más, hasta que se reemplazan. Solo guardaremos algo por más tiempo si la ley nos obliga.',
       ],
     },

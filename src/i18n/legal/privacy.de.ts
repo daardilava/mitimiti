@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email, city } = LEGAL_CONTACT;
 
 export const privacyDe: LegalDoc = {
-  effective: 'Gültig ab dem 20. Oktober 2026',
+  effective: 'Gültig ab dem 23. Oktober 2026',
   intro:
     'Diese Erklärung beschreibt, welche personenbezogenen Daten MitiMiti speichert, wofür, mit wem sie geteilt werden, wie lange sie aufbewahrt werden und wie du sie einsehen, berichtigen oder löschen lassen kannst.',
   sections: [
@@ -19,6 +19,7 @@ export const privacyDe: LegalDoc = {
         'Vom Paar: den Namen jeder Person (auch den Namen, mit dem du deinen Partner oder deine Partnerin einlädst, bevor er oder sie beitritt), den Avatar, die Währung, die Standardaufteilung und den Einladungscode.',
         'Was ihr erfasst: jede Ausgabe (Betrag, Beschreibung, Kategorie, Datum, wer bezahlt hat und wie sie aufgeteilt wird), jede Zahlung zwischen euch (Betrag, Zahlungsart und Datum) und die Budgets.',
         'Einen Änderungsverlauf: wer jede Ausgabe oder Zahlung erstellt, bearbeitet oder gelöscht hat, und wann. Außerdem speichern wir Versuche, mit einem Code beizutreten, um Missbrauch zu verhindern.',
+        'Wenn das Paar Premium kauft: Der Store (Apple oder Google) wickelt die Zahlung ab, und wir sehen weder deine Karte noch deine Zahlungsdaten. Über RevenueCat erhalten wir den Status des Abos, verknüpft mit deinem Konto: das Produkt, den Store, ob es ein Test ist, die Kauf-, Verlängerungs- und Enddaten und die Meldungen des Stores zu diesem Kauf.',
         'Auf deinem Telefon bleiben deine Sitzung, im sicheren Speicher des Systems, und deine Einstellungen für Sprache und Darstellung.',
         'Wir fragen keine sensiblen Daten ab. Wir speichern keine Bank- oder Kartendaten, keinen Standort, keine Kontakte und keine Fotos. Bitte schreib keine sensiblen Daten in die Beschreibungen der Ausgaben.',
       ],
@@ -27,6 +28,7 @@ export const privacyDe: LegalDoc = {
       heading: '3. Wofür wir sie nutzen',
       paragraphs: [
         'Um dein Konto zu erstellen und zu schützen; um dir und deinem Partner oder deiner Partnerin das Erfasste zu zeigen und den Saldo zu berechnen; um beide Telefone synchron zu halten; um Betrug und Missbrauch zu verhindern; um deine Fragen zu beantworten; um dich über Änderungen der App oder dieser Texte zu informieren; und um gesetzliche Pflichten zu erfüllen.',
+        'Wenn du Premium kaufst, nutzen wir den Status des Abos, um zu wissen, ob das Paar es hat, es euch beiden in den Einstellungen anzuzeigen und die enthaltenen Funktionen freizuschalten.',
         'Wir verkaufen deine Daten nicht, nutzen sie nicht für Werbung und erstellen keine Profile von dir für Dritte.',
       ],
     },
@@ -42,6 +44,7 @@ export const privacyDe: LegalDoc = {
       paragraphs: [
         'Mit deinem Partner oder deiner Partnerin: Diese Person sieht alles, was in eurem Bereich geteilt wird, auch deinen Namen und deinen Avatar.',
         'Mit den Anbietern, die uns beim Betrieb helfen und deine Daten nur dafür und nach unseren Anweisungen nutzen: Clerk (Anmeldung, Vereinigte Staaten) und Supabase (Datenbank, gehostet in Irland, Europäische Union). Wenn du dich mit Google oder Apple anmeldest, sind auch sie an der Anmeldung beteiligt.',
+        'Wenn ihr Premium kauft: RevenueCat (Abo-Verwaltung, Vereinigte Staaten) erhält deine Konto-Kennung und den Status des Kaufs, und Apple oder Google wickeln die Zahlung als Verantwortliche ihres eigenen Stores nach ihren Richtlinien ab.',
         'Mit Behörden, nur wenn das Gesetz es verlangt.',
       ],
     },
@@ -63,6 +66,7 @@ export const privacyDe: LegalDoc = {
       paragraphs: [
         'Solange du ein Konto hast. Eine Ausgabe oder Zahlung, die du löschst, wird nicht mehr angezeigt, bleibt aber als gelöscht markiert erhalten, solange ihr Paar besteht, damit der Änderungsverlauf vollständig ist.',
         'Wenn du dein Konto löschst, löschen wir dein Anmeldekonto, dein Profil und den gesamten Bereich des Paares: seine Ausgaben, Zahlungen, Budgets und seinen Verlauf, auch für deinen Partner oder deine Partnerin. Die App warnt dich, bevor du bestätigst.',
+        'Die Kaufmeldungen, die wir zu dir speichern, werden mit deinem Konto gelöscht. RevenueCat, Apple und Google bewahren eigene Aufzeichnungen des Kaufs nach ihren Richtlinien und ihren gesetzlichen Pflichten auf (zum Beispiel buchhalterischen).',
         'Sicherungskopien unserer Anbieter können diese Daten bis zu 30 weitere Tage enthalten, bis sie ersetzt werden. Länger bewahren wir nur etwas auf, wenn das Gesetz es verlangt.',
       ],
     },

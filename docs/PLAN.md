@@ -370,8 +370,14 @@ Free keeps the whole core, and no plan ever changes the balance.
     store; cancel it there first, as Apple asks), with *Administrar suscripción* right there. The partner reads that
     the payer keeps Premium.
   - `planLine()` and `deletionNotice()` in [src/lib/plans.ts](../src/lib/plans.ts), tested.
-- [ ] **Privacy Policy and Terms:** add RevenueCat as a provider, and Apple and Google as payment processors.
-  Add the subscription terms: renewal, cancelling in the store, one subscription per couple. In es/en/de.
+- [x] **Privacy Policy and Terms** (es binding, en/de; effective 23 Oct 2026)
+  - Términos §6 *Precio*: Free and Premium; one subscription per couple, so no second purchase. The store handles
+    purchase, billing, renewal, cancellation and refunds. Auto-renewal and cancelling 24 h before. A trial turns
+    paid at its end. Deleting the account doesn't cancel the subscription. Free deletes nothing and never changes
+    the balance. Price changes are announced.
+  - Privacidad §2, §3, §5 and §8: what we receive through RevenueCat (never card data) and what for; RevenueCat as
+    a provider (United States); Apple and Google as controllers of their stores; billing events deleted with the
+    account. **To review by the owner before launch.**
 - [ ] **Store setup runbook:** `docs/BILLING.md`. Accounts and agreements, products (`premium_monthly`,
   `premium_yearly`), RevenueCat (entitlement `premium`, offering `default`, webhook), sandbox testing, and the
   release checklist.

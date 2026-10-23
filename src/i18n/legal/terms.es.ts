@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email } = LEGAL_CONTACT;
 
 export const termsEs: LegalDoc = {
-  effective: 'Vigentes desde el 20 de octubre de 2026',
+  effective: 'Vigentes desde el 23 de octubre de 2026',
   intro:
     'Estos términos explican qué es MitiMiti, qué puedes esperar de la app y qué esperamos de quienes la usan. Al crear tu cuenta los aceptas. Si no estás de acuerdo, no uses la app.',
   sections: [
@@ -48,7 +48,12 @@ export const termsEs: LegalDoc = {
     {
       heading: '6. Precio',
       paragraphs: [
-        'Hoy MitiMiti es gratis. Si en el futuro ofrecemos un plan de pago, te lo diremos con anticipación, verás el precio antes de aceptarlo y nunca te cobraremos sin tu aceptación expresa.',
+        'MitiMiti tiene un plan gratis, sin fecha de fin, con lo esencial: registrar gastos, ver el saldo y saldar cuentas. Premium es un plan de pago que suma funciones, como el historial completo, los presupuestos y la exportación. Antes de aceptar verás qué incluye, el precio y cada cuánto se cobra.',
+        'Premium es una suscripción por pareja: una sola suscripción cubre a las dos personas del espacio, sin importar quién la compre. Por eso, mientras la pareja tiene Premium, la app no ofrece una segunda suscripción.',
+        'La compra, el cobro, la renovación, la cancelación y los reembolsos los gestiona la tienda donde la compras (App Store de Apple o Google Play), con sus propias condiciones. Nosotros no vemos tu tarjeta ni tus datos de pago.',
+        'La suscripción se renueva automáticamente al final de cada periodo, salvo que la canceles al menos 24 horas antes desde los ajustes de tu cuenta en la tienda. Si incluye una prueba gratis y no la cancelas antes de que termine, empieza el cobro ese día.',
+        'Borrar tu cuenta o dejar de usar la app no cancela la suscripción: cancélala en la tienda. Si Premium termina, nada se borra y el saldo no cambia: el plan gratis solo limita algunas pantallas.',
+        'Si cambiamos el precio, te avisaremos con anticipación, y la tienda te pedirá aceptarlo cuando así lo exija.',
       ],
     },
     {
