@@ -378,9 +378,11 @@ Free keeps the whole core, and no plan ever changes the balance.
   - Privacidad §2, §3, §5 and §8: what we receive through RevenueCat (never card data) and what for; RevenueCat as
     a provider (United States); Apple and Google as controllers of their stores; billing events deleted with the
     account. **To review by the owner before launch.**
-- [ ] **Store setup runbook:** `docs/BILLING.md`. Accounts and agreements, products (`premium_monthly`,
-  `premium_yearly`), RevenueCat (entitlement `premium`, offering `default`, webhook), sandbox testing, and the
-  release checklist.
+- [x] **Store setup runbook:** [docs/BILLING.md](BILLING.md), checked against the official docs on 2026-10-23. It
+  covers accounts and agreements, the products, RevenueCat (entitlement `premium`, offering `default`, webhook, store
+  notifications), testing, and the release checklist. It starts with RevenueCat's **Test Store**, so the whole flow
+  can be tested before any store account. Three steps are marked to re-check: Google's closed-test rule for personal
+  accounts, Play service credentials, and App Store server notifications.
 - [ ] **QA:** review the whole flow for bugs and security holes, `npx expo-doctor`, and the manual test script
   below on two real phones in sandbox. Check: if the partner who isn't paying deletes their account, the couple (and
   its `subscriptions` row) is erased while the payer's store subscription keeps running; billing-sync links it again

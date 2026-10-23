@@ -281,6 +281,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branch names, commit style and the re
 | Document | Contents |
 | --- | --- |
 | [docs/PLAN.md](docs/PLAN.md) | Product principles, features, roadmap, phase acceptance checks, Clerk setup, billing, open questions |
+| [docs/BILLING.md](docs/BILLING.md) | Billing runbook: App Store, Google Play and RevenueCat setup, sandbox testing, release checklist |
 | [docs/DESIGN.md](docs/DESIGN.md) | The 13 screens and their routes, design system (UI kit v1) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack, Clerk ↔ Supabase wiring, data model, code layout |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to propose and review changes |
