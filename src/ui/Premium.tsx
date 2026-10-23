@@ -9,7 +9,8 @@ import { font, radius, space } from './tokens';
 import { makeStyles, useTheme } from './theme';
 import { useI18n } from '@/i18n';
 
-export const openPaywall = (from: Benefit) => router.push({ pathname: '/paywall', params: { from } });
+/** The paywall, with the benefit that led there first (none from Ajustes › Tu plan). */
+export const openPaywall = (from?: Benefit) => router.push({ pathname: '/paywall', params: from ? { from } : {} });
 
 /** "Premium", next to a title. Text, so it never relies on colour or an icon alone. */
 export function PremiumBadge() {

@@ -50,3 +50,27 @@ export function planFromRpc(raw: unknown): PlanInfo {
     isPayer: r.is_payer === true,
   };
 }
+
+/** What Ajustes › Tu plan says about the date: when it renews, ends, or the trial turns paid. */
+export type PlanLine =
+  | { kind: 'free' }
+  | { kind: 'lifetime' }
+  | { kind: 'renews' | 'ends' | 'trialEnds'; date: string };
+
+export function planLine(info: PlanInfo): PlanLine {
+  if (info.plan !== 'premium') return { kind: 'free' };
+  if (!info.expiresAt) return { kind: 'lifetime' };
+  const date = isoDate(new Date(info.expiresAt));
+  // Cancelled, or the store couldn't charge: Premium lasts until this date (the end of the period, or the grace period).
+  if (info.status === 'cancelled' || info.status === 'billing_issue') return { kind: 'ends', date };
+  return { kind: info.periodType === 'TRIAL' ? 'trialEnds' : 'renews', date };
+}
+
+/**
+ * Borrar cuenta, while the couple is Premium: the payer is told the store subscription is not cancelled with the
+ * account (Apple: billing continues through the store; ask to cancel first); the partner, that the payer keeps it.
+ */
+export function deletionNotice(info: PlanInfo): 'payer' | 'partner' | null {
+  if (info.plan !== 'premium') return null;
+  return info.isPayer ? 'payer' : 'partner';
+}

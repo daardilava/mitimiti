@@ -361,9 +361,15 @@ Free keeps the whole core, and no plan ever changes the balance.
     ([src/ui/Premium.tsx](../src/ui/Premium.tsx)).
   - The balance, settle up and *Gastado juntos* ignore the plan: checked identical on Free and Premium.
   - With dev bypass, *Plan de prueba* in Ajustes switches Free / Premium. Checked at 390 px, light and dark.
-- [ ] **Ajustes plan card:** the plan, who pays, the renewal or end date, the trial end, a billing-issue warning,
-  *Administrar suscripción* (payer only), and Restaurar compras. Borrar cuenta warns the payer that deleting the
-  account does not cancel the store subscription.
+- [x] **Ajustes plan card:** *Tu plan* in [Ajustes](../src/app/(tabs)/settings.tsx).
+  - Free: *Gratis* and *Ver Premium*. Premium: *Premium para los dos*, who pays, *Se renueva / Termina / Prueba
+    gratis hasta el …* (with the year), and a neutral billing-issue warning with *Revisar el pago*.
+  - *Administrar suscripción* is for the payer only. It opens RevenueCat's managementURL, the store it was bought
+    in, or the store's own page. The partner sees *Lo administra Ana desde su tienda*. Restaurar compras is for both.
+  - Borrar cuenta: the payer reads that deleting does not cancel the subscription (billing continues through the
+    store; cancel it there first, as Apple asks), with *Administrar suscripción* right there. The partner reads that
+    the payer keeps Premium.
+  - `planLine()` and `deletionNotice()` in [src/lib/plans.ts](../src/lib/plans.ts), tested.
 - [ ] **Privacy Policy and Terms:** add RevenueCat as a provider, and Apple and Google as payment processors.
   Add the subscription terms: renewal, cancelling in the store, one subscription per couple. In es/en/de.
 - [ ] **Store setup runbook:** `docs/BILLING.md`. Accounts and agreements, products (`premium_monthly`,

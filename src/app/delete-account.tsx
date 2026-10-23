@@ -3,10 +3,13 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { confirmDeletionCode, deleteMyAccount, NoEmailFactorError, sendDeletionCode } from '@/api/account';
 import { useCouple } from '@/api/expenses';
+import { usePlan } from '@/api/plan';
+import { manageSubscriptions } from '@/api/purchases';
 import { deletionErrorMessage } from '@/lib/deleteAccount';
+import { deletionNotice } from '@/lib/plans';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { CodeStep } from '@/ui/Auth';
-import { Checkbox } from '@/ui/Form';
+import { Callout, Checkbox } from '@/ui/Form';
 import { Icon } from '@/ui/Icon';
 import { NavButton, Screen } from '@/ui/Screen';
 import { radius, space } from '@/ui/tokens';
@@ -24,6 +27,7 @@ export default function DeleteAccount() {
   const hasCouple = useSessionStore((s) => s.householdId !== null);
   const email = useSessionStore((s) => s.email);
   const couple = useCouple();
+  const plan = usePlan();
   const [understood, setUnderstood] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +94,22 @@ export default function DeleteAccount() {
         ))}
       </View>
       <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]}>{m.deleteAccount.keepNote}</Text>
+
+      {/* The store subscription isn't part of the account: Apple asks apps to say billing continues through the store
+          and to ask to cancel first; Google, that a step needed before deleting is clearly explained. */}
+      {hasCouple && deletionNotice(plan.info) === 'payer' && (
+        <View style={{ gap: space[3] }}>
+          <Callout icon="bell" tone="neutral">
+            {m.deleteAccount.subscriptionPayer}
+          </Callout>
+          <NavButton label={m.deleteAccount.manageFirst} kind="secondary" onPress={() => void manageSubscriptions()} />
+        </View>
+      )}
+      {hasCouple && partner && deletionNotice(plan.info) === 'partner' && (
+        <Callout icon="bell" tone="neutral">
+          {m.deleteAccount.subscriptionPartner(partner)}
+        </Callout>
+      )}
 
       <Checkbox
         checked={understood}

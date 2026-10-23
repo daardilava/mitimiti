@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { periodRange, shiftPeriod } from '../activity';
-import { canOpenMonth, canUseFeature, FREE_HISTORY_MONTHS, FREE_PLAN, oldestFreeMonth, planFromRpc, type Feature } from '../plans';
+import { canOpenMonth, canUseFeature, deletionNotice, FREE_HISTORY_MONTHS, FREE_PLAN, oldestFreeMonth, planFromRpc, planLine, type Feature, type PlanInfo } from '../plans';
 
 const oct19 = new Date(2026, 9, 19);
 const jan5 = new Date(2027, 0, 5);
@@ -79,5 +79,39 @@ describe('planFromRpc', () => {
     expect(planFromRpc(null)).toEqual(FREE_PLAN);
     expect(planFromRpc('premium')).toEqual(FREE_PLAN);
     expect(planFromRpc({ plan: 'gold', status: 'weird', period_type: 'PROMO', is_payer: 'yes' })).toEqual(FREE_PLAN);
+  });
+});
+
+const premium = (over: Partial<PlanInfo>): PlanInfo => ({ plan: 'premium', status: 'active', expiresAt: '2026-11-19T15:00:00.000Z', periodType: 'NORMAL', isPayer: true, ...over });
+
+describe('planLine', () => {
+  it('Free says nothing about dates', () => {
+    expect(planLine(FREE_PLAN)).toEqual({ kind: 'free' });
+  });
+
+  it('active renews; a trial says when it turns paid', () => {
+    expect(planLine(premium({}))).toEqual({ kind: 'renews', date: '2026-11-19' });
+    expect(planLine(premium({ periodType: 'TRIAL' }))).toEqual({ kind: 'trialEnds', date: '2026-11-19' });
+  });
+
+  it('cancelled, or a billing issue: ends on that date', () => {
+    expect(planLine(premium({ status: 'cancelled' }))).toEqual({ kind: 'ends', date: '2026-11-19' });
+    expect(planLine(premium({ status: 'billing_issue', periodType: 'TRIAL' }))).toEqual({ kind: 'ends', date: '2026-11-19' });
+  });
+
+  it('no date: lifetime', () => {
+    expect(planLine(premium({ expiresAt: null }))).toEqual({ kind: 'lifetime' });
+  });
+});
+
+describe('deletionNotice', () => {
+  it('the payer is told the store subscription goes on; the partner, that the payer keeps it', () => {
+    expect(deletionNotice(premium({ isPayer: true }))).toBe('payer');
+    expect(deletionNotice(premium({ isPayer: false }))).toBe('partner');
+  });
+
+  it('Free, or expired: nothing to say', () => {
+    expect(deletionNotice(FREE_PLAN)).toBeNull();
+    expect(deletionNotice({ ...FREE_PLAN, status: 'expired', isPayer: true })).toBeNull();
   });
 });

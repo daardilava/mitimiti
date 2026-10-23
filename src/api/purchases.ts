@@ -6,7 +6,7 @@
 //
 // Native code: needs a development build. Expo Go runs the SDK in RevenueCat's Preview API Mode (mocks, no real
 // purchases). With EXPO_PUBLIC_DEV_BYPASS_AUTH=1 or on web the SDK is never touched: a fake answers instead.
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import Purchases, { type PurchasesPackage } from 'react-native-purchases';
 import { periodOf, trialDays, type PlanPackage } from '@/lib/offerings';
 import { setSamplePlan } from '@/lib/sample';
@@ -106,6 +106,32 @@ export async function purchase(plan: PlanPackage): Promise<PurchaseResult> {
 export async function restore(): Promise<void> {
   if (purchasesMode === 'fake') return;
   await sdk().restorePurchases();
+}
+
+// The stores' own subscription pages, when RevenueCat has no management URL (Apple: apps.apple.com/account/subscriptions).
+const STORE_SUBSCRIPTIONS = Platform.select({
+  ios: 'https://apps.apple.com/account/subscriptions',
+  android: 'https://play.google.com/store/account/subscriptions',
+  default: undefined,
+});
+
+/**
+ * Administrar suscripción: the store's page for this subscription, where it is cancelled or the payment fixed.
+ * RevenueCat's managementURL points at the store it was bought in, even when that is the other platform's.
+ * False when there is nowhere to send the person (web).
+ */
+export async function manageSubscriptions(): Promise<boolean> {
+  let url: string | null | undefined = STORE_SUBSCRIPTIONS;
+  if (purchasesMode === 'native') {
+    try {
+      url = (await sdk().getCustomerInfo()).managementURL ?? url;
+    } catch (e) {
+      console.warn('[purchases] customer info failed', e);
+    }
+  }
+  if (!url) return false;
+  await Linking.openURL(url);
+  return true;
 }
 
 const listeners = new Set<() => void>();
