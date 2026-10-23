@@ -141,12 +141,10 @@ export const es = {
   welcome: {
     accountDeleted: 'Tu cuenta se borró. Gracias por usar MitiMiti.',
     coupleDeleted: 'Tu pareja borró su cuenta y, con ella, el espacio que compartían. Pueden empezar uno nuevo cuando quieran.',
-    title: 'Cuentas claras entre los dos.',
-    lead: 'Registren lo que gastan juntos, vean al momento quién le debe a quién y salden con un toque.',
-    create: 'Crear nuestra cuenta',
-    haveCode: 'Tengo un código de invitación',
-    haveAccount: '¿Ya tienes cuenta?',
-    signIn: 'Inicia sesión',
+    tagline: 'Gastos compartidos, cuentas claras y cero discusiones.',
+    create: 'Crear cuenta',
+    haveCode: 'Tengo una invitación de mi pareja',
+    signIn: 'Iniciar sesión',
   },
 
   signIn: {
@@ -321,6 +319,7 @@ export const es = {
     title: 'Únete a tu pareja',
     lead: 'Pídele el código de 6 caracteres que aparece en su app, en Ajustes › Código de pareja.',
     leadInvited: 'Tu invitación ya trae el código. Revísalo y toca Unirme.',
+    noCode: 'No tengo código: crear nuestra cuenta',
     submit: 'Unirme',
     label: 'Código de invitación',
     placeholder: 'Ej. AM482X',
@@ -436,7 +435,7 @@ export const es = {
 
 ` +
       `1. Descarga la app MitiMiti.
-2. Toca "Tengo un código de invitación".
+2. Toca "Tengo una invitación de mi pareja".
 3. Escribe este código:
 
 ${code}` +

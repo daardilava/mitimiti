@@ -53,6 +53,13 @@ const light = {
   /** The MitiMiti wordmark on hero surfaces: brand green, lifted to read on ink, and brand coral. */
   wordmarkGreen: '#3DC4A6',
   wordmarkCoral: '#FF7A59',
+  /** Welcome, the brand screen (same in both modes): Tinta behind, the coral "Crear cuenta" with Tinta text. */
+  brandInk: '#1A2238',
+  brandCoral: '#FF7A59',
+  onBrandCoral: '#1A2238',
+  /** Outline button and slogan on brandInk. */
+  brandLine: '#3A4563',
+  onBrandInk: '#D5DAE3',
   /** Behind sheets and dialogs. */
   scrim: '#000000',
 };
@@ -99,6 +106,11 @@ const dark: Palette = {
   negativeOnInk: '#E5486A',
   wordmarkGreen: '#3DC4A6',
   wordmarkCoral: '#FF7A59',
+  brandInk: '#1A2238',
+  brandCoral: '#FF7A59',
+  onBrandCoral: '#1A2238',
+  brandLine: '#3A4563',
+  onBrandInk: '#D5DAE3',
   scrim: '#000000',
 };
 

@@ -124,11 +124,9 @@ export const en: Messages = {
   welcome: {
     accountDeleted: 'Your account was deleted. Thanks for using MitiMiti.',
     coupleDeleted: 'Your partner deleted their account, and with it the space you shared. You can start a new one any time.',
-    title: 'Clear accounts between the two of you.',
-    lead: 'Log what you spend together, see at a glance who owes whom, and settle up with one tap.',
-    create: 'Create our account',
-    haveCode: 'I have an invite code',
-    haveAccount: 'Already have an account?',
+    tagline: 'Shared expenses, clear accounts and zero arguments.',
+    create: 'Create account',
+    haveCode: 'I have an invite from my partner',
     signIn: 'Log in',
   },
 
@@ -296,6 +294,7 @@ export const en: Messages = {
     title: 'Join your partner',
     lead: 'Ask for the 6-character code in their app, under Settings › Couple code.',
     leadInvited: 'Your invite already includes the code. Check it and tap Join.',
+    noCode: 'No code: create our account',
     submit: 'Join',
     label: 'Invite code',
     placeholder: 'E.g. AM482X',
@@ -405,7 +404,7 @@ export const en: Messages = {
 
 ` +
       `1. Download the MitiMiti app.
-2. Tap "I have an invite code".
+2. Tap "I have an invite from my partner".
 3. Enter this code:
 
 ${code}` +

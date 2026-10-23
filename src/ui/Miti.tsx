@@ -12,7 +12,7 @@ export function Miti({ size }: { size: number }) {
   );
 }
 
-/** "MitiMiti" in Fredoka, green then coral, for the dark hero surfaces (Welcome). */
+/** "MitiMiti" in Fredoka, green then coral, for the dark brand and hero surfaces (Welcome). */
 export function Wordmark({ size = 28 }: { size?: number }) {
   const { color } = useTheme();
   return (

@@ -12,7 +12,7 @@ import { useI18n } from '@/i18n';
 // 01 · Bienvenida
 export default function Welcome() {
   const { m } = useI18n();
-  const { color, type } = useTheme();
+  const { type } = useTheme();
   const styles = useStyles();
   const signedIn = useSessionStore((s) => s.userId !== null) || DEV_BYPASS_AUTH;
   // Both paths need a signed-in person: new people create an account first, then continue to the chosen one.
@@ -24,15 +24,10 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Wordmark />
       <View style={styles.hero}>
-        <Miti size={112} />
-        <Text style={[type.hero, styles.light, { lineHeight: 48 }]} accessibilityRole="header">
-          {m.welcome.title}
-        </Text>
-        <Text style={[type.body, { color: color.onInk, fontSize: 17, lineHeight: 27 }]}>
-          {m.welcome.lead}
-        </Text>
+        <Miti size={176} />
+        <Wordmark size={44} />
+        <Text style={[type.body, styles.tagline]}>{m.welcome.tagline}</Text>
       </View>
       {notice && (
         <View accessibilityLiveRegion="polite">
@@ -40,17 +35,14 @@ export default function Welcome() {
         </View>
       )}
       <View style={{ gap: space[3] }}>
-        <NavButton href={to('setup')} label={m.welcome.create} kind="inverse" />
+        <NavButton href={to('setup')} label={m.welcome.create} kind="brand" />
         <NavButton href={to('join')} label={m.welcome.haveCode} kind="outline" />
         {!signedIn && (
-          <View style={styles.signIn}>
-            <Text style={[type.body, { color: color.onInk, fontSize: 15 }]}>{m.welcome.haveAccount}</Text>
-            <Link href="/sign-in" asChild>
-              <Pressable accessibilityRole="link" hitSlop={12} style={{ minHeight: touch, justifyContent: 'center' }}>
-                <Text style={[type.row, styles.light, { fontFamily: font.bodyBold, fontSize: 15, textDecorationLine: 'underline' }]}>{m.welcome.signIn}</Text>
-              </Pressable>
-            </Link>
-          </View>
+          <Link href="/sign-in" asChild>
+            <Pressable accessibilityRole="link" hitSlop={12} style={styles.signIn}>
+              <Text style={[type.row, styles.signInText]}>{m.welcome.signIn}</Text>
+            </Pressable>
+          </Link>
         )}
       </View>
     </SafeAreaView>
@@ -58,8 +50,9 @@ export default function Welcome() {
 }
 
 const useStyles = makeStyles(({ color }) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: color.hero, padding: space[6], gap: space[6] },
-  hero: { flex: 1, justifyContent: 'center', gap: space[6] },
-  light: { color: color.onHero },
-  signIn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[1] },
+  safe: { flex: 1, backgroundColor: color.brandInk, padding: space[6], gap: space[6] },
+  hero: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space[5] },
+  tagline: { color: color.onBrandInk, fontSize: 18, lineHeight: 27, textAlign: 'center', maxWidth: 320 },
+  signIn: { minHeight: touch, alignItems: 'center', justifyContent: 'center' },
+  signInText: { color: color.wordmarkGreen, fontFamily: font.bodySemi, fontSize: 16, textDecorationLine: 'underline' },
 }));
