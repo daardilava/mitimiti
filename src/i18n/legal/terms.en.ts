@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email } = LEGAL_CONTACT;
 
 export const termsEn: LegalDoc = {
-  effective: 'Effective from October 20, 2026',
+  effective: 'Effective from October 23, 2026',
   intro:
     'These terms explain what MitiMiti is, what you can expect from the app and what we expect from the people who use it. By creating your account you accept them. If you don’t agree, don’t use the app.',
   sections: [
@@ -46,7 +46,12 @@ export const termsEn: LegalDoc = {
     {
       heading: '6. Price',
       paragraphs: [
-        'MitiMiti is free today. If we offer a paid plan in the future, we’ll tell you in advance, you’ll see the price before accepting it, and we’ll never charge you without your express acceptance.',
+        'MitiMiti has a free plan, with no end date, with the essentials: logging expenses, seeing the balance and settling up. Premium is a paid plan that adds features, such as the full history, budgets and export. Before accepting, you’ll see what it includes, the price and how often it is charged.',
+        'Premium is a subscription per couple: one subscription covers both people in the space, whoever buys it. That is why, while the couple has Premium, the app doesn’t offer a second subscription.',
+        'The purchase, billing, renewal, cancellation and refunds are handled by the store you buy it in (Apple’s App Store or Google Play), under its own terms. We never see your card or payment details.',
+        'The subscription renews automatically at the end of each period unless you cancel it at least 24 hours before, in your store account settings. If it includes a free trial and you don’t cancel before it ends, billing starts that day.',
+        'Deleting your account or no longer using the app doesn’t cancel the subscription: cancel it in the store. If Premium ends, nothing is deleted and the balance doesn’t change: the free plan only limits some screens.',
+        'If we change the price, we’ll tell you in advance, and the store will ask you to accept it where it requires that.',
       ],
     },
     {

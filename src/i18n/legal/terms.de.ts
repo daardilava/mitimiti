@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email } = LEGAL_CONTACT;
 
 export const termsDe: LegalDoc = {
-  effective: 'Gültig ab dem 20. Oktober 2026',
+  effective: 'Gültig ab dem 23. Oktober 2026',
   intro:
     'Diese Bedingungen erklären, was MitiMiti ist, was du von der App erwarten kannst und was wir von den Menschen erwarten, die sie nutzen. Mit dem Erstellen deines Kontos akzeptierst du sie. Wenn du nicht einverstanden bist, nutze die App nicht.',
   sections: [
@@ -46,7 +46,12 @@ export const termsDe: LegalDoc = {
     {
       heading: '6. Preis',
       paragraphs: [
-        'MitiMiti ist heute kostenlos. Wenn wir künftig einen kostenpflichtigen Plan anbieten, sagen wir es dir vorher, du siehst den Preis, bevor du zustimmst, und wir berechnen dir nie etwas ohne deine ausdrückliche Zustimmung.',
+        'MitiMiti hat einen kostenlosen Plan ohne Enddatum mit dem Wichtigsten: Ausgaben erfassen, den Saldo sehen und ausgleichen. Premium ist ein kostenpflichtiger Plan mit zusätzlichen Funktionen, etwa dem gesamten Verlauf, Budgets und dem Export. Bevor du zustimmst, siehst du, was er enthält, den Preis und wie oft abgerechnet wird.',
+        'Premium ist ein Abo pro Paar: Ein Abo gilt für beide Personen im Bereich, egal wer es kauft. Deshalb bietet die App kein zweites Abo an, solange das Paar Premium hat.',
+        'Kauf, Abrechnung, Verlängerung, Kündigung und Erstattungen übernimmt der Store, in dem du kaufst (Apples App Store oder Google Play), nach seinen eigenen Bedingungen. Wir sehen weder deine Karte noch deine Zahlungsdaten.',
+        'Das Abo verlängert sich am Ende jedes Zeitraums automatisch, wenn du es nicht spätestens 24 Stunden vorher in den Einstellungen deines Store-Kontos kündigst. Enthält es einen kostenlosen Test und kündigst du nicht vor dessen Ende, beginnt an diesem Tag die Abrechnung.',
+        'Das Löschen deines Kontos oder das Nicht-mehr-Nutzen der App kündigt das Abo nicht: Kündige es im Store. Endet Premium, wird nichts gelöscht und der Saldo ändert sich nicht: Der kostenlose Plan schränkt nur einige Ansichten ein.',
+        'Wenn wir den Preis ändern, sagen wir es dir vorher, und der Store bittet dich um Zustimmung, wo er das verlangt.',
       ],
     },
     {

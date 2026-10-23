@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email, city } = LEGAL_CONTACT;
 
 export const privacyEn: LegalDoc = {
-  effective: 'Effective from October 20, 2026',
+  effective: 'Effective from October 23, 2026',
   intro:
     'This policy explains what personal data MitiMiti keeps, why, who it shares it with, how long it keeps it, and how you can see it, correct it or ask for it to be deleted.',
   sections: [
@@ -19,6 +19,7 @@ export const privacyEn: LegalDoc = {
         'From the couple: each person’s name (including the name you invite your partner with before they join), the avatar, the currency, the default split and the invite code.',
         'What you record: each expense (amount, description, category, date, who paid and how it is split), each payment between you (amount, method and date) and the budgets.',
         'A history of changes: who created, edited or deleted each expense or payment, and when. We also keep attempts to join with a code, to prevent abuse.',
+        'If the couple buys Premium: the store (Apple or Google) processes the payment, and we never see your card or payment details. Through RevenueCat, we receive the subscription’s status linked to your account: the product, the store, whether it is a trial, the purchase, renewal and end dates, and the store’s notices about that purchase.',
         'Your phone keeps your session, in the system’s secure storage, and your language and appearance preferences.',
         'We don’t ask for sensitive data. We don’t keep bank or card details, your location, your contacts or your photos. Please don’t write sensitive data in expense descriptions.',
       ],
@@ -27,6 +28,7 @@ export const privacyEn: LegalDoc = {
       heading: '3. What we use it for',
       paragraphs: [
         'To create and protect your account; to show you and your partner what you record and calculate the balance; to keep both phones in sync; to prevent fraud and abuse; to answer your questions; to tell you about changes to the app or these texts; and to meet legal obligations.',
+        'If you buy Premium, we use the subscription’s status to know whether the couple has it, to show it to both of you in Settings and to open the features it includes.',
         'We don’t sell your data, don’t use it for advertising and don’t build profiles of you for third parties.',
       ],
     },
@@ -42,6 +44,7 @@ export const privacyEn: LegalDoc = {
       paragraphs: [
         'With your partner: they see everything shared in your space, including your name and avatar.',
         'With the providers that help us run the service, who only use your data for that and under our instructions: Clerk (sign-in, United States) and Supabase (database, hosted in Ireland, European Union). If you sign in with Google or Apple, they take part in signing in too.',
+        'If you buy Premium: RevenueCat (subscription management, United States) receives your account identifier and the purchase’s status, and Apple or Google process the payment as controllers of their own store, under their policies.',
         'With authorities, only when the law requires it.',
       ],
     },
@@ -63,6 +66,7 @@ export const privacyEn: LegalDoc = {
       paragraphs: [
         'As long as you have an account. An expense or payment you delete is no longer shown, but is kept marked as deleted while its couple exists, so the history of changes is complete.',
         'If you delete your account, we delete your sign-in account, your profile and the whole couple space: its expenses, payments, budgets and history, for your partner too. The app warns you before you confirm.',
+        'The purchase notices we keep about you are deleted with your account. RevenueCat, Apple and Google keep their own records of the purchase under their policies and any legal obligations they have (for example, accounting).',
         'Our providers’ backups may keep that data for up to 30 more days, until they are replaced. We only keep anything longer if the law requires it.',
       ],
     },
