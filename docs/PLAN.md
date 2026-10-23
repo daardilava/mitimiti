@@ -301,9 +301,14 @@ Free keeps the whole core, and no plan ever changes the balance.
 
 **Tasks**
 
-- [ ] **DB:** `subscriptions` (one row per couple; members read their own; only the service role writes),
-  `billing_events` (idempotency, and events that arrive before a couple exists), `household_is_premium()`,
-  `my_plan()`; `delete_account()` erases both. PGlite tests. Needs `npx supabase db push`.
+- [x] **DB:** [20261023143931_household_subscription.sql](../supabase/migrations/20261023143931_household_subscription.sql)
+  - `subscriptions`: one row per couple. Members read their own; only the service role writes (no write policies,
+    and the client grants are revoked).
+  - `billing_events`: closed to every client. It makes the webhook idempotent and keeps events that arrive before a
+    couple exists.
+  - `household_is_premium()`: service side only. `my_plan()`: the signed-in person's plan.
+  - `subscriptions` is in Realtime. `delete_account()` also erases the caller's billing events.
+  - [supabase/tests/billing.test.ts](../supabase/tests/billing.test.ts). **Needs `npx supabase db push`.**
 - [ ] **Webhook:** `supabase/functions/revenuecat-webhook` checks the Authorization header and validates the body
   with Zod. It is idempotent, maps each event type to a status, resolves the Clerk id, ignores stale events, and
   upserts `subscriptions`. The pure parts live in `supabase/functions/_shared/billing.ts`, with tests.
@@ -325,7 +330,9 @@ Free keeps the whole core, and no plan ever changes the balance.
   `premium_yearly`), RevenueCat (entitlement `premium`, offering `default`, webhook), sandbox testing, and the
   release checklist.
 - [ ] **QA:** review the whole flow for bugs and security holes, `npx expo-doctor`, and the manual test script
-  below on two real phones in sandbox.
+  below on two real phones in sandbox. Known case to settle: if the partner who isn't paying deletes their account,
+  the couple (and its `subscriptions` row) is erased while the payer's store subscription keeps running; when the
+  payer starts or joins a new couple, their kept `billing_events` must link it again.
 
 **Acceptance checks**
 
