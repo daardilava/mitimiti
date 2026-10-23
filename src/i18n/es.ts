@@ -320,6 +320,7 @@ export const es = {
     ambiguous: 'Los códigos no llevan 0, O, 1 ni I. Revisa esa letra.',
     title: 'Únete a tu pareja',
     lead: 'Pídele el código de 6 caracteres que aparece en su app, en Ajustes › Código de pareja.',
+    leadInvited: 'Tu invitación ya trae el código. Revísalo y toca Unirme.',
     submit: 'Unirme',
     label: 'Código de invitación',
     placeholder: 'Ej. AM482X',
@@ -429,7 +430,20 @@ export const es = {
     goToApp: 'Ir a la app',
     joinedTitle: (name: string) => `${name} ya se unió`,
     joinedLead: 'Los dos ven los mismos gastos y el mismo saldo. Ya no hace falta un código.',
-    shareMessage: (code: string) => `Únete a nuestra cuenta en a medias. Abre la app, toca "Tengo un código de invitación" y escribe: ${code}`,
+    // The code alone on its line: a long press in WhatsApp copies just it.
+    shareMessage: (code: string, until: string | null) =>
+      `¡Hola! Te invito a a medias, para llevar juntos nuestros gastos y ver al momento quién le debe a quién.
+
+` +
+      `1. Descarga la app a medias.
+2. Toca "Tengo un código de invitación".
+3. Escribe este código:
+
+${code}` +
+      (until ? `
+
+Vale hasta el ${until}.` : ''),
+    whatsapp: 'Enviar por WhatsApp',
     inviteTitle: (name: string) => `Invita a ${name}`,
     step: 'Paso 2 de 2',
     lead: (name: string) => `Comparte este código. Cuando ${name} lo escriba en su app, los dos verán los mismos gastos y el mismo saldo.`,
@@ -439,7 +453,7 @@ export const es = {
     codeA11y: (spaced: string) => `Código: ${spaced}`,
     copy: 'Copiar',
     copied: 'Copiado',
-    share: 'Compartir',
+    share: 'Otras apps',
     validUntil: (date: string) => `Vale hasta el ${date}.`,
     meanwhile: (name: string) => `Mientras tanto ya puedes registrar gastos. ${name} los verá en cuanto se una.`,
   },

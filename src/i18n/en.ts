@@ -295,6 +295,7 @@ export const en: Messages = {
     ambiguous: 'Codes never use 0, O, 1 or I. Check that letter.',
     title: 'Join your partner',
     lead: 'Ask for the 6-character code in their app, under Settings › Couple code.',
+    leadInvited: 'Your invite already includes the code. Check it and tap Join.',
     submit: 'Join',
     label: 'Invite code',
     placeholder: 'E.g. AM482X',
@@ -399,7 +400,19 @@ export const en: Messages = {
     goToApp: 'Go to the app',
     joinedTitle: (name) => `${name} has joined`,
     joinedLead: 'You both see the same expenses and the same balance. A code isn’t needed anymore.',
-    shareMessage: (code) => `Join our account on a medias. Open the app, tap "I have an invite code" and enter: ${code}`,
+    shareMessage: (code, until) =>
+      `Hi! I'm inviting you to a medias, so we can track our shared expenses and see who owes whom at a glance.
+
+` +
+      `1. Download the a medias app.
+2. Tap "I have an invite code".
+3. Enter this code:
+
+${code}` +
+      (until ? `
+
+Valid until ${until}.` : ''),
+    whatsapp: 'Send by WhatsApp',
     inviteTitle: (name) => `Invite ${name}`,
     step: 'Step 2 of 2',
     lead: (name) => `Share this code. When ${name} enters it in their app, you’ll both see the same expenses and the same balance.`,
@@ -409,7 +422,7 @@ export const en: Messages = {
     codeA11y: (spaced) => `Code: ${spaced}`,
     copy: 'Copy',
     copied: 'Copied',
-    share: 'Share',
+    share: 'Other apps',
     validUntil: (date) => `Valid until ${date}.`,
     meanwhile: (name) => `Meanwhile you can already log expenses. ${name} will see them as soon as they join.`,
   },

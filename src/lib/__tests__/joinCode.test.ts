@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { joinCodeStatus, normalizeJoinCode } from '../joinCode';
+import { inviteCodeFromLink, joinCodeStatus, normalizeJoinCode } from '../joinCode';
 
 describe('normalizeJoinCode', () => {
   it('upper-cases and drops spaces, dashes and symbols', () => {
@@ -26,5 +26,21 @@ describe('joinCodeStatus', () => {
     expect(joinCodeStatus('AM4821')).toEqual({ kind: 'ambiguous' });
     expect(joinCodeStatus('O')).toEqual({ kind: 'ambiguous' });
     expect(joinCodeStatus('I0')).toEqual({ kind: 'ambiguous' });
+  });
+});
+
+describe('inviteCodeFromLink', () => {
+  it('takes a whole code, in any case or with a dash', () => {
+    expect(inviteCodeFromLink('AM482X')).toBe('AM482X');
+    expect(inviteCodeFromLink('am-482x')).toBe('AM482X');
+  });
+
+  it('ignores anything that is not exactly one valid code', () => {
+    expect(inviteCodeFromLink(undefined)).toBeNull();
+    expect(inviteCodeFromLink(['AM482X'])).toBeNull();
+    expect(inviteCodeFromLink('')).toBeNull();
+    expect(inviteCodeFromLink('AM48')).toBeNull();
+    expect(inviteCodeFromLink('AM482XQ')).toBeNull();
+    expect(inviteCodeFromLink('AM4821')).toBeNull();
   });
 });

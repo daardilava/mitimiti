@@ -298,6 +298,7 @@ export const de: Messages = {
     ambiguous: 'Codes enthalten nie 0, O, 1 oder I. Prüfe diesen Buchstaben.',
     title: 'Eurem Paar-Konto beitreten',
     lead: 'Frag nach dem 6-stelligen Code aus der App der anderen Person, unter Einstellungen › Paar-Code.',
+    leadInvited: 'Deine Einladung enthält den Code schon. Prüfe ihn und tippe auf Beitreten.',
     submit: 'Beitreten',
     label: 'Einladungscode',
     placeholder: 'z. B. AM482X',
@@ -402,7 +403,19 @@ export const de: Messages = {
     goToApp: 'Zur App',
     joinedTitle: (name) => `${name} ist dabei`,
     joinedLead: 'Ihr seht beide dieselben Ausgaben und denselben Saldo. Ein Code ist nicht mehr nötig.',
-    shareMessage: (code) => `Tritt unserem Konto bei a medias bei. Öffne die App, tippe auf „Ich habe einen Einladungscode“ und gib ein: ${code}`,
+    shareMessage: (code, until) =>
+      `Hallo! Ich lade dich zu a medias ein, damit wir unsere gemeinsamen Ausgaben festhalten und sofort sehen, wer wem etwas schuldet.
+
+` +
+      `1. Lade die App a medias herunter.
+2. Tippe auf „Ich habe einen Einladungscode“.
+3. Gib diesen Code ein:
+
+${code}` +
+      (until ? `
+
+Gültig bis ${until}.` : ''),
+    whatsapp: 'Per WhatsApp senden',
     inviteTitle: (name) => `${name} einladen`,
     step: 'Schritt 2 von 2',
     lead: (name) => `Teile diesen Code. Sobald ${name} ihn in der App eingibt, seht ihr beide dieselben Ausgaben und denselben Saldo.`,
@@ -412,7 +425,7 @@ export const de: Messages = {
     codeA11y: (spaced) => `Code: ${spaced}`,
     copy: 'Kopieren',
     copied: 'Kopiert',
-    share: 'Teilen',
+    share: 'Andere Apps',
     validUntil: (date) => `Gültig bis ${date}`,
     meanwhile: (name) => `Du kannst schon jetzt Ausgaben erfassen. ${name} sieht sie nach dem Beitritt.`,
   },
