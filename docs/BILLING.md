@@ -221,12 +221,15 @@ The acceptance checks to run: [PLAN.md › Phase 6](PLAN.md#phase-6--billing-cur
 | Buy on Android, look at the partner's iPhone | Premium there too |
 | Billing issue (Google: a test card that declines; Apple: see [failing renewals](https://developer.apple.com/documentation/storekit/testing-failing-subscription-renewals-and-in-app-purchases)) | Ajustes shows the store couldn't charge, with *Revisar el pago*; Premium until the grace period ends |
 | Delete the payer's account | The couple's data is erased; the app said the subscription must be cancelled in the store |
+| Delete the account of the partner who doesn't pay; the payer then creates (or joins) a new couple | The old couple's data is erased; the payer's store subscription keeps running, and the new couple is Premium right after Setup |
+| Both partners subscribe (both phones on the paywall while Free, buy on each) | Premium stays while either subscription runs; the one that lasts longer is shown in Ajustes. Cancel it and let it expire: the couple goes back to Premium through the other one at the latest when that phone next opens the app |
 
 If a phone doesn't unlock, check:
 
 1. Supabase › `billing_events`: did the event arrive?
 2. `subscriptions`: is there a row for the couple?
-3. Edge Function logs: `revenuecat-webhook` and `billing-sync`.
+3. Edge Function logs: `revenuecat-webhook` and `billing-sync`. `other_payer` means the event belonged to the partner's
+   own subscription while the couple's row was another, longer one: expected when both pay.
 
 ---
 

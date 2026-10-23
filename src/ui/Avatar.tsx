@@ -6,7 +6,7 @@ import { useTheme } from './theme';
 
 /**
  * The character the person picked in Ajustes, or, until they pick one, their initial in a circle: blue for me,
- * orange for the partner. Decorative: the name always sits next to it.
+ * coral for the partner. Decorative: the name always sits next to it.
  */
 export function Avatar({ name, isMe, avatar, size = 32 }: { name: string; isMe: boolean; avatar?: AvatarId | null; size?: number }) {
   const { color } = useTheme();

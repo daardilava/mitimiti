@@ -1,6 +1,6 @@
-// Shared spending per day, stacked by who paid: blue for me, orange for my partner (UI kit colours).
+// Shared spending per day, stacked by who paid: blue for me, Coral Miti for my partner.
 // Dataviz specs: columns ≤ 24 px with a 4 px rounded top and a square base, a 2 px surface gap between the two
-// segments, recessive grid, round ticks, a legend with totals (orange is under 3:1 on white, so text carries it),
+// segments, recessive grid, round ticks, a legend with totals (coral is under 3:1 on white, so text carries it),
 // and tap / drag to read one day. The list below the chart is the table view.
 import { useState } from 'react';
 import { StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native';

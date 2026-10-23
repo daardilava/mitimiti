@@ -12,6 +12,9 @@ import { periodOf, trialDays, type PlanPackage } from '@/lib/offerings';
 import { setSamplePlan } from '@/lib/sample';
 import { DEV_BYPASS_AUTH } from '@/lib/session';
 
+/** The RevenueCat entitlement that is MitiMiti Premium (the same id as supabase/functions/_shared/billing.ts). */
+const PREMIUM = 'premium';
+
 const API_KEY = Platform.select({
   ios: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
   android: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
@@ -42,15 +45,34 @@ function sdk(): typeof Purchases {
   return Purchases;
 }
 
+// The last logIn / logOut. Buying, restoring and reading the customer wait for it, so a purchase made right after
+// switching accounts never lands on the previous one.
+let identity: Promise<void> = Promise.resolve();
+
 /** Follows the session: log in with the Clerk id, or out when signed out. Never fails the caller. */
-export async function identify(userId: string | null): Promise<void> {
-  if (purchasesMode !== 'native') return;
+export function identify(userId: string | null): Promise<void> {
+  if (purchasesMode !== 'native') return identity;
+  identity = identity.then(async () => {
+    try {
+      const p = sdk();
+      if (userId) await p.logIn(userId);
+      else if (!(await p.isAnonymous())) await p.logOut();
+    } catch (e) {
+      console.warn('[purchases] identify failed', e);
+    }
+  });
+  return identity;
+}
+
+/** Whether the store, through RevenueCat, says this person has Premium right now. False when it can't tell. */
+export async function premiumInStore(): Promise<boolean> {
+  if (purchasesMode !== 'native') return false;
   try {
-    const p = sdk();
-    if (userId) await p.logIn(userId);
-    else if (!(await p.isAnonymous())) await p.logOut();
+    await identity;
+    return (await sdk().getCustomerInfo()).entitlements.active[PREMIUM] !== undefined;
   } catch (e) {
-    console.warn('[purchases] identify failed', e);
+    console.warn('[purchases] customer info failed', e);
+    return false;
   }
 }
 
@@ -93,6 +115,7 @@ export async function purchase(plan: PlanPackage): Promise<PurchaseResult> {
   }
   const pkg = packages.get(plan.id);
   if (!pkg) throw new Error(`unknown_package:${plan.id}`);
+  await identity;
   try {
     await sdk().purchasePackage(pkg);
     return 'purchased';
@@ -105,6 +128,7 @@ export async function purchase(plan: PlanPackage): Promise<PurchaseResult> {
 /** Restaurar compras: the store's purchases for this account, attached to the signed-in person again. */
 export async function restore(): Promise<void> {
   if (purchasesMode === 'fake') return;
+  await identity;
   await sdk().restorePurchases();
 }
 
@@ -124,6 +148,7 @@ export async function manageSubscriptions(): Promise<boolean> {
   let url: string | null | undefined = STORE_SUBSCRIPTIONS;
   if (purchasesMode === 'native') {
     try {
+      await identity;
       url = (await sdk().getCustomerInfo()).managementURL ?? url;
     } catch (e) {
       console.warn('[purchases] customer info failed', e);

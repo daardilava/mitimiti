@@ -2,7 +2,7 @@
 // type, and apply_billing_event() on PGlite: idempotency, order, buyers without a couple, transfers.
 import type { PGlite } from '@electric-sql/pglite';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { authorized, bodySchema, clerkIdOf, decide, isStale, periodTypeOf, type BillingEvent } from '../functions/_shared/billing';
+import { authorized, bodySchema, clerkIdOf, decide, headerShape, isStale, periodTypeOf, type BillingEvent } from '../functions/_shared/billing';
 import { createTestDb, type As } from './db';
 
 const DIEGO = 'user_2hookDiegoAAAAAAAAAAAAAA';
@@ -123,6 +123,17 @@ describe('helpers', () => {
     expect(authorized('anything', undefined)).toBe(false);
   });
 
+  it('authorized: spaces and an optional "Bearer " around the secret don’t count; the secret itself still must match', () => {
+    expect(authorized(' s3cret\n', 'Bearer s3cret')).toBe(true);
+    expect(authorized('bearer  s3cret ', 'Bearer s3cret')).toBe(true);
+    expect(authorized('Bearer s3cret', 's3cret')).toBe(true);
+    expect(authorized('Bearer Bearer s3cret', 'Bearer s3cret')).toBe(false);
+    expect(authorized('Bearer ', 'Bearer ')).toBe(false);
+    expect(headerShape(null)).toBe('no Authorization header');
+    expect(headerShape('Bearer abc')).toBe('Bearer + 3 characters');
+    expect(headerShape(' abcd ')).toBe('4 characters');
+  });
+
   it('bodySchema accepts a RevenueCat body and keeps unknown fields; rejects what isn’t an event', () => {
     const body = { api_version: '1.0', event: { ...event({}), country_code: 'CO', price: 19.99 } };
     const parsed = bodySchema.parse(body);
@@ -230,6 +241,47 @@ describe('apply_billing_event', () => {
     const t = event({ type: 'TRANSFER', app_user_id: null, entitlement_ids: null, transferred_from: ['user_2goneEEEEEEEEEEEEEEEEE'], transferred_to: [DIEGO] });
     expect(await apply(t)).toBe('stored');
     expect(await row(couple)).toBeUndefined();
+  });
+
+  it('both pay: the partner’s shorter subscription and their expiry never replace the live row', async () => {
+    await apply(event({ expiration_at_ms: Date.now() + 30 * DAY }));
+    const anas = { app_user_id: ANA, original_app_user_id: ANA, aliases: [ANA] };
+    expect(await apply(event({ ...anas, event_timestamp_ms: T0 + 1, expiration_at_ms: Date.now() + 10 * DAY }))).toBe('other_payer');
+    expect(await apply(event({ ...anas, type: 'EXPIRATION', event_timestamp_ms: T0 + 2, expiration_at_ms: Date.now() - 1 }))).toBe('other_payer');
+    expect(await row(couple)).toMatchObject({ status: 'active', payer_user_id: DIEGO });
+    expect(await plan(ANA)).toBe('premium');
+  });
+
+  it('both pay: a longer subscription, or any once the row has ended, takes over', async () => {
+    await apply(event({ expiration_at_ms: Date.now() + 30 * DAY }));
+    const anas = { app_user_id: ANA, original_app_user_id: ANA, aliases: [ANA] };
+    expect(await apply(event({ ...anas, event_timestamp_ms: T0 + 1, expiration_at_ms: Date.now() + 365 * DAY }))).toBe('applied');
+    expect((await row(couple)).payer_user_id).toBe(ANA);
+    await db.query(`update subscriptions set expires_at = now() - interval '1 day'`);
+    expect(await apply(event({ type: 'RENEWAL', event_timestamp_ms: T0 + 2, expiration_at_ms: Date.now() + 30 * DAY }))).toBe('applied');
+    expect(await row(couple)).toMatchObject({ status: 'active', payer_user_id: DIEGO });
+  });
+
+  it('TRANSFER only moves the row the old account pays for, never the partner’s', async () => {
+    const anas = { app_user_id: ANA, original_app_user_id: ANA, aliases: [ANA] };
+    await apply(event({ ...anas, expiration_at_ms: Date.now() + 30 * DAY }));
+    const t = event({ type: 'TRANSFER', event_timestamp_ms: T0 + DAY, app_user_id: null, original_app_user_id: null, aliases: null, entitlement_ids: null, transferred_from: [DIEGO], transferred_to: [EVE] });
+    expect(await apply(t)).toBe('stored');
+    expect(await row(couple)).toMatchObject({ status: 'active', payer_user_id: ANA });
+    expect(await plan(EVE)).toBe('free');
+  });
+
+  it('TRANSFER into a couple with an old expired row brings its status and dates', async () => {
+    const eves = { app_user_id: EVE, original_app_user_id: EVE, aliases: [EVE] };
+    await apply(event({ ...eves, type: 'EXPIRATION', expiration_at_ms: Date.now() - DAY }));
+    expect((await row(eveCouple)).status).toBe('expired');
+    const until = Date.now() + 20 * DAY;
+    await apply(event({ event_timestamp_ms: T0, expiration_at_ms: until }));
+    const t = event({ type: 'TRANSFER', event_timestamp_ms: T0 + DAY, app_user_id: null, original_app_user_id: null, aliases: null, entitlement_ids: null, transferred_from: [DIEGO], transferred_to: [EVE] });
+    expect(await apply(t)).toBe('transferred');
+    expect(await row(eveCouple)).toMatchObject({ status: 'active', payer_user_id: EVE });
+    expect((await row(eveCouple)).expires_at?.getTime()).toBe(until);
+    expect(await plan(EVE)).toBe('premium');
   });
 
   it('no client can call it', async () => {

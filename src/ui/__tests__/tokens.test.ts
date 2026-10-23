@@ -88,7 +88,7 @@ for (const scheme of ['light', 'dark'] as Scheme[]) {
 }
 
 describe('known exception, kept from the UI kit', () => {
-  it("light partner orange is under 3:1 on white, so it never draws alone: legends and amounts carry it", () => {
+  it("light partner coral is under 3:1 on white, so it never draws alone: legends and amounts carry it", () => {
     expect(contrast(palettes.light.partner, palettes.light.surface)).toBeLessThan(3);
     expect(contrast(palettes.dark.partner, palettes.dark.surface)).toBeGreaterThanOrEqual(GRAPHIC);
   });

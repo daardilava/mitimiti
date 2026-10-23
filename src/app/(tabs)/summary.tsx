@@ -161,7 +161,7 @@ export default function Summary() {
   );
 }
 
-/** Two people's part of the month: name · %, amount, and a blue / orange bar with a 2 px gap. */
+/** Two people's part of the month: name · %, amount, and a blue / coral bar with a 2 px gap. */
 function SplitCard(props: { title: string; meName: string; partnerName: string; mine: number; theirs: number; minePct: number; theirsPct: number; fmt: (minor: number) => string; note?: string }) {
   const { color, type } = useTheme();
   const styles = useStyles();

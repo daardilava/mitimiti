@@ -22,7 +22,7 @@ there, tick it (`- [x]`) in the same change.
 | Screens, routes, design tokens, typography, components | [docs/DESIGN.md](docs/DESIGN.md) |
 | Tech stack, Clerk ↔ Supabase wiring, data model, SQL functions | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 
-Section numbers like `§4` in code refer to the external *a medias — Project Plan* (Feature breakdown tab).
+Section numbers like `§4` in code refer to the external *MitiMiti — Project Plan* (Feature breakdown tab).
 
 ## Rules that must never break
 
@@ -72,6 +72,9 @@ add a new file under `supabase/migrations/`.
 - `src/app/` — Expo Router routes, one file per screen. `(onboarding)` signed-out, `(tabs)` main app
 - `src/api/` — calls to Clerk and Supabase
 - `src/lib/` — pure logic (money, splits, session, authFlow, joinCode, dates) + tests
-- `src/ui/` — tokens (light + dark palettes), theme (`useTheme`, `makeStyles`), Icon, Screen, Avatar, form pieces
-- `supabase/` — config, migrations, SQL tests
+- `src/ui/` — tokens (light + dark palettes), theme (`useTheme`, `makeStyles`), Icon, Screen, Miti / Wordmark, Avatar,
+  form pieces
+- `src/i18n/` — UI copy: `es.ts` is the source of truth, `en.ts` and `de.ts` must match it
+- `supabase/` — config, migrations, Edge Functions (billing), SQL tests
+- `assets/` — icons and splash rendered from `assets/brand` by `python scripts/brand-assets.py`
 - Never commit `.env`; add new variables to `.env.example`.
