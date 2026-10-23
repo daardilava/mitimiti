@@ -66,6 +66,8 @@ Both phones ──my_plan() RPC + Realtime on subscriptions──▶ usePlan() �
 | expense_shares | expense_id, user_id, share_minor |
 | settlements | id, household_id, from_user, to_user, amount_minor, method, paid_on, created_by, deleted_at |
 | budgets | household_id, category, month, limit_minor |
+| subscriptions | household_id (pk), payer_user_id (Clerk id), entitlement, product_id, store, period_type, status, expires_at, last_event_at — written only by the billing webhook |
+| billing_events | id (RevenueCat event id), type, app_user_id, payload, received_at — webhook only, no client access |
 | push_tokens | user_id, token |
 | audit_log | household_id, actor, action, entity, before, after, at |
 
