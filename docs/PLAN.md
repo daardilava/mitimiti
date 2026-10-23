@@ -1,6 +1,6 @@
 # MitiMiti — Plan
 
-Scope, roadmap and the acceptance checks for each phase. External source of truth: *a medias — Project Plan* (the plan document keeps the app's former name).
+Scope, roadmap and the acceptance checks for each phase. External source of truth: *MitiMiti — Project Plan*.
 
 ## Product principles
 

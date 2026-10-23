@@ -22,8 +22,7 @@ there, tick it (`- [x]`) in the same change.
 | Screens, routes, design tokens, typography, components | [docs/DESIGN.md](docs/DESIGN.md) |
 | Tech stack, Clerk ↔ Supabase wiring, data model, SQL functions | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 
-Section numbers like `§4` in code refer to the external *a medias — Project Plan* (Feature breakdown tab; the plan
-and design documents keep the app's former name).
+Section numbers like `§4` in code refer to the external *MitiMiti — Project Plan* (Feature breakdown tab).
 
 ## Rules that must never break
 

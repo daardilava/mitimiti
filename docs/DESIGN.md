@@ -1,7 +1,6 @@
 # MitiMiti — Screens and design system
 
-External source of truth: *a medias — UI design* (13 screens + design system "UI kit v1"; the design file keeps the
-app's former name), with the MitiMiti brand on top (board *Color, tipografía y voz*).
+External source of truth: *MitiMiti — UI design* (13 screens + design system "UI kit v1"), with the MitiMiti brand on top (board *Color, tipografía y voz*).
 
 ## Screens
 
