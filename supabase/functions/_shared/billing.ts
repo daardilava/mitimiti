@@ -205,12 +205,22 @@ export function stateFromSubscriber(body: Subscriber, now: Date): SyncState {
   };
 }
 
+/** The secret itself: surrounding spaces and an optional "Bearer " don't count, so a dashboard paste can't miss it. */
+const token = (v: string) => v.trim().replace(/^bearer(\s+|$)/i, '').trim();
+
 /** Constant-time comparison of the Authorization header with the configured secret. */
 export function authorized(header: string | null, secret: string | undefined): boolean {
   if (!secret || header === null) return false;
-  const a = new TextEncoder().encode(header);
-  const b = new TextEncoder().encode(secret);
+  const a = new TextEncoder().encode(token(header));
+  const b = new TextEncoder().encode(token(secret));
+  if (b.length === 0) return false;
   let diff = a.length ^ b.length;
   for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
   return diff === 0;
+}
+
+/** What arrived, for a refused request's answer: never any of the secret, only the header's shape. */
+export function headerShape(header: string | null): string {
+  if (header === null) return 'no Authorization header';
+  return `${/^\s*bearer\s/i.test(header) ? 'Bearer + ' : ''}${token(header).length} characters`;
 }

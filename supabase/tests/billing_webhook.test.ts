@@ -2,7 +2,7 @@
 // type, and apply_billing_event() on PGlite: idempotency, order, buyers without a couple, transfers.
 import type { PGlite } from '@electric-sql/pglite';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { authorized, bodySchema, clerkIdOf, decide, isStale, periodTypeOf, type BillingEvent } from '../functions/_shared/billing';
+import { authorized, bodySchema, clerkIdOf, decide, headerShape, isStale, periodTypeOf, type BillingEvent } from '../functions/_shared/billing';
 import { createTestDb, type As } from './db';
 
 const DIEGO = 'user_2hookDiegoAAAAAAAAAAAAAA';
@@ -121,6 +121,17 @@ describe('helpers', () => {
     expect(authorized(null, 'Bearer s3cret')).toBe(false);
     expect(authorized('', '')).toBe(false);
     expect(authorized('anything', undefined)).toBe(false);
+  });
+
+  it('authorized: spaces and an optional "Bearer " around the secret don’t count; the secret itself still must match', () => {
+    expect(authorized(' s3cret\n', 'Bearer s3cret')).toBe(true);
+    expect(authorized('bearer  s3cret ', 'Bearer s3cret')).toBe(true);
+    expect(authorized('Bearer s3cret', 's3cret')).toBe(true);
+    expect(authorized('Bearer Bearer s3cret', 'Bearer s3cret')).toBe(false);
+    expect(authorized('Bearer ', 'Bearer ')).toBe(false);
+    expect(headerShape(null)).toBe('no Authorization header');
+    expect(headerShape('Bearer abc')).toBe('Bearer + 3 characters');
+    expect(headerShape(' abcd ')).toBe('4 characters');
   });
 
   it('bodySchema accepts a RevenueCat body and keeps unknown fields; rejects what isn’t an event', () => {
