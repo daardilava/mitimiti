@@ -15,6 +15,7 @@ describe('mitiSvg', () => {
 
   it('is hidden from screen readers: the name next to it says it', () => {
     expect(mitiSvg(10)).toContain('aria-hidden="true"');
+    expect(mitiSvg(10, { ariaHidden: false })).not.toContain('aria-hidden');
   });
 });
 
