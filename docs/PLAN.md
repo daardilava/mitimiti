@@ -1,6 +1,6 @@
 # MitiMiti — Plan
 
-Scope, roadmap and the acceptance checks for each phase. External source of truth: *a medias — Project Plan*.
+Scope, roadmap and the acceptance checks for each phase. External source of truth: *a medias — Project Plan* (the plan document keeps the app's former name).
 
 ## Product principles
 
@@ -68,8 +68,10 @@ with a code. Signing out returns to Welcome with nothing cached.
 **Flow**
 
 ```
-Welcome ─▶ Sign-in (Clerk) ─┬─ "Crear nuestra cuenta" ─▶ Setup (Paso 1) ─▶ Invite (Paso 2) ─▶ Home
-                            └─ "Tengo un código"      ─▶ Join            ─────────────────▶ Home
+Welcome ─┬─ "Crear cuenta"                       ─▶ Crea tu cuenta (Clerk) ─▶ Setup (Paso 1) ─▶ Invite (Paso 2) ─▶ Home
+         ├─ "Tengo una invitación de mi pareja"  ─▶ Crea tu cuenta (Clerk) ─▶ Join ─────────────────────────▶ Home
+         └─ "Iniciar sesión"                     ─▶ Iniciar sesión (Clerk) ─▶ Home, or Setup without a couple
+Invite link mitimiti://join?code=AM482X ─▶ Crea tu cuenta (if signed out) ─▶ Join, code filled in
 Signed in + already in a couple ─▶ Home directly
 Settings ▸ Cerrar sesión ─▶ Clerk signOut ─▶ Welcome (query cache cleared)
 ```
@@ -143,7 +145,7 @@ fails on anything the app cannot handle.
 - [x] **Live balance on Home (§5)** — [src/app/(tabs)/index.tsx](../src/app/(tabs)/index.tsx)
   - Balance card from `balance_view` ([src/api/balance.ts](../src/api/balance.ts)): "Ana te debe $337.950", what it
     considers ("9 gastos compartidos y 1 pago registrado"), Saldar cuentas when not zero.
-  - "Gastado juntos en octubre": shared expenses of the month by who paid, blue / orange bar.
+  - "Gastado juntos en octubre": shared expenses of the month by who paid, blue / coral bar.
   - Recientes: last 4 expenses ([src/ui/ExpenseRow.tsx](../src/ui/ExpenseRow.tsx)), "Ver todos", empty state.
   - Live: Realtime on `expenses` and `settlements` + refetch on app focus ([src/api/live.ts](../src/api/live.ts)).
   - Before the partner joins: their name is the one typed in Setup, and they cannot be picked as payer.
@@ -161,9 +163,9 @@ fails on anything the app cannot handle.
   - Logic in [src/lib/activity.ts](../src/lib/activity.ts); its tests reproduce the design's October (screen 08).
   - **Día · Semana · Mes** switch: the arrows step one day, week (Mon–Sun) or month; never into the future.
   - **Chart** ([src/ui/SpendChart.tsx](../src/ui/SpendChart.tsx)): shared spending per day stacked by who paid
-    (blue / orange), totals in the legend, tap or drag to read one day. Día shows the who-paid bar instead of a
+    (blue / coral), totals in the legend, tap or drag to read one day. Día shows the who-paid bar instead of a
     one-column chart. Built with the dataviz rules (≤ 24 px columns, 2 px gaps, round ticks, legend with values
-    because orange is under 3:1 on white; the list below is the table view). Checked in screenshots at 390 px.
+    because coral is under 3:1 on white; the list below is the table view). Checked in screenshots at 390 px.
 
 **Acceptance checks**
 
@@ -216,8 +218,8 @@ fails on anything the app cannot handle.
   - División predeterminada (Mitad y mitad / Proporcional with my share 30–70 %). New expenses now start from it
     (it was a hard-coded 60 % in the form). This pulls the v1.1 "Default split and currency" setting forward.
   - Moneda: can change only while there are no expenses or payments, since amounts are never converted.
-  - Recordatorios y avisos, Exportar CSV: shown as **Pronto** (v1.1: they need push tokens, a scheduled Edge
-    Function and file export), not as switches that do nothing.
+  - Recordatorios y avisos: shown as **Pronto** (v1.1: they need push tokens and a scheduled Edge Function), not
+    as switches that do nothing. Exportar movimientos started the same way and is now built (Premium).
   - Cerrar sesión asks once more and shows which account is signed in.
   - **Security fix:** the RLS policies "update own member row" and "members update household" let a member move
     their row into another couple without a code (and past the two-member limit) or change the currency after
@@ -248,6 +250,10 @@ fails on anything the app cannot handle.
   ([20261018020000_default_pct_range.sql](../supabase/migrations/20261018020000_default_pct_range.sql) only widens
   that check in `update_couple_settings`). New expenses start from it, and the form adds a chip for any value that
   isn't one of its five. Setup (*Armemos su cuenta*) still offers 30–70 % in steps of 5. **Needs `npx supabase db push`.**
+- [x] **MitiMiti brand** (2026-10-23) — the app is renamed MitiMiti everywhere people see it (app name, Welcome,
+  invite message, legal texts, PDF and export file names); app id `com.mitimiti.app`, scheme `mitimiti://`. Miti is
+  the logo, app icon, splash and favicon; Welcome is the Tinta brand screen; the palette moves to Tinta / Niebla /
+  Coral Miti and titles to Fredoka. Details: [DESIGN.md › Brand](DESIGN.md#brand).
 - [ ] Polish.
 
 **Acceptance checks**
@@ -349,7 +355,7 @@ Free keeps the whole core, and no plan ever changes the balance.
     de MitiMiti es gratis para siempre* (Google: whether a subscription is needed), Términos, Privacidad, Restaurar
     compras, and a visible close button.
   - States: loading, failed, unavailable (no store key), purchasing, *Activando Premium…*, done (what opened), still
-    pending, cancelled (no message), and Premium already: *Tu pareja ya activó Premium*, with no purchase offered.
+    pending, cancelled (no message), and Premium already: *Ana ya activó Premium*, with no purchase offered.
   - Helpers in [src/lib/paywall.ts](../src/lib/paywall.ts), with tests. Checked at 390 px, light and dark, on web
     with the fake purchases.
 - [x] **Gating:** only through `canOpenMonth` / `canUseFeature` ([src/lib/plans.ts](../src/lib/plans.ts)); `usePlan().gate`
@@ -418,4 +424,5 @@ Free keeps the whole core, and no plan ever changes the balance.
 - Should a settle-up need confirmation from the person receiving the money?
 - ~~What is paid vs. free, and is the subscription per couple or per person?~~ Decided 2026-10-23: one
   subscription per couple, Free keeps the core; see [Phase 6](#phase-6--billing-current).
-- App name: **MitiMiti** (decided 2026-10-23; formerly "a medias", which is taken on Google Play). Icon: still to design.
+- ~~App name and icon?~~ Decided 2026-10-23: **MitiMiti** (formerly "a medias", which is taken on Google Play), with
+  Miti as logo and app icon; see [DESIGN.md › Brand](DESIGN.md#brand).

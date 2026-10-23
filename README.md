@@ -11,7 +11,8 @@
 Two people log what they spend together, choose how each expense is split, and see one live balance on both
 phones. When they settle up outside the app, they record the payment and the balance goes back to zero.
 
-> **Status:** private beta in preparation. Phase 3 (*Settle + summary*) is built; Phase 6 (*Billing*) has started.
+> **Status:** private beta in preparation. Phases 1–3 are built (live checks open); Phase 6 (*Billing*) is built,
+> with its store QA on real phones still open.
 > Roadmap and acceptance checks: [docs/PLAN.md](docs/PLAN.md).
 
 ---
@@ -50,7 +51,7 @@ phones. When they settle up outside the app, they record the payment and the bal
 | Export | The expenses and payments of a period as a CSV for spreadsheets, or a PDF report with totals and the balance, through the share sheet | Built |
 | Notifications | Partner activity, Sunday reminder | Planned (v1.1) |
 | Offline logging, recurring expenses | Save without signal; rent and subscriptions each month | Planned (v1.2) |
-| Premium | One subscription per couple in the App Store / Google Play: full history, budgets, export | In progress (Phase 6) |
+| Premium | One subscription per couple in the App Store / Google Play: full history, budgets, export | Built; store testing open (Phase 6) |
 
 **Product principles:** two people, never a group · fair, not just 50/50 · fast to log · the app records
 payments, it never moves money · neutral, no-blame language.
@@ -154,7 +155,7 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 
 | Secret | Used by |
 | --- | --- |
-| `REVENUECAT_WEBHOOK_AUTH` | The billing webhook: the exact Authorization header RevenueCat must send |
+| `REVENUECAT_WEBHOOK_AUTH` | The billing webhook: the secret RevenueCat sends in its Authorization header (with or without `Bearer `) |
 | `REVENUECAT_SECRET_API_KEY` | `billing-sync`: RevenueCat secret API key (`sk_…`), to read a customer's current state |
 
 ## Scripts
@@ -175,18 +176,23 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 ```
 src/
   app/              Expo Router routes, one file per screen
-    (onboarding)/   Signed-out flow: welcome, sign-in/up, setup, join
+    (onboarding)/   Signed-out flow: welcome, sign-in/up, forgot password, setup, join
     (tabs)/         Main app: Inicio, Movimientos, Resumen, Ajustes
+                    plus expense, settle, budgets, invite, export, paywall, terms, privacy, delete-account
   api/              Clerk and Supabase calls, TanStack Query hooks, Realtime
   lib/              Pure, tested logic: money, splits, balance, dates, activity, budgets, settle…
     __tests__/
-  ui/               Design tokens (light + dark), theme, icons, shared components
-  i18n/             Messages in Spanish (source of truth), English and German
+  ui/               Design tokens (light + dark), theme, Miti and the wordmark, icons, shared components
+  i18n/             Messages in Spanish (source of truth), English and German; legal texts
+assets/             App icon, adaptive icon, splash, favicon (generated)
+  brand/            MitiMiti brand SVGs: Miti and its expressions, app icon
+  store/            Store listing icon
 supabase/
   migrations/       Schema, RLS policies and SQL functions, in order
+  functions/        Edge Functions: revenuecat-webhook, billing-sync
   tests/            SQL / RLS tests on PGlite, and app ↔ SQL split parity
-docs/               Plan, design and architecture
-scripts/            Tooling (Clerk configuration check)
+docs/               Plan, design, architecture and the billing runbook
+scripts/            Clerk configuration check; brand-assets.py renders assets/ from assets/brand
 ```
 
 ## Testing
@@ -197,10 +203,10 @@ npm test
 
 | Suite | Covers |
 | --- | --- |
-| `src/lib/__tests__` | Money formatting and parsing, splits and balance, dates, activity, budgets, settle up, summary, auth flow |
-| `src/ui/__tests__` | WCAG contrast of every colour pair, in light and dark mode |
+| `src/lib/__tests__` | Money formatting and parsing, splits and balance, dates, activity, budgets, settle up, summary, auth flow, plans and paywall, export (CSV, PDF), the Miti logo |
+| `src/ui/__tests__` | WCAG contrast of every colour pair (brand colours included), in light and dark mode |
 | `src/i18n/__tests__` | Every language has every message |
-| `supabase/tests` | Migrations applied to PGlite: RLS isolation between couples, every SQL function, and **split parity**: the SQL and the app compute the same balance for every split mode |
+| `supabase/tests` | Migrations applied to PGlite: RLS isolation between couples, every SQL function, billing and account deletion, and **split parity**: the SQL and the app compute the same balance for every split mode |
 
 The balance must never be wrong, so any change to split or balance math, in SQL or TypeScript, must keep
 `supabase/tests/splits_parity.test.ts` passing. CI runs typecheck, lint and tests on every push and pull request.
@@ -248,7 +254,9 @@ a purchase, or Restaurar compras) to read the person's current state from Revenu
    ```
 3. RevenueCat › Project › Integrations › Webhooks › Add:
    - URL: `https://<project-ref>.supabase.co/functions/v1/revenuecat-webhook`
-   - Authorization header: the same `Bearer …` value as in step 1
+   - Authorization header: the same `Bearer …` value as in step 1 (the function also accepts the secret without
+     `Bearer `, and ignores surrounding spaces; a refused request's answer gives the shape of what arrived, never
+     the secret)
    - Send a **test event**: the function answers 200 and stores it in `billing_events`.
 4. The function answers 200 for everything it handled (duplicates and `TEST` included), 401 without the right
    header, 400 for a body that isn't an event, and 500 when the database fails, so RevenueCat retries.
@@ -282,7 +290,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branch names, commit style and the re
 | --- | --- |
 | [docs/PLAN.md](docs/PLAN.md) | Product principles, features, roadmap, phase acceptance checks, Clerk setup, billing, open questions |
 | [docs/BILLING.md](docs/BILLING.md) | Billing runbook: App Store, Google Play and RevenueCat setup, sandbox testing, release checklist |
-| [docs/DESIGN.md](docs/DESIGN.md) | The 13 screens and their routes, design system (UI kit v1) |
+| [docs/DESIGN.md](docs/DESIGN.md) | Screens and their routes, the MitiMiti brand (logo, icon, splash, colours), design system (UI kit v1) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack, Clerk ↔ Supabase wiring, data model, code layout |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to propose and review changes |
 | [SECURITY.md](SECURITY.md) | Keys, data protection, reporting a vulnerability |
