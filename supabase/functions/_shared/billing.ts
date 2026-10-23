@@ -143,6 +143,68 @@ export function decide(e: BillingEvent): BillingAction {
   };
 }
 
+// ── billing-sync: the customer's current state from RevenueCat's REST API ─────────────────────────────────────────
+// GET https://api.revenuecat.com/v1/subscribers/{app_user_id} (https://www.revenuecat.com/docs/api-v1/customers).
+// Used where an event alone can't say it: a buyer who had no couple yet, and a TRANSFER from an account that no
+// longer has one. RevenueCat recommends reading this after webhooks too.
+
+const date = z.string().nullish();
+
+export const subscriberSchema = z.looseObject({
+  subscriber: z.looseObject({
+    entitlements: z.record(
+      z.string(),
+      z.looseObject({ expires_date: date, grace_period_expires_date: date, product_identifier: z.string().nullish() }),
+    ),
+    subscriptions: z
+      .record(
+        z.string(),
+        z.looseObject({
+          expires_date: date,
+          period_type: z.string().nullish(),
+          store: z.string().nullish(),
+          unsubscribe_detected_at: date,
+          billing_issues_detected_at: date,
+          refunded_at: date,
+        }),
+      )
+      .nullish(),
+  }),
+});
+
+export type Subscriber = z.infer<typeof subscriberSchema>;
+
+/** The couple's row as RevenueCat sees this customer right now; `none` when they have never had Premium. */
+export type SyncState =
+  | { kind: 'none' }
+  | { kind: 'state'; status: SubscriptionStatus; expiresAt: string | null; productId: string | null; store: string | null; periodType: PeriodType | null };
+
+export function stateFromSubscriber(body: Subscriber, now: Date): SyncState {
+  const ent = body.subscriber.entitlements[PREMIUM];
+  if (!ent) return { kind: 'none' };
+  const productId = ent.product_identifier ?? null;
+  const sub = productId ? body.subscriber.subscriptions?.[productId] : undefined;
+  // Premium holds until the grace period ends, when the store is retrying a charge.
+  const until = ent.grace_period_expires_date ?? ent.expires_date ?? null;
+  const ended = until !== null && Date.parse(until) <= now.getTime();
+  const status: SubscriptionStatus = ended
+    ? 'expired'
+    : sub?.billing_issues_detected_at
+      ? 'billing_issue'
+      : sub?.unsubscribe_detected_at
+        ? 'cancelled'
+        : 'active';
+  return {
+    kind: 'state',
+    status,
+    expiresAt: until === null ? null : new Date(until).toISOString(),
+    productId,
+    // The REST API says app_store / play_store; webhook events say APP_STORE / PLAY_STORE. Store one spelling.
+    store: sub?.store ? sub.store.toUpperCase() : null,
+    periodType: periodTypeOf(sub?.period_type?.toUpperCase()),
+  };
+}
+
 /** Constant-time comparison of the Authorization header with the configured secret. */
 export function authorized(header: string | null, secret: string | undefined): boolean {
   if (!secret || header === null) return false;
