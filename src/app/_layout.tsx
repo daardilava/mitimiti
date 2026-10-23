@@ -1,7 +1,7 @@
 import { ClerkProvider } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
-import { BricolageGrotesque_700Bold } from '@expo-google-fonts/bricolage-grotesque';
 import { DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold, useFonts } from '@expo-google-fonts/dm-sans';
+import { Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider as NavigationThemeProvider, type Theme as NavigationTheme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -67,7 +67,7 @@ function App() {
     SystemUI.setBackgroundColorAsync(color.background).catch(() => {});
   }, [color.background]);
 
-  const [fontsLoaded] = useFonts({ BricolageGrotesque_700Bold, DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold });
+  const [fontsLoaded] = useFonts({ DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold, Fredoka_600SemiBold, Fredoka_700Bold });
   const loading = useSessionStore((s) => s.loading);
   const hasHousehold = useSessionStore((s) => s.householdId !== null);
   const pendingRoute = useSessionStore((s) => s.pendingRoute);

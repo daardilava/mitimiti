@@ -72,7 +72,7 @@ export default function Join() {
         autoFocus
       />
       {/* No code after all: start the couple instead. */}
-      <TextLink label={m.welcome.create} onPress={() => router.replace('/setup')} />
+      <TextLink label={m.join.noCode} onPress={() => router.replace('/setup')} />
     </Screen>
   );
 }

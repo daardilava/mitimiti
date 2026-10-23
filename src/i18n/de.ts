@@ -127,11 +127,9 @@ export const de: Messages = {
   welcome: {
     accountDeleted: 'Dein Konto wurde gelöscht. Danke, dass du MitiMiti genutzt hast.',
     coupleDeleted: 'Dein Partner oder deine Partnerin hat das Konto gelöscht und damit euren gemeinsamen Bereich. Ihr könnt jederzeit neu anfangen.',
-    title: 'Klare Verhältnisse zu zweit.',
-    lead: 'Erfasst, was ihr gemeinsam ausgebt, seht sofort, wer wem was schuldet, und gleicht mit einem Tipp aus.',
-    create: 'Unser Konto erstellen',
-    haveCode: 'Ich habe einen Einladungscode',
-    haveAccount: 'Schon ein Konto?',
+    tagline: 'Gemeinsame Ausgaben, klare Verhältnisse und kein Streit.',
+    create: 'Konto erstellen',
+    haveCode: 'Ich habe eine Einladung',
     signIn: 'Anmelden',
   },
 
@@ -299,6 +297,7 @@ export const de: Messages = {
     title: 'Eurem Paar-Konto beitreten',
     lead: 'Frag nach dem 6-stelligen Code aus der App der anderen Person, unter Einstellungen › Paar-Code.',
     leadInvited: 'Deine Einladung enthält den Code schon. Prüfe ihn und tippe auf Beitreten.',
+    noCode: 'Kein Code: unser Konto erstellen',
     submit: 'Beitreten',
     label: 'Einladungscode',
     placeholder: 'z. B. AM482X',
@@ -408,7 +407,7 @@ export const de: Messages = {
 
 ` +
       `1. Lade die App MitiMiti herunter.
-2. Tippe auf „Ich habe einen Einladungscode“.
+2. Tippe auf „Ich habe eine Einladung“.
 3. Gib diesen Code ein:
 
 ${code}` +

@@ -1,8 +1,10 @@
 import { Link, type Href } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DEV_BYPASS_AUTH, useSessionStore, type NextStep } from '@/lib/session';
 import { Callout } from '@/ui/Form';
+import { Miti, Wordmark } from '@/ui/Miti';
 import { NavButton } from '@/ui/Screen';
 import { font, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
@@ -11,7 +13,7 @@ import { useI18n } from '@/i18n';
 // 01 · Bienvenida
 export default function Welcome() {
   const { m } = useI18n();
-  const { color, type } = useTheme();
+  const { type } = useTheme();
   const styles = useStyles();
   const signedIn = useSessionStore((s) => s.userId !== null) || DEV_BYPASS_AUTH;
   // Both paths need a signed-in person: new people create an account first, then continue to the chosen one.
@@ -23,18 +25,12 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Text style={[type.heading, styles.light]}>MitiMiti</Text>
+      {/* Tinta behind in both modes: light status bar text, whatever the phone's mode. */}
+      <StatusBar style="light" />
       <View style={styles.hero}>
-        <View style={styles.logo} aria-hidden>
-          <View style={[styles.circle, { backgroundColor: color.logoBlue }]} />
-          <View style={[styles.circle, styles.overlap, { backgroundColor: color.partner }]} />
-        </View>
-        <Text style={[type.hero, styles.light, { lineHeight: 48 }]} accessibilityRole="header">
-          {m.welcome.title}
-        </Text>
-        <Text style={[type.body, { color: color.onInk, fontSize: 17, lineHeight: 27 }]}>
-          {m.welcome.lead}
-        </Text>
+        <Miti size={176} />
+        <Wordmark size={44} />
+        <Text style={[type.body, styles.tagline]}>{m.welcome.tagline}</Text>
       </View>
       {notice && (
         <View accessibilityLiveRegion="polite">
@@ -42,17 +38,14 @@ export default function Welcome() {
         </View>
       )}
       <View style={{ gap: space[3] }}>
-        <NavButton href={to('setup')} label={m.welcome.create} kind="inverse" />
+        <NavButton href={to('setup')} label={m.welcome.create} kind="brand" />
         <NavButton href={to('join')} label={m.welcome.haveCode} kind="outline" />
         {!signedIn && (
-          <View style={styles.signIn}>
-            <Text style={[type.body, { color: color.onInk, fontSize: 15 }]}>{m.welcome.haveAccount}</Text>
-            <Link href="/sign-in" asChild>
-              <Pressable accessibilityRole="link" hitSlop={12} style={{ minHeight: touch, justifyContent: 'center' }}>
-                <Text style={[type.row, styles.light, { fontFamily: font.bodyBold, fontSize: 15, textDecorationLine: 'underline' }]}>{m.welcome.signIn}</Text>
-              </Pressable>
-            </Link>
-          </View>
+          <Link href="/sign-in" asChild>
+            <Pressable accessibilityRole="link" hitSlop={12} style={styles.signIn}>
+              <Text style={[type.row, styles.signInText]}>{m.welcome.signIn}</Text>
+            </Pressable>
+          </Link>
         )}
       </View>
     </SafeAreaView>
@@ -60,11 +53,9 @@ export default function Welcome() {
 }
 
 const useStyles = makeStyles(({ color }) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: color.hero, padding: space[6], gap: space[6] },
-  hero: { flex: 1, justifyContent: 'center', gap: space[6] },
-  light: { color: color.onHero },
-  logo: { flexDirection: 'row', height: 88 },
-  circle: { width: 88, height: 88, borderRadius: 44 },
-  overlap: { marginLeft: -36, opacity: 0.92 },
-  signIn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[1] },
+  safe: { flex: 1, backgroundColor: color.brandInk, padding: space[6], gap: space[6] },
+  hero: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space[5] },
+  tagline: { color: color.onBrandInk, fontSize: 18, lineHeight: 27, textAlign: 'center', maxWidth: 320 },
+  signIn: { minHeight: touch, alignItems: 'center', justifyContent: 'center' },
+  signInText: { color: color.wordmarkGreen, fontFamily: font.bodySemi, fontSize: 16, textDecorationLine: 'underline' },
 }));

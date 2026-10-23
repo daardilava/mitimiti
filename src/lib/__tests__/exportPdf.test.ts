@@ -158,6 +158,23 @@ describe('buildPdfHtml', () => {
     expect(html({ rows: exportRows(owing, [], range, couple), allExpenses: owing, allPayments: [] })).toContain('Diego le debe $50.000 a Ana');
   });
 
+  it('carries the MitiMiti brand: Miti and the two-colour wordmark, in the header and the footer', () => {
+    const out = html();
+    expect(out).not.toMatch(/a medias/i);
+    expect(out.match(/viewBox="0 0 200 200"/g)).toHaveLength(2);
+    expect(out.match(/<span style="color:#0E8C7A">Miti<\/span><span style="color:#E4572E">Miti<\/span>/g)).toHaveLength(2);
+  });
+
+  it('stacks Quién pagó and Por categoría, so wide amounts never run into each other', () => {
+    const out = html();
+    expect(out).not.toContain('class="columns"');
+    expect(out.match(/<section class="block">/g)).toHaveLength(2);
+  });
+
+  it('gives each category percentage its own column, so it is never cut off', () => {
+    expect(html()).toMatch(/<span class="bar-value">\$\d[\d.]*<\/span>\s*<span class="bar-pct">\d+ %<\/span>/);
+  });
+
   it('follows the language', () => {
     const out = html({ m: en, d: dateLabels(en.dates) });
     expect(out).toContain('<html lang="en">');

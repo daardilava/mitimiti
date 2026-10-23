@@ -5,21 +5,21 @@
 
 const light = {
   /** Text and the primary action (buttons, selected chips). */
-  ink: '#16181D',
+  ink: '#1A2238',
   /** Text and icons on `ink` fills. */
   onPrimary: '#FFFFFF',
-  background: '#F2F4F3',
+  background: '#F3F5F4',
   surface: '#FFFFFF',
   line: '#E3E6E8',
   fieldBorder: '#D5D9DD',
-  textSecondary: '#5B606B',
+  textSecondary: '#5A6275',
   tabInactive: '#6B7079',
   disabled: '#9AA0A8',
   me: '#1F4FB8',
   meTint: '#DCE5FA',
-  partner: '#E8873A',
-  partnerTint: '#FBE1CC',
-  partnerText: '#8A3A0C',
+  partner: '#FF7A59',
+  partnerTint: '#FFE3DA',
+  partnerText: '#9E3418',
   /** Payments and "settled": fills (button, check, bars); `positiveText` for text. */
   positive: '#0F7B6C',
   onPositive: '#FFFFFF',
@@ -36,22 +36,30 @@ const light = {
   info: '#1A3F94',
   infoTint: '#E3E9F8',
   neutralTint: '#E8EAED',
-  /** The near-black cards that stay dark in both modes: balance, Presupuestos' month, Welcome. */
-  hero: '#16181D',
+  /** The Tinta cards that stay dark in both modes: balance, Presupuestos' month. */
+  hero: '#1A2238',
   onHero: '#FFFFFF',
   /** Borders on hero surfaces (the outline button on Welcome). */
-  heroLine: '#4A4E57',
+  heroLine: '#4A5573',
   /** Text on hero cards: secondary, then tertiary. */
-  onInk: '#C9CDD3',
-  onInkMuted: '#AEB3BB',
-  /** Bars on hero cards: track, and the three states. Validated with the dataviz script on #16181D (lightness band,
+  onInk: '#CDD2DE',
+  onInkMuted: '#A9B0C0',
+  /** Bars on hero cards: track, and the three states. Validated with the dataviz script on #16181D, rechecked on Tinta #1A2238 (lightness band,
    * ≥ 3:1); red↔amber is 7.4 for deutan, so the status text always rides along. */
-  inkTrack: '#3A3E47',
+  inkTrack: '#36405C',
   positiveOnInk: '#2F9E86',
   warningOnInk: '#B8861A',
   negativeOnInk: '#E5486A',
-  /** Welcome logo's blue circle, lighter than `me` so the overlap reads on ink. */
-  logoBlue: '#4A78E0',
+  /** The MitiMiti wordmark on hero surfaces: brand green, lifted to read on ink, and brand coral. */
+  wordmarkGreen: '#3DC4A6',
+  wordmarkCoral: '#FF7A59',
+  /** Welcome, the brand screen (same in both modes): Tinta behind, the coral "Crear cuenta" with Tinta text. */
+  brandInk: '#1A2238',
+  brandCoral: '#FF7A59',
+  onBrandCoral: '#1A2238',
+  /** Outline button and slogan on brandInk. */
+  brandLine: '#3A4563',
+  onBrandInk: '#D5DAE3',
   /** Behind sheets and dialogs. */
   scrim: '#000000',
 };
@@ -60,19 +68,19 @@ export type Palette = Record<keyof typeof light, string>;
 
 const dark: Palette = {
   ink: '#ECEEF1',
-  onPrimary: '#16181D',
-  background: '#0F1114',
-  surface: '#1A1D22',
-  line: '#2B2F36',
-  fieldBorder: '#3A3F47',
+  onPrimary: '#1A2238',
+  background: '#0E1220',
+  surface: '#181E30',
+  line: '#283049',
+  fieldBorder: '#3A4360',
   textSecondary: '#A3A9B3',
   tabInactive: '#8C929C',
   disabled: '#5F656E',
   me: '#86A8F5',
   meTint: '#22304F',
-  partner: '#F0A063',
-  partnerTint: '#41301F',
-  partnerText: '#F7C08F',
+  partner: '#FF8C6E',
+  partnerTint: '#45261F',
+  partnerText: '#FFB8A6',
   positive: '#13806F',
   onPositive: '#FFFFFF',
   positiveText: '#4CC9AF',
@@ -85,18 +93,24 @@ const dark: Palette = {
   onDanger: '#FFFFFF',
   info: '#9DB7F5',
   infoTint: '#1D2945',
-  neutralTint: '#262A31',
+  neutralTint: '#232A40',
   // A step above the dark background, so the hero cards still read as cards.
-  hero: '#22262E',
+  hero: '#1F2740',
   onHero: '#FFFFFF',
-  heroLine: '#4A4F59',
-  onInk: '#C9CDD3',
-  onInkMuted: '#A9AEB6',
-  inkTrack: '#3E434C',
+  heroLine: '#4A5573',
+  onInk: '#CDD2DE',
+  onInkMuted: '#A9B0C0',
+  inkTrack: '#3A4562',
   positiveOnInk: '#2F9E86',
   warningOnInk: '#B8861A',
   negativeOnInk: '#E5486A',
-  logoBlue: '#4A78E0',
+  wordmarkGreen: '#3DC4A6',
+  wordmarkCoral: '#FF7A59',
+  brandInk: '#1A2238',
+  brandCoral: '#FF7A59',
+  onBrandCoral: '#1A2238',
+  brandLine: '#3A4563',
+  onBrandInk: '#D5DAE3',
   scrim: '#000000',
 };
 
@@ -217,7 +231,10 @@ export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32, 12: 48 } a
 export const radius = { tile: 12, control: 14, option: 16, card: 20, sheet: 24, pill: 28 } as const;
 
 export const font = {
-  display: 'BricolageGrotesque_700Bold',
+  /** Only the MitiMiti wordmark. */
+  brand: 'Fredoka_600SemiBold',
+  /** Titles and big amounts: round and friendly, like Miti. */
+  display: 'Fredoka_700Bold',
   body: 'DMSans_400Regular',
   bodySemi: 'DMSans_600SemiBold',
   bodyBold: 'DMSans_700Bold',
@@ -229,9 +246,9 @@ export const font = {
  */
 export function textStyles(c: Palette) {
   return {
-    balance: { fontFamily: font.display, fontSize: 52, letterSpacing: -1.5, color: c.ink },
-    hero: { fontFamily: font.display, fontSize: 44, letterSpacing: -1.1, color: c.ink },
-    screenTitle: { fontFamily: font.display, fontSize: 32, letterSpacing: -0.6, color: c.ink },
+    balance: { fontFamily: font.display, fontSize: 52, letterSpacing: -0.8, color: c.ink },
+    hero: { fontFamily: font.display, fontSize: 44, letterSpacing: -0.6, color: c.ink },
+    screenTitle: { fontFamily: font.display, fontSize: 32, letterSpacing: -0.3, color: c.ink },
     heading: { fontFamily: font.display, fontSize: 20, color: c.ink },
     bar: { fontFamily: font.bodyBold, fontSize: 17, color: c.ink },
     row: { fontFamily: font.bodySemi, fontSize: 16, color: c.ink },

@@ -34,10 +34,19 @@ each names the feature section that builds it.
 
 ## Design system (UI kit v1)
 
-Implemented in [src/ui/tokens.ts](../src/ui/tokens.ts). Near-black ink for action, blue for you, orange for
-your partner, green only for what is settled. Red and green are never the only cue: always with text.
+Implemented in [src/ui/tokens.ts](../src/ui/tokens.ts), with the MitiMiti brand (board *Color, tipografía y voz*,
+sources in [assets/brand](../assets/brand)): Tinta for action, blue for you, coral for your partner, green only for
+what is settled. Red and green are never the only cue: always with text.
 
-**Splash:** the Welcome logo (two circles, `assets/splash-icon.png`) on `#FBF4EA` in light mode and `#16181D` in dark,
+**Logo:** Miti, the two-colour mascot ([src/lib/miti.ts](../src/lib/miti.ts), drawn by `Miti` in
+[src/ui/Miti.tsx](../src/ui/Miti.tsx) and in the PDF header), and the `Wordmark` "MitiMiti" in Fredoka 600, green
+then coral. App icon, adaptive icon (with monochrome layer), splash and favicon are rendered from the SVGs by
+`python scripts/brand-assets.py`; the Google Play icon is `assets/store/play-icon-512.png`.
+
+**Welcome** is the brand screen: Tinta (`brandInk`) in both modes, Miti and the wordmark centred, the coral
+`kind="brand"` button for Crear cuenta.
+
+**Splash:** Miti (`assets/splash-icon.png`) on Niebla `#F3F5F4` in light mode and Tinta `#1A2238` in dark,
 configured in `app.json` › `expo-splash-screen`. It stays up until fonts and the session are ready, then fades
 (`src/app/_layout.tsx`). Expo Go shows the app icon instead; check it in a development or release build.
 
@@ -47,34 +56,34 @@ configured in `app.json` › `expo-splash-screen`. It stays up until fonts and t
   it). **Ajustes › Apariencia** can fix it to Claro or Oscuro on that phone; the choice is stored on the device and
   passed to `Appearance.setColorScheme`, so keyboards and alerts match.
 - `tokens.ts` has a light palette (the UI kit below) and a dark one with the **same token names**, plus dark
-  category colours. The UI kit only defines light; the dark palette keeps its hues: lighter blue / orange / green /
-  red for text and marks on near-black, deeper tints for tiles and notices.
+  category colours. The UI kit only defines light; the dark palette keeps its hues: lighter blue / coral / green /
+  red for text and marks on deep navy, deeper tints for tiles and notices.
 - Tokens by job, so each mode can treat them differently: `ink` (text, primary buttons; light in dark mode) with
-  `onPrimary` on it; `hero` (balance, Presupuestos' month, Welcome; stays dark in both) with `onHero` / `onInk`;
+  `onPrimary` on it; `hero` (balance, Presupuestos' month; stays dark in both) with `onHero` / `onInk`;
   `positive` (fills) vs `positiveText`; `danger` (delete button) vs `negative` (text, bars); `scrim`.
 - Buttons on hero cards use `kind="inverse"` (white with dark text in both modes).
 - [src/ui/__tests__/tokens.test.ts](../src/ui/__tests__/tokens.test.ts) checks ~30 text and mark pairs per mode
   against WCAG (4.5:1 text, 3:1 icons and bars) and every category icon on its tile. Known exception from the UI
-  kit: light orange is 2.6:1 on white, so the partner's marks always come with a legend and amounts.
+  kit: light coral is 2.6:1 on white, so the partner's marks always come with a legend and amounts.
 - Screens read colours with `useTheme()` and build styles with `makeStyles()` ([src/ui/theme.tsx](../src/ui/theme.tsx)).
 
 | Token | Hex | Use |
 | --- | --- | --- |
-| Ink | `#16181D` | Text, primary button (the balance card is `hero`, same hex in light mode) |
-| Background | `#F2F4F3` | App background |
+| Ink (Tinta) | `#1A2238` | Text, primary button (the balance card is `hero`, same hex in light mode) |
+| Background (Niebla) | `#F3F5F4` | App background |
 | Surface | `#FFFFFF` | Cards, sheets, fields |
 | Line | `#E3E6E8` | Card borders, dividers |
-| Text secondary | `#5B606B` | Labels, metadata |
+| Text secondary | `#5A6275` | Labels, metadata |
 | Disabled | `#9AA0A8` | Off radios / switches; inactive tab `#6B7079` |
 | You / bg | `#1F4FB8` / `#DCE5FA` | What you pay or owe; your avatar's initial (until a character is picked) |
-| Partner / bg | `#E8873A` / `#FBE1CC` (text `#8A3A0C`) | What your partner pays or owes; their avatar |
+| Partner / bg | `#FF7A59` (Coral Miti) / `#FFE3DA` (text `#9E3418`) | What your partner pays or owes; their avatar |
 | Positive | `#0F7B6C` | "Te deben", payments, budget OK |
 | Negative | `#B4232C` | "Debes", over budget, delete |
 
 Categories: Súper `#2E7D5B` · Comida fuera `#B4501F` · Casa `#3E4BA0` · Servicios `#8A6100` ·
 Transporte `#22668A` · Salidas `#83347F` · Viajes `#17706F` · Regalos `#A8304F` · Otros `#4D525C`.
 
-- **Type:** Bricolage Grotesque 700 for figures and titles (balance 52, welcome 44, screen title 32, heading 20);
+- **Type:** Fredoka 700 for figures and titles (balance 52, welcome 44, screen title 32, heading 20);
   DM Sans for UI (top bar 17/700, row & button 16/600–700, body 15–16/400 at 1.5, label 13/600,
   balance effect 12/700, tab 11/700). Figures use tabular numbers.
 - **Space & shape:** 4 px scale, 20 px side margins, every touch target ≥ 44 × 44. Radii: 12 category icon,

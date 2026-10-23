@@ -112,8 +112,9 @@ interface NavButtonProps {
   /** primary: ink · secondary: white with a border · outline: transparent, for dark backgrounds ·
    * payment: green, only for recording a payment (the UI kit reserves green for that) ·
    * inverse: white with dark text, for hero cards (balance, Welcome), in light and dark mode alike ·
-   * danger: red, only for deleting (the UI kit reserves red for that). */
-  kind?: 'primary' | 'secondary' | 'outline' | 'payment' | 'inverse' | 'danger';
+   * danger: red, only for deleting (the UI kit reserves red for that) ·
+   * brand: coral with Tinta text, only on the brand screen (Welcome). */
+  kind?: 'primary' | 'secondary' | 'outline' | 'payment' | 'inverse' | 'danger' | 'brand';
   onPress?: () => void;
   /** Greyed out and not pressable, e.g. until a form is complete. */
   disabled?: boolean;
@@ -125,7 +126,7 @@ export function NavButton({ href, label, kind = 'primary', onPress, disabled, lo
   const { color, type } = useTheme();
   const styles = useStyles();
   const inactive = disabled || loading;
-  const textColor = kind === 'secondary' ? color.ink : kind === 'outline' ? color.onHero : kind === 'payment' ? color.onPositive : kind === 'inverse' ? color.hero : kind === 'danger' ? color.onDanger : color.onPrimary;
+  const textColor = kind === 'secondary' ? color.ink : kind === 'outline' ? color.onHero : kind === 'payment' ? color.onPositive : kind === 'inverse' ? color.hero : kind === 'danger' ? color.onDanger : kind === 'brand' ? color.onBrandCoral : color.onPrimary;
   const button = (
     // Link asChild rejects style arrays, so flatten.
     <Pressable
@@ -134,7 +135,7 @@ export function NavButton({ href, label, kind = 'primary', onPress, disabled, lo
       accessibilityState={{ disabled: !!inactive, busy: !!loading }}
       disabled={inactive}
       onPress={onPress}
-      style={StyleSheet.flatten([styles.button, kind === 'secondary' && styles.buttonSecondary, kind === 'outline' && styles.buttonOutline, kind === 'payment' && styles.buttonPayment, kind === 'inverse' && styles.buttonInverse, kind === 'danger' && styles.buttonDanger, disabled && styles.buttonDisabled])}
+      style={StyleSheet.flatten([styles.button, kind === 'secondary' && styles.buttonSecondary, kind === 'outline' && styles.buttonOutline, kind === 'payment' && styles.buttonPayment, kind === 'inverse' && styles.buttonInverse, kind === 'danger' && styles.buttonDanger, kind === 'brand' && styles.buttonBrand, disabled && styles.buttonDisabled])}
     >
       {loading ? (
         <ActivityIndicator color={textColor} />
@@ -164,6 +165,7 @@ const useStyles = makeStyles(({ color }) => StyleSheet.create({
   buttonPayment: { backgroundColor: color.positive },
   buttonInverse: { backgroundColor: color.onHero },
   buttonDanger: { backgroundColor: color.danger },
+  buttonBrand: { backgroundColor: color.brandCoral },
   buttonDisabled: { backgroundColor: color.disabled, borderColor: color.disabled },
   footer: { paddingHorizontal: space[5], paddingTop: space[3], paddingBottom: space[3], borderTopWidth: 1, borderTopColor: color.line },
 }));
