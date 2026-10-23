@@ -15,6 +15,7 @@ import type { ActivityExpense, ActivityPayment } from './activity';
 import { paymentTitle } from './activity';
 import { addDays, isoDate, monthOf, type DateLabels } from './dates';
 import type { ExportCouple, ExportRange, ExportRow } from './exportData';
+import { mitiSvg } from './miti';
 import { formatMoney } from './money';
 import { expenseEffect, netBalance } from './splits';
 
@@ -283,7 +284,7 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
 <body>
   <header>
     <div class="brand">
-      <svg width="22" height="14" viewBox="0 0 140 88" aria-hidden="true"><circle cx="44" cy="44" r="44" fill="${ink.logoBlue}"/><circle cx="96" cy="44" r="44" fill="${ink.partner}" fill-opacity="0.92"/></svg>
+      ${mitiSvg(18)}
       MitiMiti
     </div>
     <div class="generated">${esc(p.generated(fullDate(isoDate(today))))}</div>

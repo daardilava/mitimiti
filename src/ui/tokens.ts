@@ -50,8 +50,9 @@ const light = {
   positiveOnInk: '#2F9E86',
   warningOnInk: '#B8861A',
   negativeOnInk: '#E5486A',
-  /** Welcome logo's blue circle, lighter than `me` so the overlap reads on ink. */
-  logoBlue: '#4A78E0',
+  /** The MitiMiti wordmark on hero surfaces: brand green, lifted to read on ink, and brand coral. */
+  wordmarkGreen: '#3DC4A6',
+  wordmarkCoral: '#FF7A59',
   /** Behind sheets and dialogs. */
   scrim: '#000000',
 };
@@ -96,7 +97,8 @@ const dark: Palette = {
   positiveOnInk: '#2F9E86',
   warningOnInk: '#B8861A',
   negativeOnInk: '#E5486A',
-  logoBlue: '#4A78E0',
+  wordmarkGreen: '#3DC4A6',
+  wordmarkCoral: '#FF7A59',
   scrim: '#000000',
 };
 
@@ -217,6 +219,8 @@ export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32, 12: 48 } a
 export const radius = { tile: 12, control: 14, option: 16, card: 20, sheet: 24, pill: 28 } as const;
 
 export const font = {
+  /** Only the MitiMiti wordmark. */
+  brand: 'Fredoka_600SemiBold',
   display: 'BricolageGrotesque_700Bold',
   body: 'DMSans_400Regular',
   bodySemi: 'DMSans_600SemiBold',

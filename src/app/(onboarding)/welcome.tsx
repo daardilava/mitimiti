@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DEV_BYPASS_AUTH, useSessionStore, type NextStep } from '@/lib/session';
 import { Callout } from '@/ui/Form';
+import { Miti, Wordmark } from '@/ui/Miti';
 import { NavButton } from '@/ui/Screen';
 import { font, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
@@ -23,12 +24,9 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Text style={[type.heading, styles.light]}>MitiMiti</Text>
+      <Wordmark />
       <View style={styles.hero}>
-        <View style={styles.logo} aria-hidden>
-          <View style={[styles.circle, { backgroundColor: color.logoBlue }]} />
-          <View style={[styles.circle, styles.overlap, { backgroundColor: color.partner }]} />
-        </View>
+        <Miti size={112} />
         <Text style={[type.hero, styles.light, { lineHeight: 48 }]} accessibilityRole="header">
           {m.welcome.title}
         </Text>
@@ -63,8 +61,5 @@ const useStyles = makeStyles(({ color }) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.hero, padding: space[6], gap: space[6] },
   hero: { flex: 1, justifyContent: 'center', gap: space[6] },
   light: { color: color.onHero },
-  logo: { flexDirection: 'row', height: 88 },
-  circle: { width: 88, height: 88, borderRadius: 44 },
-  overlap: { marginLeft: -36, opacity: 0.92 },
   signIn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[1] },
 }));
