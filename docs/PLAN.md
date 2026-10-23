@@ -309,9 +309,19 @@ Free keeps the whole core, and no plan ever changes the balance.
   - `household_is_premium()`: service side only. `my_plan()`: the signed-in person's plan.
   - `subscriptions` is in Realtime. `delete_account()` also erases the caller's billing events.
   - [supabase/tests/billing.test.ts](../supabase/tests/billing.test.ts). **Needs `npx supabase db push`.**
-- [ ] **Webhook:** `supabase/functions/revenuecat-webhook` checks the Authorization header and validates the body
-  with Zod. It is idempotent, maps each event type to a status, resolves the Clerk id, ignores stale events, and
-  upserts `subscriptions`. The pure parts live in `supabase/functions/_shared/billing.ts`, with tests.
+- [x] **Webhook:** [supabase/functions/revenuecat-webhook](../supabase/functions/revenuecat-webhook/index.ts)
+  - Checks the Authorization header (constant time), validates the body with Zod, and answers RevenueCat's way:
+    only an exact 200 counts as delivered, and 500 asks for a retry.
+  - The pure part, [_shared/billing.ts](../supabase/functions/_shared/billing.ts), maps every event type (including
+    REFUND_REVERSED, TEMPORARY_ENTITLEMENT_GRANT and SUBSCRIPTION_PAUSED). It also covers the billing grace period,
+    PROMOTIONAL/PREPAID → NORMAL, the Clerk id (anonymous ids never decide), and TRANSFER.
+  - [20261023144510_apply_billing_event.sql](../supabase/migrations/20261023144510_apply_billing_event.sql) applies
+    one event in one transaction, locked per couple: idempotent, stale events skipped, buyers without a couple kept
+    for later, and TRANSFER moving the row (it carries no dates of its own).
+  - [supabase/tests/billing_webhook.test.ts](../supabase/tests/billing_webhook.test.ts). Deploy: README ›
+    *Deploy the billing webhook*. **Needs `npx supabase db push`.**
+  - Left for the SDK task: link the events of a buyer who had no couple yet, and a TRANSFER from an account that
+    no longer has a couple. The app syncs after creating or joining a couple and after Restaurar compras.
 - [ ] **SDK + entitlement hook:** RevenueCat SDK (native, so it needs a new development build), in
   `src/api/purchases.ts`, with a fake for dev bypass and web. `usePlan()` reads `my_plan()` and refreshes through
   Realtime, the SDK listener and app focus; it polls while a purchase activates. `src/lib/plans.ts` is the single

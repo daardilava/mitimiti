@@ -148,6 +148,12 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 | `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (`pk_test_…` in development) |
 | `EXPO_PUBLIC_DEV_BYPASS_AUTH` | `1` = skip sign-in and use sample data. Development only |
 
+**Server-side secrets** never go in `.env` or the app. They live in Supabase (`npx supabase secrets set`):
+
+| Secret | Used by |
+| --- | --- |
+| `REVENUECAT_WEBHOOK_AUTH` | The billing webhook: the exact Authorization header RevenueCat must send |
+
 ## Scripts
 
 | Command | What it does |
@@ -212,6 +218,30 @@ The balance must never be wrong, so any change to split or balance math, in SQL 
   ```
   Ship the migration **before** the app code that depends on it, and keep the app tolerant of the previous
   schema until every phone has updated.
+
+### Deploy the billing webhook
+
+[`supabase/functions/revenuecat-webhook`](supabase/functions/revenuecat-webhook/index.ts) receives RevenueCat's
+events and writes each couple's Premium (Phase 6, [docs/PLAN.md](docs/PLAN.md)). Push the billing migrations first.
+
+1. Make a long random secret, and store the header value RevenueCat will send:
+   ```bash
+   npx supabase secrets set REVENUECAT_WEBHOOK_AUTH="Bearer $(openssl rand -hex 32)"
+   npx supabase secrets list            # check it is there (the value is not shown)
+   ```
+   Keep a copy of the whole value (`Bearer …`) for step 3, in a password manager, never in the repo.
+2. Deploy. RevenueCat sends no Supabase token, so JWT verification is off for this function
+   (`[functions.revenuecat-webhook] verify_jwt = false` in `supabase/config.toml`; the flag says the same):
+   ```bash
+   npx supabase functions deploy revenuecat-webhook --no-verify-jwt
+   ```
+3. RevenueCat › Project › Integrations › Webhooks › Add:
+   - URL: `https://<project-ref>.supabase.co/functions/v1/revenuecat-webhook`
+   - Authorization header: the same `Bearer …` value as in step 1
+   - Send a **test event**: the function answers 200 and stores it in `billing_events`.
+4. The function answers 200 for everything it handled (duplicates and `TEST` included), 401 without the right
+   header, 400 for a body that isn't an event, and 500 when the database fails, so RevenueCat retries.
+   Logs: Supabase Dashboard › Edge Functions › revenuecat-webhook › Logs.
 
 ## Engineering rules
 
