@@ -11,7 +11,7 @@
 Two people log what they spend together, choose how each expense is split, and see one live balance on both
 phones. When they settle up outside the app, they record the payment and the balance goes back to zero.
 
-> **Status:** private beta in preparation. Phase 3 (*Settle + summary*) is built; polish is in progress.
+> **Status:** private beta in preparation. Phase 3 (*Settle + summary*) is built; Phase 6 (*Billing*) has started.
 > Roadmap and acceptance checks: [docs/PLAN.md](docs/PLAN.md).
 
 ---
@@ -50,6 +50,7 @@ phones. When they settle up outside the app, they record the payment and the bal
 | Export | The expenses and payments of a period as a CSV for spreadsheets, or a PDF report with totals and the balance, through the share sheet | Built |
 | Notifications | Partner activity, Sunday reminder | Planned (v1.1) |
 | Offline logging, recurring expenses | Save without signal; rent and subscriptions each month | Planned (v1.2) |
+| Premium | One subscription per couple in the App Store / Google Play: full history, budgets, export | In progress (Phase 6) |
 
 **Product principles:** two people, never a group · fair, not just 50/50 · fast to log · the app records
 payments, it never moves money · neutral, no-blame language.

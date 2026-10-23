@@ -7,7 +7,7 @@
 | Mobile app | Expo SDK 57 + React Native + TypeScript | iOS and Android from one codebase; OTA updates with EAS |
 | Navigation | Expo Router | File-based routes that mirror the 13 screens |
 | **Auth** | **Clerk** (`@clerk/expo`) — email + password, Google, Apple | Session management, email verification, password reset |
-| **Billing** | **Clerk Billing** (later phase) | Plans and entitlements next to the user; see [PLAN.md](PLAN.md#billing-later-phase) |
+| **Billing** | **RevenueCat** (App Store + Google Play subscriptions) + a Supabase webhook | Store billing is required for digital subscriptions on mobile; one Premium per couple, stored in Supabase; see [PLAN.md](PLAN.md#phase-6--billing-current) |
 | Server state | TanStack Query | Caching, retries, optimistic updates |
 | UI state | Zustand | Form drafts and filters only |
 | Validation | Zod | Same schemas in the app and in Edge Functions |
@@ -36,6 +36,25 @@ Phone ──supabase-js with accessToken: () => getToken()──▶ Supabase (th
 - The Supabase client takes the Clerk token on every request: `createClient(url, key, { accessToken: async () => (await getToken()) ?? null })`.
 - **User ids are Clerk ids (`text`, e.g. `user_2x…`), not `uuid`.** Every `auth.uid()` becomes
   `auth.jwt()->>'sub'`, and every `uuid references auth.users` column becomes `text`.
+
+## How billing fits together
+
+```
+Phone ──purchase (Apple / Google)──▶ Store ──receipt──▶ RevenueCat   (app_user_id = Clerk id, user_…)
+RevenueCat ──webhook, Authorization: <secret>──▶ Edge Function revenuecat-webhook (service role)
+                                                   billing_events (idempotent) ─▶ subscriptions (one row per couple)
+Both phones ──my_plan() RPC + Realtime on subscriptions──▶ usePlan() ──▶ src/lib/plans.ts decides what Free allows
+```
+
+- **Supabase decides**, not the phone: `subscriptions` has no insert/update/delete policy, so only the webhook
+  (service role) writes it; members of the couple read it, and `my_plan()` answers for the signed-in person.
+- **One row per couple**: whoever buys, both members are Premium. RevenueCat knows the buyer by their Clerk id;
+  the webhook finds the couple through `members.user_id`. An event for someone without a couple yet waits in
+  `billing_events` until the couple exists.
+- **Free never changes the balance**: limits are applied by the app's screens and queries (`src/lib/plans.ts`),
+  not by RLS, so `balance_view` and `monthly_summary` always see every expense.
+- After a purchase the store and RevenueCat confirm first; the webhook may take a few seconds, so the app polls
+  `my_plan()` briefly ("Activando Premium…"). The partner's phone updates through Realtime.
 
 ## Data model
 
