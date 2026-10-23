@@ -2,14 +2,14 @@
 // It refreshes when the couple's subscriptions row changes (Realtime, src/api/live.ts: the partner's phone unlocks
 // within seconds), when the RevenueCat SDK learns something new, and when the app comes back to the foreground.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { waitUntil } from '@/lib/activation';
 import type { PlanPackage } from '@/lib/offerings';
 import { FREE_PLAN, planFromRpc, type Plan, type PlanInfo } from '@/lib/plans';
 import { samplePlan } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
-import { identify, onCustomerInfo, purchase, restore } from './purchases';
+import { identify, onCustomerInfo, premiumInStore, purchase, restore } from './purchases';
 
 export const planKey = ['plan'] as const;
 
@@ -44,16 +44,35 @@ export async function syncPlan(): Promise<void> {
 
 const isPremiumNow = async () => (await fetchPlan()).plan === 'premium';
 
-/** Mount once, inside QueryClientProvider: RevenueCat follows the session, and its news refreshes the plan. */
+/**
+ * Mount once, inside QueryClientProvider: RevenueCat follows the session, and its news refreshes the plan. When the
+ * store says this person has Premium but the couple is Free (a missed webhook, or the partner's subscription ended
+ * while this person's runs on), it asks billing-sync once per session and couple.
+ */
 export function usePlanSync() {
   const client = useQueryClient();
   const userId = useSessionStore((s) => s.userId);
+  const householdId = useSessionStore((s) => s.householdId);
+  const { data } = usePlan();
+  const healed = useRef<string | null>(null);
 
   useEffect(() => {
     void identify(userId);
   }, [userId]);
 
   useEffect(() => onCustomerInfo(() => void client.invalidateQueries({ queryKey: planKey })), [client]);
+
+  useEffect(() => {
+    if (data?.plan !== 'free' || !userId || !householdId) return;
+    const key = `${userId}:${householdId}`;
+    if (healed.current === key) return;
+    healed.current = key;
+    void (async () => {
+      if (!(await premiumInStore())) return;
+      await syncPlan();
+      await client.invalidateQueries({ queryKey: planKey });
+    })();
+  }, [data?.plan, userId, householdId, client]);
 }
 
 /**

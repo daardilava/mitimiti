@@ -383,10 +383,20 @@ Free keeps the whole core, and no plan ever changes the balance.
   notifications), testing, and the release checklist. It starts with RevenueCat's **Test Store**, so the whole flow
   can be tested before any store account. Three steps are marked to re-check: Google's closed-test rule for personal
   accounts, Play service credentials, and App Store server notifications.
-- [ ] **QA:** review the whole flow for bugs and security holes, `npx expo-doctor`, and the manual test script
-  below on two real phones in sandbox. Check: if the partner who isn't paying deletes their account, the couple (and
-  its `subscriptions` row) is erased while the payer's store subscription keeps running; billing-sync links it again
-  when the payer starts or joins a new couple.
+- [ ] **QA**
+  - [x] Review of the whole flow for bugs and security holes (2026-10-23). Fixed in
+    [20261023190000_billing_two_payers.sql](../supabase/migrations/20261023190000_billing_two_payers.sql): when both
+    partners pay, one person's events (their expiry above all) no longer overwrite the other's live subscription; the
+    longer one is kept (`billing_replaces()`). TRANSFER now moves only the row the old account pays for (it could take
+    the partner's), and brings its status and dates to a couple that already had a row. In the app, buying, restoring
+    and reading the customer wait for RevenueCat's logIn / logOut, and `usePlanSync()` asks billing-sync once per session
+    when the store says Premium and Supabase says Free. Checked and kept: sandbox events count (App Review buys in
+    sandbox on the production app), and billing-sync is not rate-limited (only the caller's own state is written).
+  - [x] `npx expo-doctor` passes (expo, expo-router, expo-sharing moved to the SDK's patch versions).
+  - [x] The partner who isn't paying deletes their account: the couple and its `subscriptions` row are erased, and
+    billing-sync links the payer's running subscription again in their next couple (`billing_sync.test.ts`).
+  - [ ] The manual test script in [BILLING.md › What to try](BILLING.md#what-to-try-and-what-to-expect), on two real
+    phones in sandbox (needs a development build and the store accounts).
 
 **Acceptance checks**
 
