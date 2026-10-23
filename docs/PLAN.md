@@ -29,7 +29,7 @@ a web app (mobile only), converting between currencies.
 | Notifications | "Ana agregó un gasto"; Sunday reminder when a balance is open | v1.1 |
 | Default split and currency | Per-couple setting used for every new expense | v1.1 |
 | Export (CSV, PDF) | All expenses and payments for a period (this month, last month, last 3 months, this year, all), through the share sheet | v1.1 → built early |
-| Subscription (Clerk Billing) | Paid plan, see [Billing](#billing-later-phase) | TBD |
+| Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): full history, Presupuestos, Export, later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |
 | Receipt photo / widget | Picture on an expense; home-screen balance + quick add | Later |
@@ -53,10 +53,10 @@ checks are ticked.
 | --- | --- | --- |
 | 1. Auth (Clerk) — built, checks open | Sign-in, session, sign-out, Supabase linked to Clerk, couple create/join behind auth | Both of us can sign in on real phones and land in the same couple |
 | 2. Core MVP — built, checks open | Add, edit, delete expenses; live balance on Home; Activity | — |
-| **3. Settle + summary** ← now | Settle up ✅, monthly summary ✅, split tests ✅, polish | **Balance is right:** all split tests pass ✅ |
+| 3. Settle + summary — built, polish open | Settle up ✅, monthly summary ✅, split tests ✅, polish | **Balance is right:** all split tests pass ✅ |
 | 4. Private beta | TestFlight + Play internal, both of us daily | — |
 | 5. v1.1 | Budgets, notifications, defaults, CSV | **We trust it:** 2 weeks, 0 corrections |
-| 6. Billing (Clerk Billing) | Paid plan, entitlements | Decision on mobile payment flow (below) |
+| **6. Billing (RevenueCat)** ← now, started early | Premium per couple through the stores, entitlements in Supabase | **Fair paywall:** both phones unlock within seconds; no plan changes the balance |
 
 When a phase starts, give it a section below with goal, tasks as `- [ ]` and acceptance checks.
 
@@ -174,7 +174,7 @@ fails on anything the app cannot handle.
 - [ ] Activity lists every expense and payment of the day / week / month by day, with search and filters, and
   its chart adds up to the legend totals.
 
-### Phase 3 — Settle + summary (current)
+### Phase 3 — Settle + summary (built; polish and acceptance checks open)
 
 **Goal:** settling up is a habit (≥ 1 per month) and the month can be reviewed at a glance; the balance is right.
 
@@ -259,19 +259,85 @@ fails on anything the app cannot handle.
 - [ ] Ajustes: renaming myself shows on the partner's phone; the proportional default is each one's own share.
 - [ ] Presupuestos: a limit changed on one phone shows on the other; next month starts with the same limits.
 
-### Billing (later phase)
+### Phase 6 — Billing (current)
 
-Clerk Billing is the planned billing layer, but it has constraints that must be resolved before we build it:
+Started 2026-10-23, ahead of Phases 4–5, on request.
 
-- **Checkout is web-only** (including Expo web). Native iOS/Android can *read* plans and subscriptions
-  but there is no native checkout.
-- **Stripe only, USD only.** Fine for a subscription price, independent from the couple's COP/EUR/USD currency.
-- **No Apple In-App Purchase or Google Play Billing.** Stores generally require their own billing for digital
-  subscriptions sold inside the app; check the current App Review Guidelines and Play Payments policy.
+**Goal:** a couple buys Premium once, in the App Store or Google Play, and both phones unlock within seconds.
+Free keeps the whole core, and no plan ever changes the balance.
 
-Options to decide on: (a) subscribe on a web page and unlock in the app by checking the plan with Clerk's
-`has({ plan })`; (b) use store billing (e.g. RevenueCat / `expo-iap`) on mobile and keep Clerk for identity.
-Which plan is per **couple** (B2B-style, one subscription for both) vs. per **person** is also open.
+**Decisions**
+
+- **Store billing through RevenueCat**; Clerk stays for identity only. Clerk Billing is ruled out: its checkout is
+  web-only, it is Stripe-only, and it has no Apple In-App Purchase or Google Play Billing, while the app is mobile-only.
+- **One subscription per couple** (household), not per person. Either member can buy it; both get Premium. If the
+  payer deletes their account, the couple is deleted anyway (`delete_account()` cascades).
+- **RevenueCat `app_user_id` = the Clerk user id** (`text`, `user_…`). RevenueCat anonymous ids never decide an
+  entitlement.
+- **Supabase is the source of truth** for entitlements: a RevenueCat webhook (Edge Function, service role) writes
+  the couple's `subscriptions` row; the app reads it through the `my_plan()` RPC and never writes it.
+- **Plans: Free and Premium.** Prices live in the stores, not in code: 2,99 €/month, 19,99 €/year, a 7-day free
+  trial on the yearly plan, regional prices for COP and USD.
+- **Free, forever:** unlimited expenses, every split mode, the live balance, settle up, Movimientos, and the
+  Resumen of the current month and the previous 2. **Premium:** full history (Movimientos and Resumen older than
+  3 months), Presupuestos, Export CSV/PDF, and later Recurring expenses and Receipt photo.
+- **Data is never deleted, and never hidden from the balance**, on Free: only screens are limited. Limits live in
+  the app's queries and screens (`src/lib/plans.ts`), never in RLS: `balance_view` and `monthly_summary` are
+  `security_invoker`, so hiding rows would change the balance.
+- **Store rules** (checked 2026-10-23, [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
+  3.1, [Play Payments policy](https://support.google.com/googleplay/android-developer/answer/9858738)):
+  - In-app purchase for the subscription, and a way to restore purchases (Apple 3.1.1).
+  - No second subscription to the same thing (Apple 3.1.2(b)): **once the couple is Premium, the partner's paywall
+    says so and offers no purchase.**
+  - Say clearly what Premium gives before asking to subscribe (Apple 3.1.2(c)).
+  - A purchase on one platform may unlock the other, because the same subscription is sold in both stores
+    (Apple 3.1.3(b)).
+  - Play billing for digital subscriptions; no links to other payment methods (Play Payments policy, sections 2 and 4).
+  - Neither store describes one subscription for two people, so the review notes explain the couple model.
+- **Prerequisites to buy for real:** Apple Developer Program (paid) for iOS, and a Google Play Console account with
+  the app on a testing track for Android. Until then, everything runs against a fake purchases module.
+- **Don't charge anyone before Phase 4:** we use the app daily for a few weeks first. Charging for an app with a
+  balance error ruins the reviews.
+
+**Tasks**
+
+- [ ] **DB:** `subscriptions` (one row per couple; members read their own; only the service role writes),
+  `billing_events` (idempotency, and events that arrive before a couple exists), `household_is_premium()`,
+  `my_plan()`; `delete_account()` erases both. PGlite tests. Needs `npx supabase db push`.
+- [ ] **Webhook:** `supabase/functions/revenuecat-webhook` checks the Authorization header and validates the body
+  with Zod. It is idempotent, maps each event type to a status, resolves the Clerk id, ignores stale events, and
+  upserts `subscriptions`. The pure parts live in `supabase/functions/_shared/billing.ts`, with tests.
+- [ ] **SDK + entitlement hook:** RevenueCat SDK (native, so it needs a new development build), in
+  `src/api/purchases.ts`, with a fake for dev bypass and web. `usePlan()` reads `my_plan()` and refreshes through
+  Realtime, the SDK listener and app focus; it polls while a purchase activates. `src/lib/plans.ts` is the single
+  place that says what Free allows.
+- [ ] **Paywall:** `src/app/paywall.tsx`. Prices come from the store offering. Yearly is selected by default, with
+  the savings and the trial. Restore, Terms and Privacy, and the auto-renewal disclosure. States: loading, failed,
+  purchasing, activating, done, cancelled, and *Tu pareja ya activó Premium* (no purchase offered).
+- [ ] **Gating:** history older than 3 months, Presupuestos and Export are locked on Free, with the reason in
+  text and a way to the paywall. The balance, settle up and *Gastado juntos* ignore the plan.
+- [ ] **Ajustes plan card:** the plan, who pays, the renewal or end date, the trial end, a billing-issue warning,
+  *Administrar suscripción* (payer only), and Restaurar compras. Borrar cuenta warns the payer that deleting the
+  account does not cancel the store subscription.
+- [ ] **Privacy Policy and Terms:** add RevenueCat as a provider, and Apple and Google as payment processors.
+  Add the subscription terms: renewal, cancelling in the store, one subscription per couple. In es/en/de.
+- [ ] **Store setup runbook:** `docs/BILLING.md`. Accounts and agreements, products (`premium_monthly`,
+  `premium_yearly`), RevenueCat (entitlement `premium`, offering `default`, webhook), sandbox testing, and the
+  release checklist.
+- [ ] **QA:** review the whole flow for bugs and security holes, `npx expo-doctor`, and the manual test script
+  below on two real phones in sandbox.
+
+**Acceptance checks**
+
+- [ ] Buying yearly with the trial on phone A turns both phones Premium within seconds.
+- [ ] While the couple is Premium, the partner's phone offers no second purchase.
+- [ ] Cancelling keeps Premium until it expires; at expiry the couple is Free, with every expense still there
+  and the balance unchanged.
+- [ ] Restaurar compras on a reinstalled app brings Premium back.
+- [ ] Bought on Android, Premium also shows on the partner's iPhone.
+- [ ] A billing issue shows the warning in Ajustes, and Premium stays until the store's grace period ends.
+- [ ] Deleting the payer's account erases the couple's data and says the store subscription is cancelled in the store.
+- [ ] For the same data, Home's balance, settle up and *Gastado juntos* are identical on Free and Premium.
 
 ## Open questions
 
@@ -279,5 +345,6 @@ Which plan is per **couple** (B2B-style, one subscription for both) vs. per **pe
 - One currency per couple enough, or do trips need a second one?
 - Import past expenses from the current spreadsheet / notes?
 - Should a settle-up need confirmation from the person receiving the money?
-- What is paid vs. free, and is the subscription per couple or per person?
+- ~~What is paid vs. free, and is the subscription per couple or per person?~~ Decided 2026-10-23: one
+  subscription per couple, Free keeps the core; see [Phase 6](#phase-6--billing-current).
 - App name: **MitiMiti** (decided 2026-10-23; formerly "a medias", which is taken on Google Play). Icon: still to design.

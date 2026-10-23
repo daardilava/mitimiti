@@ -7,10 +7,10 @@ Supabase (Postgres + RLS + Realtime) for data. UI copy in Spanish; code, comment
 
 ## Current focus
 
-**Phase 3 — Settle + summary** (Settle up, Monthly summary, split tests, Ajustes and Presupuestos done — gate *Balance is right*
-passes; polish next). Phases 1–2 are built; their acceptance
-checks are still open. Phase 1 (Auth) is built; its acceptance
-checks are still open. One feature at a time; don't start work from a later phase unless asked.
+**Phase 6 — Billing** (started early, on request): Premium per couple through the App Store and Google Play
+(RevenueCat), entitlements in Supabase, Free keeps the core. Phases 1–3 are built; their acceptance checks (and
+Phase 3 polish) are still open, and Phases 4–5 come before anyone is charged. One feature at a time; don't start
+work from a later phase unless asked.
 Phase scope, status and acceptance checks: [docs/PLAN.md](docs/PLAN.md). When a task finishes a check
 there, tick it (`- [x]`) in the same change.
 
