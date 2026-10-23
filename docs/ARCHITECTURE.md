@@ -1,4 +1,4 @@
-# a medias — Architecture
+# MitiMiti — Architecture
 
 ## Tech stack
 

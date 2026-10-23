@@ -1,4 +1,4 @@
-// Datenschutzerklärung von a medias auf Deutsch: eine Übersetzung von privacy.es.ts, das die verbindliche Fassung ist.
+// Datenschutzerklärung von MitiMiti auf Deutsch: eine Übersetzung von privacy.es.ts, das die verbindliche Fassung ist.
 import { LEGAL_CONTACT, type LegalDoc } from './types';
 
 const { owner, email, city } = LEGAL_CONTACT;
@@ -6,7 +6,7 @@ const { owner, email, city } = LEGAL_CONTACT;
 export const privacyDe: LegalDoc = {
   effective: 'Gültig ab dem 20. Oktober 2026',
   intro:
-    'Diese Erklärung beschreibt, welche personenbezogenen Daten a medias speichert, wofür, mit wem sie geteilt werden, wie lange sie aufbewahrt werden und wie du sie einsehen, berichtigen oder löschen lassen kannst.',
+    'Diese Erklärung beschreibt, welche personenbezogenen Daten MitiMiti speichert, wofür, mit wem sie geteilt werden, wie lange sie aufbewahrt werden und wie du sie einsehen, berichtigen oder löschen lassen kannst.',
   sections: [
     {
       heading: '1. Verantwortlicher',
@@ -82,7 +82,7 @@ export const privacyDe: LegalDoc = {
     },
     {
       heading: '11. Minderjährige',
-      paragraphs: ['a medias ist nur für Personen über 18 Jahre. Wir speichern nicht wissentlich Daten von Minderjährigen; erfahren wir davon, löschen wir sie.'],
+      paragraphs: ['MitiMiti ist nur für Personen über 18 Jahre. Wir speichern nicht wissentlich Daten von Minderjährigen; erfahren wir davon, löschen wir sie.'],
     },
     {
       heading: '12. Änderungen dieser Erklärung',

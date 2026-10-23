@@ -284,7 +284,7 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
   <header>
     <div class="brand">
       <svg width="22" height="14" viewBox="0 0 140 88" aria-hidden="true"><circle cx="44" cy="44" r="44" fill="${ink.logoBlue}"/><circle cx="96" cy="44" r="44" fill="${ink.partner}" fill-opacity="0.92"/></svg>
-      a medias
+      MitiMiti
     </div>
     <div class="generated">${esc(p.generated(fullDate(isoDate(today))))}</div>
   </header>
@@ -344,7 +344,7 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
 
   <footer>
     <span>${esc(p.currencyNote(couple.currency))}</span>
-    <span>a medias</span>
+    <span>MitiMiti</span>
   </footer>
 </body>
 </html>`;

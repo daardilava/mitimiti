@@ -142,7 +142,7 @@ export function buildCsv(rows: ExportRow[], couple: ExportCouple, m: Messages = 
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-/** "a-medias-movimientos_2026-10-01_2026-10-31.csv", or only the end date for Todo: "…_2026-10-31.csv". */
+/** "mitimiti-movimientos_2026-10-01_2026-10-31.csv", or only the end date for Todo: "…_2026-10-31.csv". */
 export function exportFileName(range: ExportRange, extension: 'csv' | 'pdf', m: Messages = es): string {
   const dates = range.start ? `${range.start}_${range.end}` : range.end;
   return `${m.exportData.fileName}_${dates}.${extension}`;

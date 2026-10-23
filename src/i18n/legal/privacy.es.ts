@@ -1,4 +1,4 @@
-// Política de privacidad y tratamiento de datos personales de a medias, en español: la versión que vale.
+// Política de privacidad y tratamiento de datos personales de MitiMiti, en español: la versión que vale.
 // Ley 1581 de 2012 y Decreto 1377 de 2013 (compilado en el Decreto 1074 de 2015). Debe decir lo que la app hace de
 // verdad: si cambia lo que se guarda o con quién se comparte, cambia este texto y su fecha.
 import { LEGAL_CONTACT, type LegalDoc } from './types';
@@ -8,7 +8,7 @@ const { owner, email, city } = LEGAL_CONTACT;
 export const privacyEs: LegalDoc = {
   effective: 'Vigente desde el 20 de octubre de 2026',
   intro:
-    'Esta política explica qué datos personales guarda a medias, para qué, con quién los comparte, cuánto tiempo los conserva y cómo puedes conocerlos, corregirlos o pedir que se borren.',
+    'Esta política explica qué datos personales guarda MitiMiti, para qué, con quién los comparte, cuánto tiempo los conserva y cómo puedes conocerlos, corregirlos o pedir que se borren.',
   sections: [
     {
       heading: '1. Responsable del tratamiento',
@@ -84,7 +84,7 @@ export const privacyEs: LegalDoc = {
     },
     {
       heading: '11. Menores de edad',
-      paragraphs: ['a medias es solo para mayores de 18 años. No guardamos a sabiendas datos de menores; si nos enteramos de que los hay, los borramos.'],
+      paragraphs: ['MitiMiti es solo para mayores de 18 años. No guardamos a sabiendas datos de menores; si nos enteramos de que los hay, los borramos.'],
     },
     {
       heading: '12. Cambios a esta política',

@@ -23,7 +23,7 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Text style={[type.heading, styles.light]}>a medias</Text>
+      <Text style={[type.heading, styles.light]}>MitiMiti</Text>
       <View style={styles.hero}>
         <View style={styles.logo} aria-hidden>
           <View style={[styles.circle, { backgroundColor: color.logoBlue }]} />

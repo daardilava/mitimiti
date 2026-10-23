@@ -25,7 +25,7 @@ export function joinCodeStatus(code: string): JoinCodeStatus {
 }
 
 /**
- * The code in an invite link (`amedias://join?code=AM482X`), or null when it isn't a whole, valid code. Unlike the
+ * The code in an invite link (`mitimiti://join?code=AM482X`), or null when it isn't a whole, valid code. Unlike the
  * field, a link never truncates: "AM482XQ" was not sent by the app, so it fills nothing.
  */
 export function inviteCodeFromLink(param: unknown): string | null {

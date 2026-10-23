@@ -1,4 +1,4 @@
-# a medias — Plan
+# MitiMiti — Plan
 
 Scope, roadmap and the acceptance checks for each phase. External source of truth: *a medias — Project Plan*.
 
@@ -86,7 +86,7 @@ Settings ▸ Cerrar sesión ─▶ Clerk signOut ─▶ Welcome (query cache cle
 | Términos y condiciones (es / en / de, Spanish binding; Colombian law), open signed out and from Ajustes › Información legal | [src/app/terms.tsx](../src/app/terms.tsx), [src/i18n/legal/](../src/i18n/legal/), [src/ui/LegalScreen.tsx](../src/ui/LegalScreen.tsx) |
 | Política de privacidad (Ley 1581 de 2012 / Decreto 1377 de 2013; controller in Bucaramanga; Clerk in the US, Supabase in Ireland; deleting an account deletes the couple's space), accepted with the terms at sign-up | [src/app/privacy.tsx](../src/app/privacy.tsx), [src/i18n/legal/](../src/i18n/legal/) |
 | Borrar cuenta (Ajustes › Cuenta, and Setup for an account without a couple): confirm a recent sign-in with a code by email, erase the couple's space for both (`delete_account()`), then the Clerk user; the partner lands on Welcome with a notice | [src/app/delete-account.tsx](../src/app/delete-account.tsx), [src/lib/deleteAccount.ts](../src/lib/deleteAccount.ts), [src/api/account.ts](../src/api/account.ts), [supabase/migrations/20261020000000_delete_account.sql](../supabase/migrations/20261020000000_delete_account.sql) |
-| Browser comes back to `amedias://sso-callback` | [src/app/sso-callback.tsx](../src/app/sso-callback.tsx) |
+| Browser comes back to `mitimiti://sso-callback` | [src/app/sso-callback.tsx](../src/app/sso-callback.tsx) |
 | User ids are `text` Clerk ids; RLS and RPCs use `requesting_user_id()` = `auth.jwt()->>'sub'` | [supabase/migrations/](../supabase/migrations/) |
 | Supabase trusts Clerk (`[auth.third_party.clerk]`, domain from `CLERK_DOMAIN`) | [supabase/config.toml](../supabase/config.toml) |
 
@@ -101,7 +101,7 @@ fails on anything the app cannot handle.
 3. **SSO connections:** add **Google** (and **Apple**), "Enable for sign-up and sign-in". On a development
    instance Clerk's shared credentials work, so no Google Cloud project is needed until production.
 4. **Native applications:** enable the **Native API**. If Clerk rejects the redirect after Google, add
-   `amedias://sso-callback` (development build) to the mobile SSO redirect allowlist; in Expo Go the redirect
+   `mitimiti://sso-callback` (development build) to the mobile SSO redirect allowlist; in Expo Go the redirect
    is `exp://<your-ip>:8081/--/sso-callback`.
 5. **Integrations › Supabase:** activate it (adds `role: authenticated` to session tokens) and copy the Clerk
    domain. Put it in `[auth.third_party.clerk] domain` in `supabase/config.toml` (local), and in Supabase ›
@@ -280,4 +280,4 @@ Which plan is per **couple** (B2B-style, one subscription for both) vs. per **pe
 - Import past expenses from the current spreadsheet / notes?
 - Should a settle-up need confirmation from the person receiving the money?
 - What is paid vs. free, and is the subscription per couple or per person?
-- App name and icon: keep "a medias"?
+- App name: **MitiMiti** (decided 2026-10-23; formerly "a medias", which is taken on Google Play). Icon: still to design.

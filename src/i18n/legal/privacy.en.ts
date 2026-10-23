@@ -1,4 +1,4 @@
-// Privacy Policy of a medias, in English: a translation of privacy.es.ts, which is the binding version.
+// Privacy Policy of MitiMiti, in English: a translation of privacy.es.ts, which is the binding version.
 import { LEGAL_CONTACT, type LegalDoc } from './types';
 
 const { owner, email, city } = LEGAL_CONTACT;
@@ -6,7 +6,7 @@ const { owner, email, city } = LEGAL_CONTACT;
 export const privacyEn: LegalDoc = {
   effective: 'Effective from October 20, 2026',
   intro:
-    'This policy explains what personal data a medias keeps, why, who it shares it with, how long it keeps it, and how you can see it, correct it or ask for it to be deleted.',
+    'This policy explains what personal data MitiMiti keeps, why, who it shares it with, how long it keeps it, and how you can see it, correct it or ask for it to be deleted.',
   sections: [
     {
       heading: '1. Data controller',
@@ -82,7 +82,7 @@ export const privacyEn: LegalDoc = {
     },
     {
       heading: '11. Minors',
-      paragraphs: ['a medias is only for people over 18. We don’t knowingly keep data of minors; if we find out we do, we delete it.'],
+      paragraphs: ['MitiMiti is only for people over 18. We don’t knowingly keep data of minors; if we find out we do, we delete it.'],
     },
     {
       heading: '12. Changes to this policy',

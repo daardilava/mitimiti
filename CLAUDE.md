@@ -1,4 +1,4 @@
-# a medias — guide for Claude
+# MitiMiti — guide for Claude
 
 Expo app for two people who share a budget: **who owes whom, and how much?** Clerk for sign-in,
 Supabase (Postgres + RLS + Realtime) for data. UI copy in Spanish; code, comments and docs in English.

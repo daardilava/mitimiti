@@ -1,4 +1,4 @@
-// Terms and conditions of a medias, in English: a translation of terms.es.ts, which is the binding version.
+// Terms and conditions of MitiMiti, in English: a translation of terms.es.ts, which is the binding version.
 import { LEGAL_CONTACT, type LegalDoc } from './types';
 
 const { owner, email } = LEGAL_CONTACT;
@@ -6,24 +6,24 @@ const { owner, email } = LEGAL_CONTACT;
 export const termsEn: LegalDoc = {
   effective: 'Effective from October 20, 2026',
   intro:
-    'These terms explain what a medias is, what you can expect from the app and what we expect from the people who use it. By creating your account you accept them. If you don’t agree, don’t use the app.',
+    'These terms explain what MitiMiti is, what you can expect from the app and what we expect from the people who use it. By creating your account you accept them. If you don’t agree, don’t use the app.',
   sections: [
     {
       heading: '1. Who offers the app',
-      paragraphs: [`a medias is offered by ${owner}, an individual domiciled in Colombia ("we"). You can write to us at ${email}.`],
+      paragraphs: [`MitiMiti is offered by ${owner}, an individual domiciled in Colombia ("we"). You can write to us at ${email}.`],
     },
     {
-      heading: '2. What a medias is',
+      heading: '2. What MitiMiti is',
       paragraphs: [
-        'a medias helps two people record the expenses they share, decide how each one is split and see who owes whom.',
+        'MitiMiti helps two people record the expenses they share, decide how each one is split and see who owes whom.',
         'The app only keeps records. It doesn’t move money, doesn’t connect to banks and doesn’t store card or account details. When you settle up, the payment happens outside the app and is only noted in it.',
-        'The balance is calculated from what you record. a medias is not financial, accounting, tax or legal advice.',
+        'The balance is calculated from what you record. MitiMiti is not financial, accounting, tax or legal advice.',
       ],
     },
     {
       heading: '3. Your account',
       paragraphs: [
-        'You must be over 18 to use a medias.',
+        'You must be over 18 to use MitiMiti.',
         'You can sign in with email and password, with Google or with Apple. Give us true information, keep access to your account safe and tell us if you think someone else is using it.',
         'Each account is personal. You are responsible for what is done with it.',
       ],
@@ -31,35 +31,35 @@ export const termsEn: LegalDoc = {
     {
       heading: '4. The couple account',
       paragraphs: [
-        'Each space in a medias is for exactly two people. Your partner joins with an invite code; share it only with them.',
+        'Each space in MitiMiti is for exactly two people. Your partner joins with an invite code; share it only with them.',
         'Both people can see and edit the shared expenses, payments, budgets and settings. Every change is recorded, with who made it and when.',
-        'The balance is only as right as what is recorded. Review any difference together: a medias doesn’t decide who is right.',
+        'The balance is only as right as what is recorded. Review any difference together: MitiMiti doesn’t decide who is right.',
       ],
     },
     {
       heading: '5. Acceptable use',
       paragraphs: [
-        'Don’t use a medias for illegal activities, to harass or deceive another person, or to record someone’s data without their permission.',
+        'Don’t use MitiMiti for illegal activities, to harass or deceive another person, or to record someone’s data without their permission.',
         'Don’t try to access other couples’ data, interfere with the service, or copy, decompile or resell the app.',
       ],
     },
     {
       heading: '6. Price',
       paragraphs: [
-        'a medias is free today. If we offer a paid plan in the future, we’ll tell you in advance, you’ll see the price before accepting it, and we’ll never charge you without your express acceptance.',
+        'MitiMiti is free today. If we offer a paid plan in the future, we’ll tell you in advance, you’ll see the price before accepting it, and we’ll never charge you without your express acceptance.',
       ],
     },
     {
       heading: '7. Your data',
       paragraphs: [
-        'We process your personal data under Colombian Law 1581 of 2012 and its regulations, and the a medias Privacy Policy. It explains what data we keep, why, who we share it with and how to exercise your rights.',
+        'We process your personal data under Colombian Law 1581 of 2012 and its regulations, and the MitiMiti Privacy Policy. It explains what data we keep, why, who we share it with and how to exercise your rights.',
         'You can delete your account at any time from Settings › Account, or by writing to us.',
       ],
     },
     {
       heading: '8. The service',
       paragraphs: [
-        'We work to keep a medias running well and its calculations exact, but the app is offered as is and may have errors or interruptions. We may change, improve or remove features.',
+        'We work to keep MitiMiti running well and its calculations exact, but the app is offered as is and may have errors or interruptions. We may change, improve or remove features.',
         'If we stop offering the app, we’ll tell you at least 30 days in advance so you can keep your information.',
       ],
     },
@@ -79,14 +79,14 @@ export const termsEn: LegalDoc = {
     {
       heading: '11. Termination',
       paragraphs: [
-        'You can stop using a medias and delete your account at any time.',
+        'You can stop using MitiMiti and delete your account at any time.',
         'We may suspend or close an account that breaks these terms. Unless there is a risk to other people or a legal obligation, we’ll tell you first and explain why.',
       ],
     },
     {
       heading: '12. Changes to these terms',
       paragraphs: [
-        'If we change these terms, we’ll update the date above and tell you in the app before important changes apply. If you keep using a medias after that date, you accept the new version.',
+        'If we change these terms, we’ll update the date above and tell you in the app before important changes apply. If you keep using MitiMiti after that date, you accept the new version.',
       ],
     },
     {
