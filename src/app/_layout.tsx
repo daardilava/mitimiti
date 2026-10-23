@@ -8,6 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useMemo } from 'react';
+import { usePlanSync } from '@/api/plan';
 import { DEV_BYPASS_AUTH, useSessionStore, useSessionSync } from '@/lib/session';
 import { I18nProvider } from '@/i18n';
 import { ThemeProvider, useTheme } from '@/ui/theme';
@@ -54,6 +55,12 @@ function SessionSync() {
   return null;
 }
 
+/** RevenueCat follows the session; its news refreshes the plan. Inside QueryClientProvider. */
+function PlanSync() {
+  usePlanSync();
+  return null;
+}
+
 function App() {
   const { color, scheme } = useTheme();
   // React Navigation draws stack and tab backgrounds itself; give it our palette so nothing flashes white in dark.
@@ -93,6 +100,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <PlanSync />
       <NavigationThemeProvider value={navigationTheme}>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.background } }}>

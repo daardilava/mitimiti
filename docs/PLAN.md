@@ -320,12 +320,27 @@ Free keeps the whole core, and no plan ever changes the balance.
     for later, and TRANSFER moving the row (it carries no dates of its own).
   - [supabase/tests/billing_webhook.test.ts](../supabase/tests/billing_webhook.test.ts). Deploy: README ›
     *Deploy the billing webhook*. **Needs `npx supabase db push`.**
-  - Left for the SDK task: link the events of a buyer who had no couple yet, and a TRANSFER from an account that
-    no longer has a couple. The app syncs after creating or joining a couple and after Restaurar compras.
-- [ ] **SDK + entitlement hook:** RevenueCat SDK (native, so it needs a new development build), in
-  `src/api/purchases.ts`, with a fake for dev bypass and web. `usePlan()` reads `my_plan()` and refreshes through
-  Realtime, the SDK listener and app focus; it polls while a purchase activates. `src/lib/plans.ts` is the single
-  place that says what Free allows.
+  - The two cases an event can't settle alone are closed by billing-sync (SDK task, below).
+- [x] **SDK + entitlement hook**
+  - `react-native-purchases`, in [src/api/purchases.ts](../src/api/purchases.ts). It is native code, so it **needs a
+    new development build**; Expo Go only runs it in RevenueCat's Preview API Mode. The keys are
+    `EXPO_PUBLIC_REVENUECAT_IOS_KEY` and `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`.
+  - RevenueCat follows the session (logIn with the Clerk id, logOut when it ends, whatever ends it). With dev bypass
+    and on web a fake answers instead: buying turns the sample couple Premium (`setSamplePlan()`).
+  - [src/api/plan.ts](../src/api/plan.ts): `usePlan()` over `my_plan()`, refreshed by Realtime on `subscriptions`,
+    the SDK's listener and app focus. Purchase → server sync → [src/lib/activation.ts](../src/lib/activation.ts)
+    checks for about 20 s (*Activando Premium…*).
+  - [src/lib/plans.ts](../src/lib/plans.ts) is the single place that says what Free allows (`FREE_HISTORY_MONTHS`,
+    `canOpenMonth`, `canUseFeature`); [src/lib/offerings.ts](../src/lib/offerings.ts) holds the store's offer in
+    the app's shape.
+  - **billing-sync** closes the two gaps left by the webhook:
+    [supabase/functions/billing-sync](../supabase/functions/billing-sync/index.ts) reads the caller's state from
+    RevenueCat's REST API, and
+    [20261023145729_sync_subscription.sql](../supabase/migrations/20261023145729_sync_subscription.sql) writes it.
+    The app calls it after creating or joining a couple, a purchase and Restaurar compras, so a purchase made before
+    having a couple and a restore on a new account both reach the couple. It never expires the partner's Premium.
+    Tests: [supabase/tests/billing_sync.test.ts](../supabase/tests/billing_sync.test.ts). **Needs
+    `npx supabase db push`** and the README deploy steps.
 - [ ] **Paywall:** `src/app/paywall.tsx`. Prices come from the store offering. Yearly is selected by default, with
   the savings and the trial. Restore, Terms and Privacy, and the auto-renewal disclosure. States: loading, failed,
   purchasing, activating, done, cancelled, and *Tu pareja ya activó Premium* (no purchase offered).
@@ -340,9 +355,9 @@ Free keeps the whole core, and no plan ever changes the balance.
   `premium_yearly`), RevenueCat (entitlement `premium`, offering `default`, webhook), sandbox testing, and the
   release checklist.
 - [ ] **QA:** review the whole flow for bugs and security holes, `npx expo-doctor`, and the manual test script
-  below on two real phones in sandbox. Known case to settle: if the partner who isn't paying deletes their account,
-  the couple (and its `subscriptions` row) is erased while the payer's store subscription keeps running; when the
-  payer starts or joins a new couple, their kept `billing_events` must link it again.
+  below on two real phones in sandbox. Check: if the partner who isn't paying deletes their account, the couple (and
+  its `subscriptions` row) is erased while the payer's store subscription keeps running; billing-sync links it again
+  when the payer starts or joins a new couple.
 
 **Acceptance checks**
 

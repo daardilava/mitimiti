@@ -425,3 +425,8 @@ enabled = true
 # (REVENUECAT_WEBHOOK_AUTH) instead. See README.md › "Deploy the billing webhook".
 [functions.revenuecat-webhook]
 verify_jwt = false
+
+# Phase 6 — Billing. The app calls this with its Clerk session token, which the gateway can't verify; the function
+# checks it through Supabase (requesting_user_id() with the caller's token) instead.
+[functions.billing-sync]
+verify_jwt = false

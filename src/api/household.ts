@@ -9,6 +9,7 @@ import { avatars, ME, names, PARTNER, sampleExpenses, sampleHousehold, sampleSet
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { coupleKey } from './expenses';
+import { syncPlan } from './plan';
 
 export type DefaultSplit = 'half' | 'pct';
 
@@ -180,7 +181,11 @@ export function useHousehold() {
 export function useCreateHousehold() {
   return useMutation({
     mutationFn: createHousehold,
-    onSuccess: (id) => useSessionStore.getState().setHousehold(id, { pathname: '/invite', params: { from: 'setup' } }),
+    onSuccess: (id) => {
+      useSessionStore.getState().setHousehold(id, { pathname: '/invite', params: { from: 'setup' } });
+      // Someone who bought Premium before having a couple gets it now.
+      void syncPlan();
+    },
   });
 }
 
@@ -188,7 +193,10 @@ export function useCreateHousehold() {
 export function useJoinHousehold() {
   return useMutation({
     mutationFn: joinHousehold,
-    onSuccess: (id) => useSessionStore.getState().setHousehold(id, '/'),
+    onSuccess: (id) => {
+      useSessionStore.getState().setHousehold(id, '/');
+      void syncPlan();
+    },
   });
 }
 

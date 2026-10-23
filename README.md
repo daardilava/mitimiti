@@ -147,12 +147,15 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 | `EXPO_PUBLIC_SUPABASE_KEY` | Supabase publishable / anon key. Safe in the app: RLS guards every row |
 | `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (`pk_test_…` in development) |
 | `EXPO_PUBLIC_DEV_BYPASS_AUTH` | `1` = skip sign-in and use sample data. Development only |
+| `EXPO_PUBLIC_REVENUECAT_IOS_KEY` | RevenueCat public SDK key for iOS (`appl_…`). Empty = no purchases |
+| `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | RevenueCat public SDK key for Android (`goog_…`). Empty = no purchases |
 
 **Server-side secrets** never go in `.env` or the app. They live in Supabase (`npx supabase secrets set`):
 
 | Secret | Used by |
 | --- | --- |
 | `REVENUECAT_WEBHOOK_AUTH` | The billing webhook: the exact Authorization header RevenueCat must send |
+| `REVENUECAT_SECRET_API_KEY` | `billing-sync`: RevenueCat secret API key (`sk_…`), to read a customer's current state |
 
 ## Scripts
 
@@ -221,8 +224,10 @@ The balance must never be wrong, so any change to split or balance math, in SQL 
 
 ### Deploy the billing webhook
 
-[`supabase/functions/revenuecat-webhook`](supabase/functions/revenuecat-webhook/index.ts) receives RevenueCat's
-events and writes each couple's Premium (Phase 6, [docs/PLAN.md](docs/PLAN.md)). Push the billing migrations first.
+Two functions write each couple's Premium (Phase 6, [docs/PLAN.md](docs/PLAN.md)); push the billing migrations first:
+[`revenuecat-webhook`](supabase/functions/revenuecat-webhook/index.ts) receives RevenueCat's events, and
+[`billing-sync`](supabase/functions/billing-sync/index.ts) is called by the app (after creating or joining a couple,
+a purchase, or Restaurar compras) to read the person's current state from RevenueCat's REST API.
 
 1. Make a long random secret, and store the header value RevenueCat will send:
    ```bash
@@ -230,10 +235,16 @@ events and writes each couple's Premium (Phase 6, [docs/PLAN.md](docs/PLAN.md)).
    npx supabase secrets list            # check it is there (the value is not shown)
    ```
    Keep a copy of the whole value (`Bearer …`) for step 3, in a password manager, never in the repo.
-2. Deploy. RevenueCat sends no Supabase token, so JWT verification is off for this function
-   (`[functions.revenuecat-webhook] verify_jwt = false` in `supabase/config.toml`; the flag says the same):
+   Then the secret API key for `billing-sync` (RevenueCat › Project settings › API keys › Secret API keys, `sk_…`):
+   ```bash
+   npx supabase secrets set REVENUECAT_SECRET_API_KEY=sk_your-secret-key
+   ```
+2. Deploy both. Neither gets a token the gateway knows (RevenueCat sends none; the app sends Clerk's), so JWT
+   verification is off for them (`verify_jwt = false` in `supabase/config.toml`; the flag says the same). Each checks
+   its caller itself: the webhook its shared secret, `billing-sync` the Clerk session through Supabase.
    ```bash
    npx supabase functions deploy revenuecat-webhook --no-verify-jwt
+   npx supabase functions deploy billing-sync --no-verify-jwt
    ```
 3. RevenueCat › Project › Integrations › Webhooks › Add:
    - URL: `https://<project-ref>.supabase.co/functions/v1/revenuecat-webhook`
