@@ -7,16 +7,17 @@ import { signOut as endSession } from '@/api/auth';
 import { useSettlements } from '@/api/balance';
 import { coupleKey, useCouple, useExpenses, type Couple } from '@/api/expenses';
 import { householdKey, useHousehold, useUpdateCoupleSettings, type CoupleSettingsInput } from '@/api/household';
-import { planKey, usePlan } from '@/api/plan';
+import { planKey, usePlan, useRestorePurchases } from '@/api/plan';
+import { manageSubscriptions } from '@/api/purchases';
 import { AVATAR_IDS, type AvatarId } from '@/lib/avatars';
 import { DEFAULT_PCT_MAX, DEFAULT_PCT_MIN, DEFAULT_PCT_PRESETS, parseSharePct, settingsErrorMessage, shareLabel } from '@/lib/coupleSettings';
 import { CURRENCIES } from '@/lib/money';
-import { canUseFeature } from '@/lib/plans';
+import { canUseFeature, planLine } from '@/lib/plans';
 import { setSamplePlan } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { TextLink } from '@/ui/Auth';
 import { Avatar } from '@/ui/Avatar';
-import { Chip, TextField } from '@/ui/Form';
+import { Callout, Chip, TextField } from '@/ui/Form';
 import { Icon } from '@/ui/Icon';
 import { openPaywall } from '@/ui/Premium';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
@@ -79,6 +80,8 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
 
         <CoupleCode partnerJoined={couple.partnerJoined} partnerName={couple.partner.name} code={expired ? null : joinCode} />
       </Card>
+
+      <PlanCard partnerName={couple.partner.name} />
 
       <Card title={m.settings.defaultSplit} detail={m.settings.defaultSplitDetail}>
         <DefaultSplitChoice couple={couple} onSave={(input) => save('split', input)} />
@@ -413,6 +416,82 @@ function SignOut({ email }: { email: string | null }) {
           <NavButton label={m.settings.deleteAccount} kind="secondary" href="/delete-account" />
         </>
       )}
+    </Card>
+  );
+}
+
+/**
+ * Tu plan: Free with the way to Premium, or Premium with who pays and until when. Only the payer manages the store
+ * subscription (the store only lets them); the partner is told who does. Restaurar compras for everyone.
+ */
+function PlanCard({ partnerName }: { partnerName: string }) {
+  const { m, d } = useI18n();
+  const { color, type } = useTheme();
+  const plan = usePlan();
+  const restore = useRestorePurchases();
+  const [note, setNote] = useState<string | null>(null);
+  if (!plan.data) return null;
+
+  const { info } = plan;
+  const line = planLine(info);
+  // Renewals are often a year away: always with the year, "23 oct 2027" (the PDF's format).
+  const day = (iso: string) => m.exportData.pdf.dateWithYear(d.shortDate(iso), Number(iso.slice(0, 4)));
+  const manage = async () => {
+    setNote(null);
+    if (!(await manageSubscriptions())) setNote(m.settings.noStorePage);
+  };
+  const restorePurchases = () => {
+    setNote(null);
+    restore.mutate(undefined, {
+      onSuccess: (now) => setNote(now.plan === 'premium' ? null : m.paywall.restoreNone),
+      onError: () => setNote(m.paywall.restoreFailed),
+    });
+  };
+  const restoreLink = <TextLink label={m.paywall.restore} onPress={restorePurchases} disabled={restore.isPending} />;
+  const noteLine = note && (
+    <Text style={[type.label, { color: color.textSecondary, fontFamily: font.body }]} accessibilityLiveRegion="polite">
+      {note}
+    </Text>
+  );
+
+  if (line.kind === 'free') {
+    return (
+      <Card title={m.settings.planTitle}>
+        <View style={{ gap: 2 }}>
+          <Text style={[type.row, { fontFamily: font.bodyBold }]}>{m.settings.planFree}</Text>
+          <Hint>{m.settings.planFreeDetail}</Hint>
+        </View>
+        <NavButton label={m.premium.see} kind="secondary" onPress={() => openPaywall()} />
+        {restoreLink}
+        {noteLine}
+      </Card>
+    );
+  }
+
+  const date =
+    line.kind === 'lifetime' ? m.settings.lifetime
+    : line.kind === 'renews' ? m.settings.renews(day(line.date))
+    : line.kind === 'ends' ? m.settings.ends(day(line.date))
+    : m.settings.trialEnds(day(line.date));
+  return (
+    <Card title={m.settings.planTitle}>
+      <View style={{ gap: 2 }}>
+        <Text style={[type.row, { fontFamily: font.bodyBold }]}>{m.settings.planPremium}</Text>
+        <Hint>{info.isPayer ? m.settings.payerYou : m.settings.payerPartner(partnerName)}</Hint>
+        {info.status !== 'billing_issue' && <Hint>{date}</Hint>}
+      </View>
+      {info.status === 'billing_issue' && line.kind === 'ends' && (
+        <Callout icon="bell" tone="neutral">
+          {m.settings.billingIssue(day(line.date))}
+        </Callout>
+      )}
+      {info.isPayer ? (
+        <NavButton label={info.status === 'billing_issue' ? m.settings.fixPayment : m.settings.manage} kind="secondary" onPress={manage} />
+      ) : (
+        <Hint>{m.settings.managedBy(partnerName)}</Hint>
+      )}
+      {restoreLink}
+      {noteLine}
     </Card>
   );
 }
