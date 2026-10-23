@@ -15,7 +15,7 @@ import type { ActivityExpense, ActivityPayment } from './activity';
 import { paymentTitle } from './activity';
 import { addDays, isoDate, monthOf, type DateLabels } from './dates';
 import type { ExportCouple, ExportRange, ExportRow } from './exportData';
-import { mitiSvg } from './miti';
+import { mitiSvg, wordmarkHtml } from './miti';
 import { formatMoney } from './money';
 import { expenseEffect, netBalance } from './splits';
 
@@ -226,10 +226,12 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
   html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Roboto, Arial, sans-serif; color: ${ink.ink}; font-size: 9.5pt; line-height: 1.45; }
   .num, .figure, .hero-value { font-variant-numeric: tabular-nums; }
+  /* The brand's Fredoka isn't on the phone's print engine; iOS has SF Pro Rounded (ui-rounded), others fall back. */
+  .brand, h1, .hero-value, .figure .value { font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", -apple-system, Roboto, sans-serif; }
   .muted { color: ${ink.textSecondary}; }
 
   header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10pt; border-bottom: 1px solid ${ink.line}; }
-  .brand { display: flex; align-items: center; gap: 6pt; font-weight: 700; font-size: 10.5pt; letter-spacing: -0.01em; }
+  .brand { display: flex; align-items: center; gap: 6pt; font-weight: 700; font-size: 14pt; white-space: nowrap; }
   .generated { color: ${ink.textSecondary}; font-size: 8.5pt; }
   h1 { font-size: 20pt; letter-spacing: -0.02em; margin: 14pt 0 2pt; }
   .meta { color: ${ink.textSecondary}; font-size: 10pt; margin: 0 0 14pt; }
@@ -248,8 +250,8 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
   .figure .value { font-size: 13pt; font-weight: 700; margin-top: 1pt; }
   .figure .hint { color: ${ink.textSecondary}; font-size: 8pt; }
 
-  .columns { display: flex; gap: 14pt; margin-bottom: 16pt; }
-  .columns > section { flex: 1; min-width: 0; }
+  /* Stacked, full width: side by side, the who-paid amounts (never wrapped) ran into the categories on iPhone. */
+  .block { margin-bottom: 16pt; }
   h2 { font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.06em; color: ${ink.textSecondary}; margin: 0 0 6pt; font-weight: 600; }
   h2 .count { margin-left: 6pt; padding: 0 5pt; border-radius: 6pt; background: ${ink.neutralTint}; letter-spacing: 0; }
 
@@ -261,11 +263,11 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
   .strong { font-weight: 600; }
 
   .bar-row { display: flex; align-items: center; gap: 6pt; padding: 3pt 0; font-size: 9pt; }
-  .bar-name { width: 34%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-name { width: 30%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .bar-track { flex: 1; height: 6pt; border-radius: 3pt; background: ${ink.neutralTint}; overflow: hidden; }
   .bar-fill { height: 100%; border-radius: 3pt; }
-  .bar-value { width: 32%; text-align: right; white-space: nowrap; }
-  .bar-value .muted { margin-left: 4pt; }
+  .bar-value { width: 22%; text-align: right; white-space: nowrap; }
+  .bar-pct { width: 34pt; flex: none; text-align: right; white-space: nowrap; color: ${ink.textSecondary}; }
 
   .movements thead { display: table-header-group; }
   .movements tr { page-break-inside: avoid; break-inside: avoid; }
@@ -278,14 +280,15 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
   .month td { border-bottom: none; padding: 12pt 4pt 4pt; font-weight: 700; display: table-cell; }
   .month td span.muted { font-weight: 400; margin-left: 6pt; font-size: 8.5pt; }
 
-  footer { margin-top: 14pt; padding-top: 8pt; border-top: 1px solid ${ink.line}; color: ${ink.textSecondary}; font-size: 8pt; display: flex; justify-content: space-between; gap: 12pt; }
+  footer { margin-top: 14pt; padding-top: 8pt; border-top: 1px solid ${ink.line}; color: ${ink.textSecondary}; font-size: 8pt; display: flex; justify-content: space-between; align-items: flex-start; gap: 12pt; }
+  footer .brand { font-size: 9pt; gap: 4pt; flex: none; }
 </style>
 </head>
 <body>
   <header>
     <div class="brand">
-      ${mitiSvg(18)}
-      MitiMiti
+      ${mitiSvg(22)}
+      <span>${wordmarkHtml()}</span>
     </div>
     <div class="generated">${esc(p.generated(fullDate(isoDate(today))))}</div>
   </header>
@@ -308,8 +311,7 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
     <div class="figure"><div class="label">${esc(p.personal)}</div><div class="value">${money(t.personalMinor)}</div><div class="hint">${esc(p.personalNote)}</div></div>
   </div>
 
-  <div class="columns">
-    <section>
+  <section class="block">
       <h2>${esc(p.whoPaid)}</h2>
       <table class="people">
         <thead><tr><th>${esc(p.person)}</th><th class="num">${esc(p.paid)}</th><th class="num">${esc(p.share)}</th><th class="num">${esc(p.difference)}</th></tr></thead>
@@ -317,20 +319,20 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
           ${people.map((x) => `<tr><td class="strong">${esc(x.name)}</td><td class="num">${money(x.paid)}</td><td class="num">${money(x.share)}</td><td class="num strong">${signed(x.paid - x.share)}</td></tr>`).join('')}
         </tbody>
       </table>
-    </section>
-    <section>
+  </section>
+  <section class="block">
       <h2>${esc(p.byCategory)}</h2>
       ${categories
         .map(
           (c) => `<div class="bar-row">
         <span class="bar-name">${esc(m.categories[c.category])}</span>
         <span class="bar-track"><span class="bar-fill" style="display:block;width:${Math.max(c.pct, 2)}%;background:${cat[c.category].color}"></span></span>
-        <span class="bar-value">${money(c.amountMinor)}<span class="muted">${c.pct} %</span></span>
+        <span class="bar-value">${money(c.amountMinor)}</span>
+        <span class="bar-pct">${c.pct} %</span>
       </div>`,
         )
         .join('')}
-    </section>
-  </div>
+  </section>
 
   <h2>${esc(p.movements)}<span class="count">${rows.length}</span></h2>
   <table class="movements">
@@ -345,7 +347,7 @@ export function buildPdfHtml({ rows, range, couple, allExpenses, allPayments, m,
 
   <footer>
     <span>${esc(p.currencyNote(couple.currency))}</span>
-    <span>MitiMiti</span>
+    <span class="brand">${mitiSvg(12)}<span>${wordmarkHtml()}</span></span>
   </footer>
 </body>
 </html>`;

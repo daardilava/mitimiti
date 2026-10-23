@@ -4,6 +4,14 @@
 
 export const MITI_COLORS = { green: '#0E8C7A', coral: '#FF7A59', ink: '#1A2238' } as const;
 
+/** The wordmark on white (the PDF): Verde Miti and Coral texto, the brand's coral that reads on light backgrounds. */
+export const WORDMARK_ON_LIGHT = { green: '#0E8C7A', coral: '#E4572E' } as const;
+
+/** "MitiMiti" as two coloured spans, for HTML. */
+export function wordmarkHtml(): string {
+  return `<span style="color:${WORDMARK_ON_LIGHT.green}">Miti</span><span style="color:${WORDMARK_ON_LIGHT.coral}">Miti</span>`;
+}
+
 const { green, coral, ink } = MITI_COLORS;
 
 const ART =
