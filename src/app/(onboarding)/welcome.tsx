@@ -1,4 +1,5 @@
 import { Link, type Href } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DEV_BYPASS_AUTH, useSessionStore, type NextStep } from '@/lib/session';
@@ -24,6 +25,8 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* Tinta behind in both modes: light status bar text, whatever the phone's mode. */}
+      <StatusBar style="light" />
       <View style={styles.hero}>
         <Miti size={176} />
         <Wordmark size={44} />
