@@ -139,7 +139,7 @@ export const es = {
   },
 
   welcome: {
-    accountDeleted: 'Tu cuenta se borró. Gracias por usar a medias.',
+    accountDeleted: 'Tu cuenta se borró. Gracias por usar MitiMiti.',
     coupleDeleted: 'Tu pareja borró su cuenta y, con ella, el espacio que compartían. Pueden empezar uno nuevo cuando quieran.',
     title: 'Cuentas claras entre los dos.',
     lead: 'Registren lo que gastan juntos, vean al momento quién le debe a quién y salden con un toque.',
@@ -206,8 +206,8 @@ export const es = {
   deleteAccount: {
     title: 'Borrar tu cuenta',
     lead: 'Esto no se puede deshacer. Se borra para siempre:',
-    yourAccount: (email: string) => `Tu cuenta de a medias (${email}) y tu inicio de sesión.`,
-    yourAccountNoEmail: 'Tu cuenta de a medias y tu inicio de sesión.',
+    yourAccount: (email: string) => `Tu cuenta de MitiMiti (${email}) y tu inicio de sesión.`,
+    yourAccountNoEmail: 'Tu cuenta de MitiMiti y tu inicio de sesión.',
     sharedSpace: (partner: string) => `El espacio que compartes con ${partner}: todos los gastos, pagos, presupuestos y su historial.`,
     soloSpace: 'El espacio de la pareja y todo lo que registraste.',
     partnerToo: (partner: string) => `También se borra para ${partner}. Su cuenta sigue, pero empezará de cero.`,
@@ -270,12 +270,12 @@ export const es = {
       movements: 'Movimientos',
       payment: 'Pago',
       personalBadge: 'Personal',
-      currencyNote: (currency: string) => `Montos en ${currency}. a medias registra los gastos y pagos; no convierte monedas ni mueve dinero.`,
+      currencyNote: (currency: string) => `Montos en ${currency}. MitiMiti registra los gastos y pagos; no convierte monedas ni mueve dinero.`,
     },
     exportCsv: 'Exportar CSV',
     failed: 'No se pudo crear el archivo. Inténtalo de nuevo.',
     /** File name, without date or extension. */
-    fileName: 'a-medias-movimientos',
+    fileName: 'mitimiti-movimientos',
     /** Column headers and values of the CSV file. */
     csv: {
       date: 'Fecha',
@@ -432,10 +432,10 @@ export const es = {
     joinedLead: 'Los dos ven los mismos gastos y el mismo saldo. Ya no hace falta un código.',
     // The code alone on its line: a long press in WhatsApp copies just it.
     shareMessage: (code: string, until: string | null) =>
-      `¡Hola! Te invito a a medias, para llevar juntos nuestros gastos y ver al momento quién le debe a quién.
+      `¡Hola! Te invito a MitiMiti, para llevar juntos nuestros gastos y ver al momento quién le debe a quién.
 
 ` +
-      `1. Descarga la app a medias.
+      `1. Descarga la app MitiMiti.
 2. Toca "Tengo un código de invitación".
 3. Escribe este código:
 

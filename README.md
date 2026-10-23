@@ -1,6 +1,6 @@
-# a medias
+# MitiMiti
 
-[![CI](https://github.com/daardilava/a-medias/actions/workflows/ci.yml/badge.svg)](https://github.com/daardilava/a-medias/actions/workflows/ci.yml)
+[![CI](https://github.com/daardilava/mitimiti/actions/workflows/ci.yml/badge.svg)](https://github.com/daardilava/mitimiti/actions/workflows/ci.yml)
 ![Expo SDK 57](https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres_+_RLS-3FCF8E?logo=supabase&logoColor=white)
@@ -103,8 +103,8 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ### 1. Install
 
 ```bash
-git clone https://github.com/daardilava/a-medias.git
-cd a-medias
+git clone https://github.com/daardilava/mitimiti.git
+cd mitimiti
 npm install
 cp .env.example .env
 ```

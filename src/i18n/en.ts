@@ -122,7 +122,7 @@ export const en: Messages = {
   },
 
   welcome: {
-    accountDeleted: 'Your account was deleted. Thanks for using a medias.',
+    accountDeleted: 'Your account was deleted. Thanks for using MitiMiti.',
     coupleDeleted: 'Your partner deleted their account, and with it the space you shared. You can start a new one any time.',
     title: 'Clear accounts between the two of you.',
     lead: 'Log what you spend together, see at a glance who owes whom, and settle up with one tap.',
@@ -189,8 +189,8 @@ export const en: Messages = {
   deleteAccount: {
     title: 'Delete your account',
     lead: 'This can’t be undone. Deleted forever:',
-    yourAccount: (email) => `Your a medias account (${email}) and your sign-in.`,
-    yourAccountNoEmail: 'Your a medias account and your sign-in.',
+    yourAccount: (email) => `Your MitiMiti account (${email}) and your sign-in.`,
+    yourAccountNoEmail: 'Your MitiMiti account and your sign-in.',
     sharedSpace: (partner) => `The space you share with ${partner}: every expense, payment, budget and their history.`,
     soloSpace: 'The couple’s space and everything you recorded.',
     partnerToo: (partner) => `It’s deleted for ${partner} too. Their account stays, but they’ll start from scratch.`,
@@ -248,11 +248,11 @@ export const en: Messages = {
       movements: 'Activity',
       payment: 'Payment',
       personalBadge: 'Personal',
-      currencyNote: (currency) => `Amounts in ${currency}. a medias records expenses and payments; it never converts currencies or moves money.`,
+      currencyNote: (currency) => `Amounts in ${currency}. MitiMiti records expenses and payments; it never converts currencies or moves money.`,
     },
     exportCsv: 'Export CSV',
     failed: 'Couldn’t create the file. Try again.',
-    fileName: 'a-medias-activity',
+    fileName: 'mitimiti-activity',
     csv: {
       date: 'Date',
       type: 'Type',
@@ -401,10 +401,10 @@ export const en: Messages = {
     joinedTitle: (name) => `${name} has joined`,
     joinedLead: 'You both see the same expenses and the same balance. A code isn’t needed anymore.',
     shareMessage: (code, until) =>
-      `Hi! I'm inviting you to a medias, so we can track our shared expenses and see who owes whom at a glance.
+      `Hi! I'm inviting you to MitiMiti, so we can track our shared expenses and see who owes whom at a glance.
 
 ` +
-      `1. Download the a medias app.
+      `1. Download the MitiMiti app.
 2. Tap "I have an invite code".
 3. Enter this code:
 

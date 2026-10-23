@@ -125,7 +125,7 @@ export const de: Messages = {
   },
 
   welcome: {
-    accountDeleted: 'Dein Konto wurde gelöscht. Danke, dass du a medias genutzt hast.',
+    accountDeleted: 'Dein Konto wurde gelöscht. Danke, dass du MitiMiti genutzt hast.',
     coupleDeleted: 'Dein Partner oder deine Partnerin hat das Konto gelöscht und damit euren gemeinsamen Bereich. Ihr könnt jederzeit neu anfangen.',
     title: 'Klare Verhältnisse zu zweit.',
     lead: 'Erfasst, was ihr gemeinsam ausgebt, seht sofort, wer wem was schuldet, und gleicht mit einem Tipp aus.',
@@ -192,8 +192,8 @@ export const de: Messages = {
   deleteAccount: {
     title: 'Konto löschen',
     lead: 'Das lässt sich nicht rückgängig machen. Für immer gelöscht wird:',
-    yourAccount: (email) => `Dein a-medias-Konto (${email}) und deine Anmeldung.`,
-    yourAccountNoEmail: 'Dein a-medias-Konto und deine Anmeldung.',
+    yourAccount: (email) => `Dein MitiMiti-Konto (${email}) und deine Anmeldung.`,
+    yourAccountNoEmail: 'Dein MitiMiti-Konto und deine Anmeldung.',
     sharedSpace: (partner) => `Der Bereich, den du mit ${partner} teilst: alle Ausgaben, Zahlungen, Budgets und ihr Verlauf.`,
     soloSpace: 'Der Bereich des Paares und alles, was du erfasst hast.',
     partnerToo: (partner) => `Er wird auch für ${partner} gelöscht. Das Konto bleibt, fängt aber bei null an.`,
@@ -251,11 +251,11 @@ export const de: Messages = {
       movements: 'Umsätze',
       payment: 'Zahlung',
       personalBadge: 'Persönlich',
-      currencyNote: (currency) => `Beträge in ${currency}. a medias erfasst Ausgaben und Zahlungen; es rechnet keine Währungen um und bewegt kein Geld.`,
+      currencyNote: (currency) => `Beträge in ${currency}. MitiMiti erfasst Ausgaben und Zahlungen; es rechnet keine Währungen um und bewegt kein Geld.`,
     },
     exportCsv: 'CSV exportieren',
     failed: 'Die Datei konnte nicht erstellt werden. Versuche es noch einmal.',
-    fileName: 'a-medias-umsaetze',
+    fileName: 'mitimiti-umsaetze',
     csv: {
       date: 'Datum',
       type: 'Art',
@@ -404,10 +404,10 @@ export const de: Messages = {
     joinedTitle: (name) => `${name} ist dabei`,
     joinedLead: 'Ihr seht beide dieselben Ausgaben und denselben Saldo. Ein Code ist nicht mehr nötig.',
     shareMessage: (code, until) =>
-      `Hallo! Ich lade dich zu a medias ein, damit wir unsere gemeinsamen Ausgaben festhalten und sofort sehen, wer wem etwas schuldet.
+      `Hallo! Ich lade dich zu MitiMiti ein, damit wir unsere gemeinsamen Ausgaben festhalten und sofort sehen, wer wem etwas schuldet.
 
 ` +
-      `1. Lade die App a medias herunter.
+      `1. Lade die App MitiMiti herunter.
 2. Tippe auf „Ich habe einen Einladungscode“.
 3. Gib diesen Code ein:
 

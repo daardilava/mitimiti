@@ -141,7 +141,7 @@ describe('csvField', () => {
 
 describe('exportFileName', () => {
   it('names the period', () => {
-    expect(exportFileName(presetRange('thisMonth', today), 'csv')).toBe('a-medias-movimientos_2026-10-01_2026-10-31.csv');
-    expect(exportFileName(presetRange('all', today), 'csv', en)).toBe('a-medias-activity_2026-10-31.csv');
+    expect(exportFileName(presetRange('thisMonth', today), 'csv')).toBe('mitimiti-movimientos_2026-10-01_2026-10-31.csv');
+    expect(exportFileName(presetRange('all', today), 'csv', en)).toBe('mitimiti-activity_2026-10-31.csv');
   });
 });

@@ -14,7 +14,7 @@ export type { Language, LanguagePreference, Messages };
 
 export const messages: Record<Language, Messages> = { es, en, de };
 
-const STORAGE_KEY = 'amedias.language';
+const STORAGE_KEY = 'mitimiti.language';
 
 interface I18n {
   language: Language;

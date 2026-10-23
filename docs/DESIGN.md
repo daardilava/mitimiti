@@ -1,4 +1,4 @@
-# a medias — Screens and design system
+# MitiMiti — Screens and design system
 
 External source of truth: *a medias — UI design* (13 screens + design system "UI kit v1").
 

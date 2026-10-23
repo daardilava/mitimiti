@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "a medias",
+    "name": "MitiMiti",
     "slug": "a-medias",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.amedias.app",
+      "bundleIdentifier": "com.mitimiti.app",
       "usesAppleSignIn": true,
       "infoPlist": {
         "CFBundleLocalizations": [
@@ -30,7 +30,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.amedias.app"
+      "package": "com.mitimiti.app"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -75,7 +75,7 @@
       ],
       "expo-sharing"
     ],
-    "scheme": "amedias",
+    "scheme": "mitimiti",
     "experiments": {
       "typedRoutes": true
     },

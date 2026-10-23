@@ -10,7 +10,7 @@ import { NavButton, Screen } from '@/ui/Screen';
 import { font, radius } from '@/ui/tokens';
 import { useI18n } from '@/i18n';
 
-// 04 · Unirse con código. Also opened by an invite link: amedias://join?code=AM482X
+// 04 · Unirse con código. Also opened by an invite link: mitimiti://join?code=AM482X
 export default function Join() {
   const { m } = useI18n();
   const signedIn = useSessionStore((s) => s.userId !== null) || DEV_BYPASS_AUTH;
