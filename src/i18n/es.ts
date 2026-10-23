@@ -320,6 +320,7 @@ export const es = {
     ambiguous: 'Los códigos no llevan 0, O, 1 ni I. Revisa esa letra.',
     title: 'Únete a tu pareja',
     lead: 'Pídele el código de 6 caracteres que aparece en su app, en Ajustes › Código de pareja.',
+    leadInvited: 'Tu invitación ya trae el código. Revísalo y toca Unirme.',
     submit: 'Unirme',
     label: 'Código de invitación',
     placeholder: 'Ej. AM482X',

@@ -295,6 +295,7 @@ export const en: Messages = {
     ambiguous: 'Codes never use 0, O, 1 or I. Check that letter.',
     title: 'Join your partner',
     lead: 'Ask for the 6-character code in their app, under Settings › Couple code.',
+    leadInvited: 'Your invite already includes the code. Check it and tap Join.',
     submit: 'Join',
     label: 'Invite code',
     placeholder: 'E.g. AM482X',

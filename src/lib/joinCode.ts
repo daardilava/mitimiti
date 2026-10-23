@@ -23,3 +23,14 @@ export function joinCodeStatus(code: string): JoinCodeStatus {
   if (code.length < JOIN_CODE_LENGTH) return { kind: 'incomplete', missing: JOIN_CODE_LENGTH - code.length };
   return { kind: 'ready' };
 }
+
+/**
+ * The code in an invite link (`amedias://join?code=AM482X`), or null when it isn't a whole, valid code. Unlike the
+ * field, a link never truncates: "AM482XQ" was not sent by the app, so it fills nothing.
+ */
+export function inviteCodeFromLink(param: unknown): string | null {
+  if (typeof param !== 'string') return null;
+  const code = normalizeJoinCode(param);
+  const sent = param.replace(/[^A-Za-z0-9]/g, '');
+  return sent.length === JOIN_CODE_LENGTH && joinCodeStatus(code).kind === 'ready' ? code : null;
+}

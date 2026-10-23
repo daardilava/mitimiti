@@ -298,6 +298,7 @@ export const de: Messages = {
     ambiguous: 'Codes enthalten nie 0, O, 1 oder I. Prüfe diesen Buchstaben.',
     title: 'Eurem Paar-Konto beitreten',
     lead: 'Frag nach dem 6-stelligen Code aus der App der anderen Person, unter Einstellungen › Paar-Code.',
+    leadInvited: 'Deine Einladung enthält den Code schon. Prüfe ihn und tippe auf Beitreten.',
     submit: 'Beitreten',
     label: 'Einladungscode',
     placeholder: 'z. B. AM482X',
