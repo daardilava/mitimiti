@@ -341,9 +341,17 @@ Free keeps the whole core, and no plan ever changes the balance.
     having a couple and a restore on a new account both reach the couple. It never expires the partner's Premium.
     Tests: [supabase/tests/billing_sync.test.ts](../supabase/tests/billing_sync.test.ts). **Needs
     `npx supabase db push`** and the README deploy steps.
-- [ ] **Paywall:** `src/app/paywall.tsx`. Prices come from the store offering. Yearly is selected by default, with
-  the savings and the trial. Restore, Terms and Privacy, and the auto-renewal disclosure. States: loading, failed,
-  purchasing, activating, done, cancelled, and *Tu pareja ya activó Premium* (no purchase offered).
+- [x] **Paywall:** [src/app/paywall.tsx](../src/app/paywall.tsx), a modal (`?from=history|budgets|export` puts that
+  benefit first, highlighted).
+  - Prices come from the store offering. Yearly is selected by default, with *Ahorra 44 %* and *7 días gratis*.
+  - The billed amount is the largest price (Apple), and the yearly plan is never shown as a monthly price (Google).
+  - The trial terms give the date of the first charge. Then the renewal and how to cancel in the store, *Lo esencial
+    de MitiMiti es gratis para siempre* (Google: whether a subscription is needed), Términos, Privacidad, Restaurar
+    compras, and a visible close button.
+  - States: loading, failed, unavailable (no store key), purchasing, *Activando Premium…*, done (what opened), still
+    pending, cancelled (no message), and Premium already: *Tu pareja ya activó Premium*, with no purchase offered.
+  - Helpers in [src/lib/paywall.ts](../src/lib/paywall.ts), with tests. Checked at 390 px, light and dark, on web
+    with the fake purchases.
 - [ ] **Gating:** history older than 3 months, Presupuestos and Export are locked on Free, with the reason in
   text and a way to the paywall. The balance, settle up and *Gastado juntos* ignore the plan.
 - [ ] **Ajustes plan card:** the plan, who pays, the renewal or end date, the trial end, a billing-issue warning,

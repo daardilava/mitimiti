@@ -114,6 +114,7 @@ function App() {
             <Stack.Screen name="settle/done" options={{ gestureEnabled: false }} />
             <Stack.Screen name="budgets" />
             <Stack.Screen name="export" />
+            <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
           </Stack.Protected>
           <Stack.Protected guard={!hasHousehold}>
             <Stack.Screen name="(onboarding)" />

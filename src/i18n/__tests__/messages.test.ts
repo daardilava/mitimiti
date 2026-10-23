@@ -19,8 +19,8 @@ const get = (m: Messages, path: string) => path.split('.').reduce<unknown>((o, k
 
 /** Texts that are rightly the same as in Spanish. */
 const SAME_AS_SPANISH: Record<'en' | 'de', string[]> = {
-  en: ['balance.personal', 'expense.splitPersonal', 'money.million', 'avatars.panda', 'exportData.csvTitle', 'exportData.pdfTitle', 'exportData.pdf.personalBadge'],
-  de: ['authUi.code', 'avatars.panda', 'exportData.format', 'exportData.csvTitle', 'exportData.pdfTitle', 'exportData.pdf.person'],
+  en: ['balance.personal', 'expense.splitPersonal', 'money.million', 'avatars.panda', 'exportData.csvTitle', 'exportData.pdfTitle', 'exportData.pdf.personalBadge', 'paywall.stores.ios', 'paywall.stores.android'],
+  de: ['authUi.code', 'avatars.panda', 'exportData.format', 'exportData.csvTitle', 'exportData.pdfTitle', 'exportData.pdf.person', 'paywall.stores.ios', 'paywall.stores.android'],
 };
 
 describe.each([

@@ -1,14 +1,17 @@
 // The MitiMiti logo in the app: Miti (the mascot) and the two-colour wordmark.
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { mitiSvg } from '@/lib/miti';
 import { font } from './tokens';
 import { useTheme } from './theme';
 
-/** Miti, decorative: the wordmark or a title next to it carries the name. */
+/** Miti, decorative: the wordmark or a title next to it carries the name. Hidden through the View, which works on
+ * every platform. */
 export function Miti({ size }: { size: number }) {
   return (
-    <SvgXml xml={mitiSvg(size)} width={size} height={size} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
+    <View aria-hidden>
+      <SvgXml xml={mitiSvg(size, { ariaHidden: false })} width={size} height={size} />
+    </View>
   );
 }
 

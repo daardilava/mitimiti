@@ -26,7 +26,10 @@ const ART =
   '<circle cx="131.5" cy="94.5" r="3.6" fill="#FFFFFF"/>' +
   `<path d="M82 130Q100 148 118 130" fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`;
 
-/** Miti as standalone SVG markup, `size` × `size`. */
-export function mitiSvg(size: number): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 200 200" aria-hidden="true">${ART}</svg>`;
+/**
+ * Miti as standalone SVG markup, `size` × `size`. Hidden from screen readers by default (the PDF); the app's <Miti>
+ * hides its wrapping View instead, since react-native-svg would turn the attribute into an invalid DOM prop on web.
+ */
+export function mitiSvg(size: number, { ariaHidden = true }: { ariaHidden?: boolean } = {}): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 200 200"${ariaHidden ? ' aria-hidden="true"' : ''}>${ART}</svg>`;
 }
