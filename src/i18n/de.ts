@@ -595,6 +595,22 @@ Gültig bis ${until}.` : ''),
     included: 'Inklusive',
   },
 
+  premium: {
+    badge: 'Premium',
+    see: 'Premium ansehen',
+    historyTitle: 'Frühere Monate gehören zu Premium',
+    historyDetail: (previous) =>
+      `Im kostenlosen Plan seht ihr diesen Monat und die ${previous} davor. Eure früheren Ausgaben bleiben erhalten und zählen im Saldo.`,
+    budgetsTitle: 'Budgets gehören zu Premium',
+    budgetsDetail: 'Ein Limit pro Kategorie und wie viel euch bleibt. Bereits gespeicherte Limits bleiben erhalten.',
+    exportTitle: 'Export gehört zu Premium',
+    exportDetail: 'Eure Umsätze als Tabelle (CSV) oder als Bericht (PDF).',
+    homeBudget: 'Legt mit Premium ein Limit pro Kategorie fest.',
+    devPlan: 'Testplan (nur in der Entwicklung)',
+    devFree: 'Kostenlos',
+    devPremium: 'Premium',
+  },
+
   ui: {
     back: 'Zurück',
     close: 'Schließen',

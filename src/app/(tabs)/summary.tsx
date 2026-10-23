@@ -2,11 +2,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
+import { usePlan } from '@/api/plan';
 import { isoDate, monthOf, shiftMonth } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
+import { canOpenMonth, canUseFeature, FREE_HISTORY_MONTHS } from '@/lib/plans';
 import { monthSummary, sharedCountLabel } from '@/lib/summary';
 import { Icon, type IconName } from '@/ui/Icon';
 import { PeriodNav } from '@/ui/PeriodNav';
+import { Locked, openPaywall } from '@/ui/Premium';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { font, radius, space } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
@@ -20,6 +23,7 @@ export default function Summary() {
   const client = useQueryClient();
   const couple = useCouple();
   const expenses = useExpenses();
+  const { gate } = usePlan();
   const thisMonth = monthOf(isoDate(new Date()));
   const [month, setMonth] = useState(thisMonth);
 
@@ -40,14 +44,30 @@ export default function Summary() {
   // Paid − share is this month's effect on the balance (payments between them are not spending).
   const overShare = summary.paid.mineMinor - summary.share.mineMinor;
 
+  const open = canOpenMonth(gate, month, new Date());
+  const nav = (
+    <PeriodNav
+      title={d.monthLabel(month)}
+      onPrevious={() => setMonth(shiftMonth(month, -1))}
+      onNext={() => setMonth(shiftMonth(month, 1))}
+      nextDisabled={month >= thisMonth}
+      previousDisabled={!open}
+    />
+  );
+
+  // Free: one step past the open months shows why it's closed, and no totals of that month.
+  if (!open) {
+    return (
+      <Screen title={m.summaryScreen.title}>
+        {nav}
+        <Locked title={m.premium.historyTitle} detail={m.premium.historyDetail(FREE_HISTORY_MONTHS - 1)} from="history" />
+      </Screen>
+    );
+  }
+
   return (
     <Screen title={m.summaryScreen.title}>
-      <PeriodNav
-        title={d.monthLabel(month)}
-        onPrevious={() => setMonth(shiftMonth(month, -1))}
-        onNext={() => setMonth(shiftMonth(month, 1))}
-        nextDisabled={month >= thisMonth}
-      />
+      {nav}
 
       <View style={styles.card}>
         <Text style={[type.label, { color: color.textSecondary, fontSize: 15 }]}>{m.summaryScreen.shared}</Text>
@@ -132,7 +152,11 @@ export default function Summary() {
         </Text>
       </View>
 
-      <NavButton href="/budgets" label={m.summaryScreen.seeBudgets} kind="secondary" />
+      {canUseFeature(gate, 'budgets') ? (
+        <NavButton href="/budgets" label={m.summaryScreen.seeBudgets} kind="secondary" />
+      ) : (
+        <NavButton label={`${m.summaryScreen.seeBudgets} · ${m.premium.badge}`} kind="secondary" onPress={() => openPaywall('budgets')} />
+      )}
     </Screen>
   );
 }

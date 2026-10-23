@@ -352,8 +352,15 @@ Free keeps the whole core, and no plan ever changes the balance.
     pending, cancelled (no message), and Premium already: *Tu pareja ya activó Premium*, with no purchase offered.
   - Helpers in [src/lib/paywall.ts](../src/lib/paywall.ts), with tests. Checked at 390 px, light and dark, on web
     with the fake purchases.
-- [ ] **Gating:** history older than 3 months, Presupuestos and Export are locked on Free, with the reason in
-  text and a way to the paywall. The balance, settle up and *Gastado juntos* ignore the plan.
+- [x] **Gating:** only through `canOpenMonth` / `canUseFeature` ([src/lib/plans.ts](../src/lib/plans.ts)); `usePlan().gate`
+  is Premium while the plan loads, so a paying couple never sees a lock flash.
+  - Movimientos and Resumen: Free steps back to the oldest open month (a period counts by its last day). One step
+    further shows *Los meses anteriores son parte de Premium*, with no rows or totals, and the ‹ arrow stops.
+  - Presupuestos: the Home card and Resumen's button say **Premium** in text and open the paywall; saved limits stay.
+    Exportar in Ajustes does the same. Both screens are locked too if reached another way
+    ([src/ui/Premium.tsx](../src/ui/Premium.tsx)).
+  - The balance, settle up and *Gastado juntos* ignore the plan: checked identical on Free and Premium.
+  - With dev bypass, *Plan de prueba* in Ajustes switches Free / Premium. Checked at 390 px, light and dark.
 - [ ] **Ajustes plan card:** the plan, who pays, the renewal or end date, the trial end, a billing-issue warning,
   *Administrar suscripción* (payer only), and Restaurar compras. Borrar cuenta warns the payer that deleting the
   account does not cancel the store subscription.

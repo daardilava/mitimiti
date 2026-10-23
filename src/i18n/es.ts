@@ -623,6 +623,22 @@ Vale hasta el ${until}.` : ''),
     included: 'Incluido',
   },
 
+  premium: {
+    badge: 'Premium',
+    see: 'Ver Premium',
+    historyTitle: 'Los meses anteriores son parte de Premium',
+    historyDetail: (previous: number) =>
+      `Con el plan gratis ven este mes y los ${previous} anteriores. Sus gastos de antes siguen ahí y cuentan en el saldo.`,
+    budgetsTitle: 'Presupuestos es parte de Premium',
+    budgetsDetail: 'Un límite por categoría y cuánto les queda. Los límites que ya guardaron se mantienen.',
+    exportTitle: 'Exportar es parte de Premium',
+    exportDetail: 'Sus movimientos en una hoja de cálculo (CSV) o en un informe (PDF).',
+    homeBudget: 'Pongan un límite por categoría con Premium.',
+    devPlan: 'Plan de prueba (solo en desarrollo)',
+    devFree: 'Gratis',
+    devPremium: 'Premium',
+  },
+
   ui: {
     back: 'Volver',
     close: 'Cerrar',

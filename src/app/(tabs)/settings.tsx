@@ -7,14 +7,18 @@ import { signOut as endSession } from '@/api/auth';
 import { useSettlements } from '@/api/balance';
 import { coupleKey, useCouple, useExpenses, type Couple } from '@/api/expenses';
 import { householdKey, useHousehold, useUpdateCoupleSettings, type CoupleSettingsInput } from '@/api/household';
+import { planKey, usePlan } from '@/api/plan';
 import { AVATAR_IDS, type AvatarId } from '@/lib/avatars';
 import { DEFAULT_PCT_MAX, DEFAULT_PCT_MIN, DEFAULT_PCT_PRESETS, parseSharePct, settingsErrorMessage, shareLabel } from '@/lib/coupleSettings';
 import { CURRENCIES } from '@/lib/money';
+import { canUseFeature } from '@/lib/plans';
+import { setSamplePlan } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { TextLink } from '@/ui/Auth';
 import { Avatar } from '@/ui/Avatar';
 import { Chip, TextField } from '@/ui/Form';
 import { Icon } from '@/ui/Icon';
+import { openPaywall } from '@/ui/Premium';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { font, radius, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme, type AppearancePreference } from '@/ui/theme';
@@ -46,6 +50,8 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
   const expenses = useExpenses();
   const settlements = useSettlements();
   const email = useSessionStore((s) => s.email);
+  const { gate } = usePlan();
+  const canExport = canUseFeature(gate, 'export');
   const [status, setStatus] = useState<{ section: Section; error?: string } | null>(null);
 
   const save = (section: Section, input: CoupleSettingsInput) =>
@@ -102,9 +108,15 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
         <Coming title={m.settings.newExpenseAlert} detail={m.settings.newExpenseAlertDetail(couple.partner.name)} />
       </Card>
 
-      <Card title={m.settings.exportCsv} detail={m.settings.exportCsvDetail}>
-        <NavButton label={m.settings.exportOpen} kind="secondary" href="/export" />
+      <Card title={m.settings.exportCsv} detail={m.settings.exportCsvDetail} badge={canExport ? undefined : m.premium.badge}>
+        {canExport ? (
+          <NavButton label={m.settings.exportOpen} kind="secondary" href="/export" />
+        ) : (
+          <NavButton label={m.premium.see} kind="secondary" onPress={() => openPaywall('export')} />
+        )}
       </Card>
+
+      {DEV_BYPASS_AUTH && <DevPlanCard />}
 
       <Card title={m.settings.legal}>
         <NavButton label={m.terms.title} kind="secondary" href="/terms" />
@@ -401,6 +413,26 @@ function SignOut({ email }: { email: string | null }) {
           <NavButton label={m.settings.deleteAccount} kind="secondary" href="/delete-account" />
         </>
       )}
+    </Card>
+  );
+}
+
+/** Sample data only: switch the couple between Free and Premium to check every gated screen. */
+function DevPlanCard() {
+  const { m } = useI18n();
+  const client = useQueryClient();
+  const styles = useStyles();
+  const { info } = usePlan();
+  const pick = (plan: 'free' | 'premium') => {
+    setSamplePlan(plan);
+    client.invalidateQueries({ queryKey: planKey });
+  };
+  return (
+    <Card title={m.premium.devPlan}>
+      <View style={styles.row} accessibilityRole="radiogroup">
+        <Chip label={m.premium.devFree} selected={info.plan === 'free'} onPress={() => pick('free')} />
+        <Chip label={m.premium.devPremium} selected={info.plan === 'premium'} onPress={() => pick('premium')} />
+      </View>
     </Card>
   );
 }
