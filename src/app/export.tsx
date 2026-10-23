@@ -4,9 +4,12 @@ import { Text, View } from 'react-native';
 import { balanceKeys, useSettlements } from '@/api/balance';
 import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
 import { sharePdf, shareTextFile } from '@/api/exportFile';
+import { usePlan } from '@/api/plan';
 import { buildCsv, EXPORT_PRESETS, exportFileName, exportRows, exportSummary, presetRange, type ExportPreset } from '@/lib/exportData';
 import { buildPdfHtml } from '@/lib/exportPdf';
+import { canUseFeature } from '@/lib/plans';
 import { Chip, Field, RadioCard } from '@/ui/Form';
+import { Locked } from '@/ui/Premium';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { space } from '@/ui/tokens';
 import { useTheme } from '@/ui/theme';
@@ -25,12 +28,22 @@ export default function Export() {
   const [format, setFormat] = useState<'csv' | 'pdf'>('csv');
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const { gate } = usePlan();
 
   const range = useMemo(() => presetRange(preset), [preset]);
   const rows = useMemo(
     () => (couple.data && expenses.data && settlements.data ? exportRows(expenses.data, settlements.data, range, couple.data) : null),
     [couple.data, expenses.data, settlements.data, range],
   );
+
+  // Reached some other way than Ajustes' (labelled) entry point: still closed on Free.
+  if (!canUseFeature(gate, 'export')) {
+    return (
+      <Screen title={m.exportData.title} back="back">
+        <Locked title={m.premium.exportTitle} detail={m.premium.exportDetail} from="export" />
+      </Screen>
+    );
+  }
 
   if (!rows || !couple.data) {
     return (

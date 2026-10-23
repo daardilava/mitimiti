@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { waitUntil } from '@/lib/activation';
 import type { PlanPackage } from '@/lib/offerings';
-import { FREE_PLAN, planFromRpc, type PlanInfo } from '@/lib/plans';
+import { FREE_PLAN, planFromRpc, type Plan, type PlanInfo } from '@/lib/plans';
 import { samplePlan } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
@@ -20,11 +20,15 @@ export async function fetchPlan(): Promise<PlanInfo> {
   return planFromRpc(data);
 }
 
-/** The couple's plan. Free until it has loaded, so nothing Premium flashes open. */
+/**
+ * The couple's plan. `info` is Free until it has loaded. `gate` is what screens pass to src/lib/plans.ts: Premium
+ * while loading, so a paying couple never sees a lock flash (it's a screen limit, not a secret: the data is theirs).
+ */
 export function usePlan() {
   const hasHousehold = useSessionStore((s) => s.householdId !== null) || DEV_BYPASS_AUTH;
   const query = useQuery({ queryKey: planKey, queryFn: fetchPlan, enabled: hasHousehold });
-  return { ...query, info: query.data ?? FREE_PLAN, isPremium: query.data?.plan === 'premium' };
+  const gate: Plan = query.isLoading ? 'premium' : (query.data?.plan ?? 'free');
+  return { ...query, info: query.data ?? FREE_PLAN, isPremium: query.data?.plan === 'premium', gate };
 }
 
 /**

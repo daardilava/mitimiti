@@ -4,15 +4,18 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { balanceKeys, useMyBalance, useSettlements } from '@/api/balance';
 import { useBudgets } from '@/api/budgets';
 import { coupleKey, expenseKeys, useCouple, useExpenses, type Expense } from '@/api/expenses';
+import { usePlan } from '@/api/plan';
 import { balanceBasis, balanceHeadline, monthSpend, sharedCount } from '@/lib/balance';
 import { isoDate, monthOf } from '@/lib/dates';
 import { budgetStatus, daysLeftInMonth, daysLeftLabel, monthBudget, type BudgetTone } from '@/lib/budgets';
 import { formatMoney, type Currency } from '@/lib/money';
+import { canUseFeature } from '@/lib/plans';
 import { TextLink } from '@/ui/Auth';
 import { Avatar } from '@/ui/Avatar';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { Icon } from '@/ui/Icon';
+import { openPaywall, PremiumBadge } from '@/ui/Premium';
 import { font, radius, space, type Palette } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
@@ -133,6 +136,20 @@ function BudgetCard({ expenses, month, today, currency }: { expenses: Expense[];
   const { color, type } = useTheme();
   const styles = useStyles();
   const budgets = useBudgets();
+  const { gate } = usePlan();
+  // Free: the card stays, says Premium in text and opens the paywall; the limits already saved are kept.
+  if (!canUseFeature(gate, 'budgets')) {
+    return (
+      <Pressable accessibilityRole="button" accessibilityLabel={`${m.home.budgetTitle}, ${m.premium.badge}. ${m.premium.homeBudget}`} onPress={() => openPaywall('budgets')} style={styles.card}>
+        <View style={styles.cardTitle}>
+          <Text style={[type.row, { fontFamily: font.bodyBold, flex: 1 }]}>{m.home.budgetTitle}</Text>
+          <PremiumBadge />
+          <Icon name="forward" size={20} color={color.textSecondary} />
+        </View>
+        <Text style={[type.body, { color: color.textSecondary, fontSize: 15 }]}>{m.premium.homeBudget}</Text>
+      </Pressable>
+    );
+  }
   if (!budgets.data) return null;
   const b = monthBudget(expenses, budgets.data, month, currency, m);
   const fmt = (n: number) => formatMoney(n, currency);

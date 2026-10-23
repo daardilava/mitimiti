@@ -3,10 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { budgetKeys, useBudgets, useSetBudget } from '@/api/budgets';
 import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
+import { usePlan } from '@/api/plan';
 import { BUDGET_STEP, budgetStatus, daysLeftInMonth, daysLeftLabel, monthBudget, monthBudgetLine, stepLimit, type BudgetTone } from '@/lib/budgets';
 import { isoDate, monthOf } from '@/lib/dates';
 import { formatMoney, type Currency } from '@/lib/money';
+import { canUseFeature } from '@/lib/plans';
 import { Icon, type IconName } from '@/ui/Icon';
+import { Locked } from '@/ui/Premium';
 import { Pending, Screen } from '@/ui/Screen';
 import { font, radius, space, type CategoryId, type Palette } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
@@ -26,6 +29,16 @@ export default function Budgets() {
   const expenses = useExpenses();
   const budgets = useBudgets();
   const save = useSetBudget();
+  const { gate } = usePlan();
+
+  // Reached some other way than its (labelled) entry points: still closed on Free. Saved limits stay in the database.
+  if (!canUseFeature(gate, 'budgets')) {
+    return (
+      <Screen title={m.budgetsScreen.title} back="back">
+        <Locked title={m.premium.budgetsTitle} detail={m.premium.budgetsDetail} from="budgets" />
+      </Screen>
+    );
+  }
 
   if (!couple.data || !expenses.data || !budgets.data) {
     return (

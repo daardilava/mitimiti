@@ -592,6 +592,22 @@ Valid until ${until}.` : ''),
     included: 'Included',
   },
 
+  premium: {
+    badge: 'Premium',
+    see: 'See Premium',
+    historyTitle: 'Earlier months are part of Premium',
+    historyDetail: (previous) =>
+      `On the free plan you see this month and the ${previous} before it. Your earlier expenses are still there and count in the balance.`,
+    budgetsTitle: 'Budgets are part of Premium',
+    budgetsDetail: 'A limit per category and how much you have left. Limits you already saved are kept.',
+    exportTitle: 'Export is part of Premium',
+    exportDetail: 'Your activity as a spreadsheet (CSV) or a report (PDF).',
+    homeBudget: 'Set a limit per category with Premium.',
+    devPlan: 'Test plan (development only)',
+    devFree: 'Free',
+    devPremium: 'Premium',
+  },
+
   ui: {
     back: 'Back',
     close: 'Close',

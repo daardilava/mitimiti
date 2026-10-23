@@ -3,14 +3,17 @@ import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { balanceKeys, useSettlements } from '@/api/balance';
 import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
+import { usePlan } from '@/api/plan';
 import { activityView, countLabel, dailySpend, isCurrentOrLater, periodLabel, periodRange, shiftPeriod, type ActivityFilter, type Period } from '@/lib/activity';
 import { isoDate, monthOf } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
+import { canOpenMonth, FREE_HISTORY_MONTHS } from '@/lib/plans';
 import { ExpenseRow, PaymentRow } from '@/ui/ExpenseRow';
 import { DatePickerSheet } from '@/ui/DatePickerSheet';
 import { Chip, SearchField } from '@/ui/Form';
 import { Icon } from '@/ui/Icon';
 import { PeriodNav } from '@/ui/PeriodNav';
+import { Locked } from '@/ui/Premium';
 import { Pending, Screen } from '@/ui/Screen';
 import { SpendCard } from '@/ui/SpendChart';
 import { font, radius, space } from '@/ui/tokens';
@@ -26,6 +29,7 @@ export default function Activity() {
   const couple = useCouple();
   const expenses = useExpenses();
   const settlements = useSettlements();
+  const { gate } = usePlan();
 
   const today = new Date();
   const [period, setPeriod] = useState<Period>('month');
@@ -76,6 +80,8 @@ export default function Activity() {
     { id: 'payments', label: m.activityScreen.payments },
   ];
   const narrowed = filter !== 'all' || query.trim() !== '';
+  // Free opens the last FREE_HISTORY_MONTHS months: a period counts by its last day, so a week reaching into them opens.
+  const open = canOpenMonth(gate, range.end, today);
   const atLatest = isCurrentOrLater(period, anchor, today);
   const periods: { id: Period; label: string }[] = [
     { id: 'day', label: m.activityScreen.day },
@@ -94,10 +100,11 @@ export default function Activity() {
 
       <PeriodNav
         title={periodLabel(period, anchor, today, d)}
-        subtitle={m.activityScreen.subtitle(countLabel(view.count, m), formatMoney(view.expensesTotalMinor, couple.data.currency))}
+        subtitle={open ? m.activityScreen.subtitle(countLabel(view.count, m), formatMoney(view.expensesTotalMinor, couple.data.currency)) : undefined}
         onPrevious={() => setAnchor(shiftPeriod(period, anchor, -1))}
         onNext={() => setAnchor(shiftPeriod(period, anchor, 1))}
         nextDisabled={atLatest}
+        previousDisabled={!open}
         onTitlePress={() => {
           setOpens((n) => n + 1);
           setPicking(true);
@@ -116,41 +123,47 @@ export default function Activity() {
         onClose={() => setPicking(false)}
       />
 
-      <SpendCard key={`${period}:${range.start}`} days={chart} currency={couple.data.currency} meName={couple.data.me.name} partnerName={couple.data.partner.name} />
-
-      <SearchField label={m.activityScreen.searchLabel} placeholder={m.activityScreen.searchPlaceholder} value={query} onChangeText={setQuery} />
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} accessibilityRole="radiogroup" style={styles.chipsBleed}>
-        {filters.map((f) => (
-          <Chip key={f.id} label={f.label} selected={filter === f.id} onPress={() => setFilter(f.id)} />
-        ))}
-      </ScrollView>
-
-      {view.days.length === 0 ? (
-        <Empty
-          title={narrowed ? m.activityScreen.noMatch : emptyTitle}
-          hint={narrowed ? m.activityScreen.noMatchHint : atLatest ? m.activityScreen.emptyNowHint : m.activityScreen.emptyPastHint}
-        />
+      {!open ? (
+        <Locked title={m.premium.historyTitle} detail={m.premium.historyDetail(FREE_HISTORY_MONTHS - 1)} from="history" />
       ) : (
-        view.days.map((day) => (
-          <View key={day.date} style={{ gap: space[2] }}>
-            {/* In the Día view the switcher already names the day. */}
-            {period !== 'day' && (
-              <Text style={[type.label, { color: color.textSecondary, fontSize: 15 }]} accessibilityRole="header">
-                {d.dayHeading(day.date, today)}
-              </Text>
-            )}
-            <View style={styles.card}>
-              {day.items.map((item) =>
-                item.kind === 'expense' ? (
-                  <ExpenseRow key={item.expense.id} expense={item.expense} couple={couple.data} />
-                ) : (
-                  <PaymentRow key={item.payment.id} payment={item.payment} couple={couple.data} />
-                ),
-              )}
-            </View>
-          </View>
-        ))
+        <>
+          <SpendCard key={`${period}:${range.start}`} days={chart} currency={couple.data.currency} meName={couple.data.me.name} partnerName={couple.data.partner.name} />
+
+          <SearchField label={m.activityScreen.searchLabel} placeholder={m.activityScreen.searchPlaceholder} value={query} onChangeText={setQuery} />
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} accessibilityRole="radiogroup" style={styles.chipsBleed}>
+            {filters.map((f) => (
+              <Chip key={f.id} label={f.label} selected={filter === f.id} onPress={() => setFilter(f.id)} />
+            ))}
+          </ScrollView>
+
+          {view.days.length === 0 ? (
+            <Empty
+              title={narrowed ? m.activityScreen.noMatch : emptyTitle}
+              hint={narrowed ? m.activityScreen.noMatchHint : atLatest ? m.activityScreen.emptyNowHint : m.activityScreen.emptyPastHint}
+            />
+          ) : (
+            view.days.map((day) => (
+              <View key={day.date} style={{ gap: space[2] }}>
+                {/* In the Día view the switcher already names the day. */}
+                {period !== 'day' && (
+                  <Text style={[type.label, { color: color.textSecondary, fontSize: 15 }]} accessibilityRole="header">
+                    {d.dayHeading(day.date, today)}
+                  </Text>
+                )}
+                <View style={styles.card}>
+                  {day.items.map((item) =>
+                    item.kind === 'expense' ? (
+                      <ExpenseRow key={item.expense.id} expense={item.expense} couple={couple.data} />
+                    ) : (
+                      <PaymentRow key={item.payment.id} payment={item.payment} couple={couple.data} />
+                    ),
+                  )}
+                </View>
+              </View>
+            ))
+          )}
+        </>
       )}
     </Screen>
   );

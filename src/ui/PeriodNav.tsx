@@ -13,18 +13,20 @@ interface Props {
   onNext: () => void;
   /** No periods after the current one. */
   nextDisabled?: boolean;
+  /** No going further back (the Free plan's limit). */
+  previousDisabled?: boolean;
   onTitlePress?: () => void;
   /** Screen-reader hint for the title button: "Cambiar fecha". */
   titleHint?: string;
 }
 
-export function PeriodNav({ title, subtitle, onPrevious, onNext, nextDisabled, onTitlePress, titleHint }: Props) {
+export function PeriodNav({ title, subtitle, onPrevious, onNext, nextDisabled, previousDisabled, onTitlePress, titleHint }: Props) {
   const { m } = useI18n();
   const { color, type } = useTheme();
   const styles = useStyles();
   return (
     <View style={styles.card}>
-      <Arrow icon="back" label={m.ui.previous} onPress={onPrevious} />
+      <Arrow icon="back" label={m.ui.previous} disabled={previousDisabled} onPress={onPrevious} />
       <Pressable
         disabled={!onTitlePress}
         onPress={onTitlePress}

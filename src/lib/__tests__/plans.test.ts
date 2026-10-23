@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { periodRange, shiftPeriod } from '../activity';
 import { canOpenMonth, canUseFeature, FREE_HISTORY_MONTHS, FREE_PLAN, oldestFreeMonth, planFromRpc, type Feature } from '../plans';
 
 const oct19 = new Date(2026, 9, 19);
@@ -30,6 +31,25 @@ describe('canOpenMonth', () => {
   it('the first day of the month already counts as that month', () => {
     expect(oldestFreeMonth(new Date(2026, 9, 1))).toBe('2026-08');
     expect(oldestFreeMonth(new Date(2026, 9, 31, 23, 59))).toBe('2026-08');
+  });
+
+  it('a period counts by its last day: a week reaching into the open months opens', () => {
+    // Mon 27 Jul – Sun 2 Aug 2026: mostly July, but its end is in August, which Free opens on 19 Oct.
+    expect(canOpenMonth('free', periodRange('week', '2026-07-30').end, oct19)).toBe(true);
+    expect(canOpenMonth('free', periodRange('week', '2026-07-23').end, oct19)).toBe(false);
+    expect(canOpenMonth('free', periodRange('day', '2026-07-31').end, oct19)).toBe(false);
+    expect(canOpenMonth('free', periodRange('month', '2026-08-15').end, oct19)).toBe(true);
+  });
+
+  it('stepping back from today: Free stops exactly one period past the limit', () => {
+    let anchor = '2026-10-19';
+    let steps = 0;
+    while (canOpenMonth('free', periodRange('month', anchor).end, oct19)) {
+      anchor = shiftPeriod('month', anchor, -1);
+      steps++;
+    }
+    expect(steps).toBe(3); // Oct, Sep, Aug open; the step to July is the first locked one
+    expect(anchor).toBe('2026-07-01');
   });
 
   it('Premium opens everything', () => {
