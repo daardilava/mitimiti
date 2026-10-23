@@ -19,6 +19,7 @@ phones. When they settle up outside the app, they record the payment and the bal
 
 ## Contents
 
+- [Screenshots](#screenshots)
 - [What it does](#what-it-does)
 - [Tech stack](#tech-stack)
 - [Architecture](#architecture)
@@ -34,6 +35,24 @@ phones. When they settle up outside the app, they record the payment and the bal
 - [License](#license)
 
 ---
+
+## Screenshots
+
+Sample data (`EXPO_PUBLIC_DEV_BYPASS_AUTH=1`), 390 px wide, on the Premium plan.
+
+| Bienvenida | Inicio | Movimientos | Resumen | Presupuestos |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/welcome.png" width="180" alt="Welcome: Miti, the MitiMiti wordmark and the slogan, with Crear cuenta and Tengo una invitación de mi pareja"> | <img src="docs/screenshots/home-light.png" width="180" alt="Home: Ana te debe $337.950, spending this month by who paid, the month's budget and recent expenses"> | <img src="docs/screenshots/activity-light.png" width="180" alt="Movimientos: the month's chart of shared spending by who paid, search and filters"> | <img src="docs/screenshots/summary-light.png" width="180" alt="Resumen: the month's shared spending by category"> | <img src="docs/screenshots/budgets-light.png" width="180" alt="Presupuestos: the month's total against its limit, and a limit per category"> |
+
+| Saldar cuentas | Detalle del gasto | Nuevo gasto | Ajustes | Premium |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/settle-light.png" width="180" alt="Saldar cuentas: Ana pays Diego $337.950, with Todo / La mitad and the payment method"> | <img src="docs/screenshots/expense-light.png" width="180" alt="Expense detail: Mercado de la semana, $285.000, split half and half"> | <img src="docs/screenshots/new-expense-light.png" width="180" alt="New expense: amount, description, who paid, category and split"> | <img src="docs/screenshots/settings-light.png" width="180" alt="Ajustes: the avatar picker and the couple's names"> | <img src="docs/screenshots/paywall-light.png" width="180" alt="Paywall: Premium para los dos, its benefits and the yearly plan with a 7-day trial"> |
+
+Dark mode follows the phone, or Ajustes › Apariencia:
+
+| Inicio | Movimientos | Resumen | Presupuestos |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/home-dark.png" width="180" alt="Home in dark mode"> | <img src="docs/screenshots/activity-dark.png" width="180" alt="Movimientos in dark mode"> | <img src="docs/screenshots/summary-dark.png" width="180" alt="Resumen in dark mode"> | <img src="docs/screenshots/budgets-dark.png" width="180" alt="Presupuestos in dark mode"> |
 
 ## What it does
 
