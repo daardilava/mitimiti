@@ -115,6 +115,21 @@ describe('sync_subscription', () => {
     await db.query(`delete from households where id = $1`, [h.id]);
   });
 
+  it('the partner who doesn’t pay deletes their account: the row goes with the couple, and comes back in the payer’s next one', async () => {
+    const payer = 'user_2syncPayerDDDDDDDDDDDDDD';
+    const leaver = 'user_2syncLeaverEEEEEEEEEEEEE';
+    const [h] = await as<{ id: string; join_code: string }>(payer, `select id, join_code from create_household('P', 'L', 'COP', 'half', 50::smallint)`);
+    await as(leaver, `select join_household($1, '')`, [h.join_code]);
+    expect(await sync(payer, active(30))).toBe('synced');
+    await as(leaver, `select delete_account()`);
+    expect((await db.query(`select * from subscriptions where household_id = $1`, [h.id])).rows).toHaveLength(0);
+    expect(await sync(payer, active(30))).toBe('no_couple');
+    const [h2] = await as<{ id: string }>(payer, `select id from create_household('P', 'Nueva', 'COP', 'half', 50::smallint)`);
+    expect(await sync(payer, active(30))).toBe('synced');
+    expect(await plan(payer)).toMatchObject({ plan: 'premium', is_payer: true });
+    await db.query(`delete from households where id = $1`, [h2.id]);
+  });
+
   it('a restore on a new account (no row to move) creates the couple’s row', async () => {
     expect(await sync(ANA, active(30))).toBe('synced');
     expect(await plan(DIEGO)).toMatchObject({ plan: 'premium', is_payer: false });
@@ -126,6 +141,14 @@ describe('sync_subscription', () => {
     expect(await sync(ANA, { kind: 'none' })).toBe('unchanged');
     expect(await sync(ANA, expired)).toBe('unchanged');
     expect(await plan(ANA)).toMatchObject({ plan: 'premium' });
+  });
+
+  it('both pay: the partner’s own subscription replaces the payer’s only when it lasts longer', async () => {
+    await sync(DIEGO, active(30));
+    expect(await sync(ANA, active(10))).toBe('unchanged');
+    expect(await plan(DIEGO)).toMatchObject({ plan: 'premium', is_payer: true });
+    expect(await sync(ANA, active(365))).toBe('synced');
+    expect(await plan(ANA)).toMatchObject({ plan: 'premium', is_payer: true });
   });
 
   it('the payer’s own expiry ends it; an expiry never creates a row', async () => {

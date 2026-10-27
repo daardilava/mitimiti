@@ -6,7 +6,7 @@
 // everything else — including duplicates, TEST, and buyers who have no couple yet (their event waits in
 // billing_events; the app links it after creating or joining a couple).
 import { createClient } from '@supabase/supabase-js';
-import { authorized, bodySchema, decide } from '../_shared/billing.ts';
+import { authorized, bodySchema, decide, headerShape } from '../_shared/billing.ts';
 
 const SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}') as Record<string, string>;
 const db = createClient(Deno.env.get('SUPABASE_URL')!, SECRET_KEYS.default ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -18,8 +18,9 @@ const reply = (status: number, body: Record<string, unknown>) =>
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return reply(405, { error: 'method_not_allowed' });
-  if (!authorized(req.headers.get('Authorization'), Deno.env.get('REVENUECAT_WEBHOOK_AUTH'))) {
-    return reply(401, { error: 'unauthorized' });
+  const auth = req.headers.get('Authorization');
+  if (!authorized(auth, Deno.env.get('REVENUECAT_WEBHOOK_AUTH'))) {
+    return reply(401, { error: 'unauthorized', received: headerShape(auth) });
   }
 
   let raw: unknown;

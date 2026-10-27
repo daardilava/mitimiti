@@ -5,7 +5,7 @@
 | Layer | Choice | Why |
 | --- | --- | --- |
 | Mobile app | Expo SDK 57 + React Native + TypeScript | iOS and Android from one codebase; OTA updates with EAS |
-| Navigation | Expo Router | File-based routes that mirror the 13 screens |
+| Navigation | Expo Router | File-based routes that mirror the screens in [DESIGN.md](DESIGN.md#screens) |
 | **Auth** | **Clerk** (`@clerk/expo`) — email + password, Google, Apple | Session management, email verification, password reset |
 | **Billing** | **RevenueCat** (App Store + Google Play subscriptions) + a Supabase webhook | Store billing is required for digital subscriptions on mobile; one Premium per couple, stored in Supabase; see [PLAN.md](PLAN.md#phase-6--billing-current) |
 | Server state | TanStack Query | Caching, retries, optimistic updates |
@@ -14,11 +14,14 @@
 | Database | Supabase Postgres | Balances and summaries are plain SQL |
 | Security | Row Level Security, keyed on the **Clerk user id** | A member only reads/writes rows of their own couple |
 | Realtime | Supabase Realtime | Partner's screen updates within seconds |
-| Server logic | Supabase Edge Functions + pg_cron | Join by code, push, Sunday reminder |
-| Push | Expo Notifications | One API for APNs and FCM |
-| Offline (v1.2) | PowerSync on top of Supabase | Log without signal |
-| Testing | Vitest (balance math), Maestro (E2E) | The balance logic must never be wrong |
-| Monitoring | Sentry, PostHog | Crashes and success metrics |
+| Server logic | Supabase Edge Functions (`revenuecat-webhook`, `billing-sync`); pg_cron planned | Billing today; push and the Sunday reminder in v1.1 |
+| UI | `react-native-svg` (Miti, avatars, chart), Fredoka + DM Sans (`@expo-google-fonts`) | The MitiMiti brand; see [DESIGN.md › Brand](DESIGN.md#brand) |
+| Languages | Own typed messages (`src/i18n`: es, en, de) + `expo-localization` | Spanish is the source; the type checker refuses a missing message |
+| Export | `expo-print` (PDF), `expo-sharing` (share sheet) | CSV and PDF of a period, Premium |
+| Push (v1.1, planned) | Expo Notifications | One API for APNs and FCM |
+| Offline (v1.2, planned) | PowerSync on top of Supabase | Log without signal |
+| Testing | Vitest (balance math, SQL and RLS on PGlite); Maestro (E2E) planned | The balance logic must never be wrong |
+| Monitoring (planned) | Sentry, PostHog | Crashes and success metrics |
 | Delivery | EAS Build + Submit, GitHub Actions | CI runs tests and type checks on every PR |
 
 ## How Clerk and Supabase fit together
@@ -60,7 +63,7 @@ Both phones ──my_plan() RPC + Realtime on subscriptions──▶ usePlan() �
 
 | Table | Key columns |
 | --- | --- |
-| households | id, name, currency, join_code, default_split, created_at |
+| households | id, name, invited_name, currency, default_split, default_pct, join_code, join_code_expires_at, created_at |
 | members | household_id, user_id (**text**, Clerk id), display_name, role, avatar (character id or null; set via `update_couple_settings`) |
 | expenses | id, household_id, paid_by, amount_minor, category, description, spent_on (date), split_mode, split_pct, created_by, updated_by, deleted_at |
 | expense_shares | expense_id, user_id, share_minor |
@@ -93,7 +96,7 @@ Both phones ──my_plan() RPC + Realtime on subscriptions──▶ usePlan() �
 | Path | What |
 | --- | --- |
 | `src/app/` | Expo Router routes, one file per screen. `(onboarding)` for signed-out, `(tabs)` for the main app |
-| `src/api/` | Calls to Clerk and Supabase (`auth.ts`, `household.ts`, `expenses.ts`, `balance.ts`, `budgets.ts`); `live.ts` keeps both phones in sync (Realtime + refetch on focus) |
+| `src/api/` | Calls to Clerk and Supabase (`auth.ts`, `household.ts`, `expenses.ts`, `balance.ts`, `budgets.ts`, `account.ts`); `live.ts` keeps both phones in sync (Realtime + refetch on focus); `purchases.ts` wraps RevenueCat (a fake with dev bypass and on web); `plan.ts` is `usePlan()` over `my_plan()` |
 | `src/lib/money.ts` | Format and parse COP / EUR / USD; amounts are integers in minor units |
 | `src/lib/splits.ts` | Split modes and balance; mirrors `write_shares()` and `balance_view` in SQL |
 | `src/lib/session.ts` | Clerk auth state (`userId`) and the route guard's inputs |
@@ -105,7 +108,12 @@ Both phones ──my_plan() RPC + Realtime on subscriptions──▶ usePlan() �
 | `src/lib/exportData.ts` | Exportar movimientos: period presets, rows with each one's share, CSV in the language's dialect (`;` + decimal comma for es/de), formula-safe fields; `src/lib/exportPdf.ts` builds the PDF statement as HTML: the balance first, then how it got there (opening + the period's expenses + its payments = closing), key figures, who paid against their share, spending by category (percents always total 100), and the movements grouped by month; HTML-escaped; `src/api/exportFile.ts` writes the CSV, prints the PDF (`expo-print`, A4) and opens the share sheet |
 | `src/lib/settle.ts` | Saldar cuentas: who pays whom, half / full, never more than owed, confirmation wording |
 | `src/lib/balance.ts` | Balance wording ("Ana te debe", "Te deben $X") and the month's shared spending by who paid |
-| `src/lib/joinCode.ts`, `dates.ts` | Invite code validation; date labels ("Ayer", "Lunes 12 de octubre") |
-| `src/ui/` | Design tokens, `Icon`, `Screen`, `Avatar`, form pieces, auth pieces, `ExpenseRow` / `PaymentRow`, `SearchField`, `SpendChart`, `PeriodNav` and shared buttons |
-| `supabase/` | Local config, migrations, and SQL tests on PGlite (`supabase/tests`: RLS and RPCs, and app ↔ database split parity) |
-| `scripts/check-clerk.mjs` | `npm run clerk:check` |
+| `src/lib/joinCode.ts`, `dates.ts` | Invite code validation and the code in an invite link (`mitimiti://join?code=…`); date labels ("Ayer", "Lunes 12 de octubre") |
+| `src/lib/plans.ts`, `paywall.ts`, `offerings.ts`, `activation.ts` | Premium: what Free allows (`canOpenMonth`, `canUseFeature`), the plan line in Ajustes and the deletion notice; paywall helpers; the store offer in the app's shape; waiting for the webhook after a purchase |
+| `src/lib/miti.ts` | Miti's SVG markup and the brand colours, shared by the app (`src/ui/Miti.tsx`) and the PDF |
+| `src/lib/avatars.ts`, `deleteAccount.ts`, `sample.ts` | Avatar ids; the Borrar cuenta steps; the sample couple for `EXPO_PUBLIC_DEV_BYPASS_AUTH=1` |
+| `src/i18n/` | Messages in Spanish (source of truth), English and German, and the legal texts (`legal/`) |
+| `src/ui/` | Design tokens, theme, `Icon`, `Screen` (and `NavButton`), `Miti` / `Wordmark`, `Avatar` / `AvatarArt`, form pieces, auth pieces, `ExpenseRow` / `PaymentRow`, `SearchField`, `SpendChart`, `PeriodNav`, `DatePickerSheet`, `LegalScreen`, `Premium` (locks) |
+| `supabase/` | Local config, migrations, Edge Functions (`functions/`: `revenuecat-webhook`, `billing-sync`, shared `_shared/billing.ts`), and SQL tests on PGlite (`supabase/tests`: RLS and RPCs, billing, account deletion, and app ↔ database split parity) |
+| `assets/` | App icon, adaptive icon, splash and favicon (PNG, generated); brand SVGs in `assets/brand`; store icon in `assets/store` |
+| `scripts/` | `check-clerk.mjs` (`npm run clerk:check`); `brand-assets.py` renders the PNGs in `assets/` from `assets/brand` |

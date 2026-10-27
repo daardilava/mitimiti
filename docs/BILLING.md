@@ -40,6 +40,12 @@ entitlement and shows in the dashboard as sandbox data.
 
 > **Never ship a Test Store key.** RevenueCat makes release builds with it crash on purpose. Switch to the platform
 > keys (section 3.2) before any TestFlight or Play testing track.
+>
+> Only the `development` profile is a development build. `preview` and `production` are **release** builds, so their
+> EAS environments take the platform keys (`appl_…`, `goog_…`), never `test_…`. Test Store purchases need a
+> `development` build. If a `test_` key still reaches a release build, the app opens without purchases: the paywall
+> says the store is unavailable, and the log shows `[purchases] RevenueCat Test Store key in a release build`
+> (`src/lib/purchasesMode.ts`).
 
 ---
 
@@ -221,12 +227,15 @@ The acceptance checks to run: [PLAN.md › Phase 6](PLAN.md#phase-6--billing-cur
 | Buy on Android, look at the partner's iPhone | Premium there too |
 | Billing issue (Google: a test card that declines; Apple: see [failing renewals](https://developer.apple.com/documentation/storekit/testing-failing-subscription-renewals-and-in-app-purchases)) | Ajustes shows the store couldn't charge, with *Revisar el pago*; Premium until the grace period ends |
 | Delete the payer's account | The couple's data is erased; the app said the subscription must be cancelled in the store |
+| Delete the account of the partner who doesn't pay; the payer then creates (or joins) a new couple | The old couple's data is erased; the payer's store subscription keeps running, and the new couple is Premium right after Setup |
+| Both partners subscribe (both phones on the paywall while Free, buy on each) | Premium stays while either subscription runs; the one that lasts longer is shown in Ajustes. Cancel it and let it expire: the couple goes back to Premium through the other one at the latest when that phone next opens the app |
 
 If a phone doesn't unlock, check:
 
 1. Supabase › `billing_events`: did the event arrive?
 2. `subscriptions`: is there a row for the couple?
-3. Edge Function logs: `revenuecat-webhook` and `billing-sync`.
+3. Edge Function logs: `revenuecat-webhook` and `billing-sync`. `other_payer` means the event belonged to the partner's
+   own subscription while the couple's row was another, longer one: expected when both pay.
 
 ---
 
