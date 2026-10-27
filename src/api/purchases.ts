@@ -9,6 +9,7 @@
 import { Linking, Platform } from 'react-native';
 import Purchases, { type PurchasesPackage } from 'react-native-purchases';
 import { periodOf, trialDays, type PlanPackage } from '@/lib/offerings';
+import { isTestStoreKey, purchasesModeFor, type PurchasesMode } from '@/lib/purchasesMode';
 import { setSamplePlan } from '@/lib/sample';
 import { DEV_BYPASS_AUTH } from '@/lib/session';
 
@@ -19,11 +20,19 @@ const API_KEY = Platform.select({
   ios: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
   android: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
   default: undefined,
+})?.trim();
+
+/** native: the RevenueCat SDK · fake: sample offers (dev bypass, web) · unavailable: no usable API key. */
+export const purchasesMode: PurchasesMode = purchasesModeFor({
+  apiKey: API_KEY,
+  devBypass: DEV_BYPASS_AUTH,
+  web: Platform.OS === 'web',
+  dev: __DEV__,
 });
 
-/** native: the RevenueCat SDK · fake: sample offers (dev bypass, web) · unavailable: no API key for this platform. */
-export const purchasesMode: 'native' | 'fake' | 'unavailable' =
-  DEV_BYPASS_AUTH || Platform.OS === 'web' ? 'fake' : API_KEY ? 'native' : 'unavailable';
+if (!__DEV__ && API_KEY && isTestStoreKey(API_KEY)) {
+  console.error('[purchases] RevenueCat Test Store key in a release build: purchases are off. Use the appl_/goog_ key.');
+}
 
 export type PurchaseResult = 'purchased' | 'cancelled';
 

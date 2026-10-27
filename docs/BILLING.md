@@ -40,6 +40,12 @@ entitlement and shows in the dashboard as sandbox data.
 
 > **Never ship a Test Store key.** RevenueCat makes release builds with it crash on purpose. Switch to the platform
 > keys (section 3.2) before any TestFlight or Play testing track.
+>
+> Only the `development` profile is a development build. `preview` and `production` are **release** builds, so their
+> EAS environments take the platform keys (`appl_…`, `goog_…`), never `test_…`. Test Store purchases need a
+> `development` build. If a `test_` key still reaches a release build, the app opens without purchases: the paywall
+> says the store is unavailable, and the log shows `[purchases] RevenueCat Test Store key in a release build`
+> (`src/lib/purchasesMode.ts`).
 
 ---
 
