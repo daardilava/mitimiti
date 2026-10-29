@@ -32,6 +32,7 @@ a web app (mobile only), converting between currencies.
 | Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): full history, Presupuestos, Export, later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |
+| Quick entry | Type or say "café 4,50 pagó Ana" and it's logged in ~3 s; local parser first, AI fallback; see [QUICK_ENTRY.md](QUICK_ENTRY.md) | Slice 1 built (on request) |
 | Receipt photo / widget | Picture on an expense; home-screen balance + quick add | Later |
 
 ### Balance rules (the core logic)

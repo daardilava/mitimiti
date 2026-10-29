@@ -21,6 +21,7 @@ there, tick it (`- [x]`) in the same change.
 | Roadmap, phases, acceptance checks, open questions, billing | [docs/PLAN.md](docs/PLAN.md) |
 | Screens, routes, design tokens, typography, components | [docs/DESIGN.md](docs/DESIGN.md) |
 | Tech stack, Clerk ↔ Supabase wiring, data model, SQL functions | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Quick entry (phrase → expense draft, AI fallback, voice, widget) | [docs/QUICK_ENTRY.md](docs/QUICK_ENTRY.md) |
 
 Section numbers like `§4` in code refer to the external *MitiMiti — Project Plan* (Feature breakdown tab).
 
@@ -71,7 +72,7 @@ add a new file under `supabase/migrations/`.
 
 - `src/app/` — Expo Router routes, one file per screen. `(onboarding)` signed-out, `(tabs)` main app
 - `src/api/` — calls to Clerk and Supabase
-- `src/lib/` — pure logic (money, splits, session, authFlow, joinCode, dates) + tests
+- `src/lib/` — pure logic (money, splits, session, authFlow, joinCode, dates, quickEntry) + tests
 - `src/ui/` — tokens (light + dark palettes), theme (`useTheme`, `makeStyles`), Icon, Screen, Miti / Wordmark, Avatar,
   form pieces
 - `src/i18n/` — UI copy: `es.ts` is the source of truth, `en.ts` and `de.ts` must match it
