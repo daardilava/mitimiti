@@ -463,6 +463,8 @@ Vale hasta el ${until}.` : ''),
   expense: {
     newTitle: 'Nuevo gasto',
     add: 'Agregar gasto',
+    quick: 'Rápido',
+    quickA11y: 'Abrir el gasto rápido: escribir el gasto en una frase',
     editTitle: 'Editar gasto',
     saveChanges: 'Guardar cambios',
     saveFailed: 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.',

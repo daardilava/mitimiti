@@ -39,10 +39,10 @@ export default function TabsLayout() {
           ),
         }}
         listeners={{
-          // The centre button opens quick entry instead of a tab; its "Más opciones" leads to the full form.
+          // The centre button opens the full form instead of a tab; its "Rápido" leads to quick entry.
           tabPress: (e) => {
             e.preventDefault();
-            router.push('/expense/quick');
+            router.push('/expense/new');
           },
         }}
       />

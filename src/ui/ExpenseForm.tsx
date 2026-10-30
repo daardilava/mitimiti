@@ -25,9 +25,11 @@ interface ExpenseFormProps {
   saving: boolean;
   error?: string | null;
   onSave: (input: ExpenseInput) => void;
+  /** A text link at the right of the header (e.g. "Rápido" → quick entry). */
+  headerAction?: { label: string; accessibilityLabel: string; onPress: () => void };
 }
 
-export function ExpenseForm({ title, saveLabel, couple, initial, draft: prefill, saving, error, onSave }: ExpenseFormProps) {
+export function ExpenseForm({ title, saveLabel, couple, initial, draft: prefill, saving, error, onSave, headerAction }: ExpenseFormProps) {
   const { m, d: dl } = useI18n();
   const { color, type, categories } = useTheme();
   const styles = useStyles();
@@ -103,9 +105,14 @@ export function ExpenseForm({ title, saveLabel, couple, initial, draft: prefill,
           <Pressable accessibilityRole="button" accessibilityLabel={m.ui.close} onPress={() => router.back()} style={styles.iconButton}>
             <Icon name="close" size={22} color={color.ink} />
           </Pressable>
-          <Text style={type.bar} accessibilityRole="header">
+          <Text style={[type.bar, styles.flex]} accessibilityRole="header">
             {title}
           </Text>
+          {headerAction && (
+            <Pressable accessibilityRole="button" accessibilityLabel={headerAction.accessibilityLabel} onPress={headerAction.onPress} style={styles.headerAction}>
+              <Text style={styles.headerActionText}>{headerAction.label}</Text>
+            </Pressable>
+          )}
         </View>
 
         <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -301,6 +308,8 @@ const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
     borderBottomColor: color.line,
   },
   iconButton: { width: touch, height: touch, alignItems: 'center', justifyContent: 'center' },
+  headerAction: { minHeight: touch, minWidth: touch, paddingHorizontal: space[3], alignItems: 'center', justifyContent: 'center' },
+  headerActionText: { ...type.row, color: color.ink, fontFamily: font.bodyBold, textDecorationLine: 'underline' },
   content: { padding: space[5], paddingBottom: 28, gap: space[6] },
   field: { gap: space[2] },
   label: { ...type.label, color: color.textSecondary },

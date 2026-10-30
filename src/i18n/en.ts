@@ -432,6 +432,8 @@ Valid until ${until}.` : ''),
   expense: {
     newTitle: 'New expense',
     add: 'Add expense',
+    quick: 'Quick',
+    quickA11y: 'Open quick expense: type the expense in one line',
     editTitle: 'Edit expense',
     saveChanges: 'Save changes',
     saveFailed: 'Couldn’t save. Check your connection and try again.',

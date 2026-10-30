@@ -435,6 +435,8 @@ Gültig bis ${until}.` : ''),
   expense: {
     newTitle: 'Neue Ausgabe',
     add: 'Ausgabe hinzufügen',
+    quick: 'Schnell',
+    quickA11y: 'Schnelle Ausgabe öffnen: die Ausgabe in einer Zeile schreiben',
     editTitle: 'Ausgabe bearbeiten',
     saveChanges: 'Änderungen speichern',
     saveFailed: 'Konnte nicht speichern. Prüfe deine Verbindung und versuche es noch einmal.',

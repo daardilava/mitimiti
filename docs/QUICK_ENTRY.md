@@ -113,8 +113,8 @@ Built as `src/app/expense/quick.tsx` with the draft card in `src/ui/QuickDraftCa
 - The save **waits for the server** before closing instead of an optimistic insert, so a failed save never loses the
   entry.
 
-- New route `src/app/expense/quick.tsx` (modal sheet). The tab bar's **+** opens it; "Más opciones" opens the
-  current `/expense/new` with the draft.
+- New route `src/app/expense/quick.tsx` (modal sheet). The tab bar's **+** opens the full form `/expense/new`, whose "Rápido" link
+  opens quick entry; quick entry's "Formulario" opens `/expense/new` with the draft.
 - One autofocused field, placeholder from i18n ("café 4,50 yo pagué"). Chips under it update **as you type**:
   amount · category · who paid · split · date. Tapping a chip changes it (one tap, no form).
 - Return key / one primary button saves when the draft is `high` and has an amount. `low` → the missing chip

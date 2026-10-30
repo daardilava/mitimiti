@@ -19,7 +19,8 @@ function readDraft(raw: string | undefined): Partial<ExpenseInput> | undefined {
   }
 }
 
-// 06 · Nuevo gasto. From quick entry ("Revisar", "Más opciones") it starts from that draft, and remembers how it began.
+// 06 · Nuevo gasto, from the tab bar's +. From quick entry ("Revisar", "Formulario") it starts from that draft, and
+// remembers how it began. Without a draft, "Rápido" (top right) switches to quick entry.
 export default function NewExpense() {
   const { m } = useI18n();
   const couple = useCouple();
@@ -38,6 +39,7 @@ export default function NewExpense() {
       draft={draft}
       saving={save.isPending}
       error={save.error ? m.expense.saveFailed : null}
+      headerAction={draft ? undefined : { label: m.expense.quick, accessibilityLabel: m.expense.quickA11y, onPress: () => router.replace('/expense/quick') }}
       onSave={(input) =>
         save.mutate({ ...input, source }, {
           onSuccess: (saved) => router.replace({ pathname: '/expense/[id]', params: { id: saved.id } }),
