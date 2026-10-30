@@ -1,7 +1,7 @@
-// What each plan allows: the single place that says it (Phase 6 — Billing, docs/PLAN.md). Screens ask
-// canOpenMonth() and canUseFeature(); no plan checks scattered elsewhere. Free never changes the balance: these rules
-// only decide which screens and periods open, never which expenses count.
-import { isoDate, monthOf, shiftMonth } from './dates';
+// What each plan allows: the single place that says it (Phase 6 — Billing, docs/PLAN.md). Screens ask canUseFeature();
+// no plan checks scattered elsewhere. Free never changes the balance: these rules only decide which screens open, never
+// which expenses count. Every month (Movimientos, Resumen) and Presupuestos are free.
+import { isoDate } from './dates';
 
 export type Plan = 'free' | 'premium';
 
@@ -9,10 +9,7 @@ export type Plan = 'free' | 'premium';
  * Premium features. `aiEntry`: quick entry with AI (phrases the phone can't read, receipt photos); typing and dictation
  * stay free. `recurring` and `receiptPhoto` (a picture kept on an expense) don't exist yet; the paywall lists them as Pronto.
  */
-export type Feature = 'history' | 'budgets' | 'export' | 'aiEntry' | 'recurring' | 'receiptPhoto';
-
-/** Free opens the current month and the 2 before it in Movimientos and Resumen. */
-export const FREE_HISTORY_MONTHS = 3;
+export type Feature = 'export' | 'aiEntry' | 'recurring' | 'receiptPhoto';
 
 /** The plan as my_plan() reports it. */
 export interface PlanInfo {
@@ -28,16 +25,6 @@ export const FREE_PLAN: PlanInfo = { plan: 'free', status: null, expiresAt: null
 export function canUseFeature(plan: Plan, feature: Feature): boolean {
   void feature; // every feature in the list is Premium today; keep the parameter so callers say what they need
   return plan === 'premium';
-}
-
-/** The oldest "YYYY-MM" month Free opens: two before today's. */
-export function oldestFreeMonth(today: Date): string {
-  return shiftMonth(monthOf(isoDate(today)), -(FREE_HISTORY_MONTHS - 1));
-}
-
-/** `month` is "YYYY-MM" or any date in it ("YYYY-MM-DD"). Months after today's are never locked by the plan. */
-export function canOpenMonth(plan: Plan, month: string, today: Date): boolean {
-  return plan === 'premium' || monthOf(month) >= oldestFreeMonth(today);
 }
 
 /** A row from my_plan(), into the app's shape. Anything unexpected reads as Free. */

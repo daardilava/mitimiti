@@ -13,14 +13,14 @@ describe('shortcutIds', () => {
 
 describe('isLocked', () => {
   it('locks the Premium shortcuts on Free only', () => {
-    for (const id of ['scan', 'budgets', 'export'] as const) {
+    for (const id of ['scan', 'export'] as const) {
       expect(isLocked(id, 'free')).toBe(true);
       expect(isLocked(id, 'premium')).toBe(false);
     }
   });
 
-  it('never locks typing, dictation or Movimientos', () => {
-    for (const id of ['quick', 'dictate', 'history'] as const) {
+  it('never locks typing, dictation, Presupuestos or Movimientos', () => {
+    for (const id of ['quick', 'dictate', 'budgets', 'history'] as const) {
       expect(isLocked(id, 'free')).toBe(false);
     }
   });
@@ -35,12 +35,11 @@ describe('shortcutTarget', () => {
 
   it('sends Free to the paywall with the benefit it tapped', () => {
     expect(shortcutTarget('scan', 'free')).toEqual({ kind: 'paywall', from: 'aiEntry' });
-    expect(shortcutTarget('budgets', 'free')).toEqual({ kind: 'paywall', from: 'budgets' });
     expect(shortcutTarget('export', 'free')).toEqual({ kind: 'paywall', from: 'export' });
   });
 
-  it('opens the screens themselves on Premium', () => {
-    expect(shortcutTarget('budgets', 'premium')).toEqual({ kind: 'route', route: { pathname: '/budgets' } });
+  it('opens the screens themselves when the plan allows them', () => {
+    expect(shortcutTarget('budgets', 'free')).toEqual({ kind: 'route', route: { pathname: '/budgets' } });
     expect(shortcutTarget('export', 'premium')).toEqual({ kind: 'route', route: { pathname: '/export' } });
     expect(shortcutTarget('history', 'free')).toEqual({ kind: 'route', route: { pathname: '/activity' } });
   });

@@ -29,7 +29,7 @@ a web app (mobile only), converting between currencies.
 | Notifications | "Ana agregó un gasto"; Sunday reminder when a balance is open | v1.1 |
 | Default split and currency | Per-couple setting used for every new expense | v1.1 |
 | Export (CSV, PDF) | All expenses and payments for a period (this month, last month, last 3 months, this year, all), through the share sheet | v1.1 → built early |
-| Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): full history, Presupuestos, Export, later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
+| Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): Export, quick entry with AI (receipts, harder phrases), later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |
 | Quick entry | Type or say "café 4,50 pagó Ana" and it's logged in ~3 s; local parser first, AI fallback and receipt photos for Premium; see [QUICK_ENTRY.md](QUICK_ENTRY.md) | Slices 1–5 built (on request); widget later |
@@ -285,9 +285,10 @@ Free keeps the whole core, and no plan ever changes the balance.
   the couple's `subscriptions` row; the app reads it through the `my_plan()` RPC and never writes it.
 - **Plans: Free and Premium.** Prices live in the stores, not in code: 2,99 €/month, 19,99 €/year, a 7-day free
   trial on the yearly plan, regional prices for COP and USD.
-- **Free, forever:** unlimited expenses, every split mode, the live balance, settle up, Movimientos, and the
-  Resumen of the current month and the previous 2. **Premium:** full history (Movimientos and Resumen older than
-  3 months), Presupuestos, Export CSV/PDF, and later Recurring expenses and Receipt photo.
+- **Free, forever:** unlimited expenses, every split mode, the live balance, settle up, Movimientos and Resumen of
+  every month, and Presupuestos (made free on 2026-10-30; until then the full history and Presupuestos were
+  Premium). **Premium:** Export CSV/PDF, quick entry with AI (receipt photos, phrases the phone can't read), and
+  later Recurring expenses and Receipt photo.
 - **Data is never deleted, and never hidden from the balance**, on Free: only screens are limited. Limits live in
   the app's queries and screens (`src/lib/plans.ts`), never in RLS: `balance_view` and `monthly_summary` are
   `security_invoker`, so hiding rows would change the balance.
@@ -337,8 +338,7 @@ Free keeps the whole core, and no plan ever changes the balance.
   - [src/api/plan.ts](../src/api/plan.ts): `usePlan()` over `my_plan()`, refreshed by Realtime on `subscriptions`,
     the SDK's listener and app focus. Purchase → server sync → [src/lib/activation.ts](../src/lib/activation.ts)
     checks for about 20 s (*Activando Premium…*).
-  - [src/lib/plans.ts](../src/lib/plans.ts) is the single place that says what Free allows (`FREE_HISTORY_MONTHS`,
-    `canOpenMonth`, `canUseFeature`); [src/lib/offerings.ts](../src/lib/offerings.ts) holds the store's offer in
+  - [src/lib/plans.ts](../src/lib/plans.ts) is the single place that says what Free allows (`canUseFeature`); [src/lib/offerings.ts](../src/lib/offerings.ts) holds the store's offer in
     the app's shape.
   - **billing-sync** closes the two gaps left by the webhook:
     [supabase/functions/billing-sync](../supabase/functions/billing-sync/index.ts) reads the caller's state from
@@ -348,8 +348,8 @@ Free keeps the whole core, and no plan ever changes the balance.
     having a couple and a restore on a new account both reach the couple. It never expires the partner's Premium.
     Tests: [supabase/tests/billing_sync.test.ts](../supabase/tests/billing_sync.test.ts). **Needs
     `npx supabase db push`** and the README deploy steps.
-- [x] **Paywall:** [src/app/paywall.tsx](../src/app/paywall.tsx), a modal (`?from=history|budgets|export` puts that
-  benefit first, highlighted).
+- [x] **Paywall:** [src/app/paywall.tsx](../src/app/paywall.tsx), a modal (`?from=export|aiEntry` puts that benefit
+  first, highlighted; an old `history` or `budgets` link shows the default order).
   - Prices come from the store offering. Yearly is selected by default, with *Ahorra 44 %* and *7 días gratis*.
   - The billed amount is the largest price (Apple), and the yearly plan is never shown as a monthly price (Google).
   - The trial terms give the date of the first charge. Then the renewal and how to cancel in the store, *Lo esencial
@@ -359,12 +359,11 @@ Free keeps the whole core, and no plan ever changes the balance.
     pending, cancelled (no message), and Premium already: *Ana ya activó Premium*, with no purchase offered.
   - Helpers in [src/lib/paywall.ts](../src/lib/paywall.ts), with tests. Checked at 390 px, light and dark, on web
     with the fake purchases.
-- [x] **Gating:** only through `canOpenMonth` / `canUseFeature` ([src/lib/plans.ts](../src/lib/plans.ts)); `usePlan().gate`
-  is Premium while the plan loads, so a paying couple never sees a lock flash.
-  - Movimientos and Resumen: Free steps back to the oldest open month (a period counts by its last day). One step
-    further shows *Los meses anteriores son parte de Premium*, with no rows or totals, and the ‹ arrow stops.
-  - Presupuestos: the Home card and Resumen's button say **Premium** in text and open the paywall; saved limits stay.
-    Exportar in Ajustes does the same. Both screens are locked too if reached another way
+- [x] **Gating:** only through `canUseFeature` ([src/lib/plans.ts](../src/lib/plans.ts)); `usePlan().gate` is
+  Premium while the plan loads, so a paying couple never sees a lock flash.
+  - Movimientos, Resumen and Presupuestos have no lock: every month and the limits are free (since 2026-10-30).
+  - Exportar in Ajustes and Inicio's Exportar / Escanear shortcuts say **Premium** (in text, or a crown with its
+    spoken label and a legend line) and open the paywall. Exportar is locked too if reached another way
     ([src/ui/Premium.tsx](../src/ui/Premium.tsx)).
   - The balance, settle up and *Gastado juntos* ignore the plan: checked identical on Free and Premium.
   - With dev bypass, *Plan de prueba* in Ajustes switches Free / Premium. Checked at 390 px, light and dark.

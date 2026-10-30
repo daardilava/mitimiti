@@ -15,11 +15,11 @@ import { font, radius, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
 
-const ICONS: Record<Benefit, IconName> = { history: 'calendar', budgets: 'chart', export: 'share', aiEntry: 'camera', recurring: 'swap' };
+const ICONS: Record<Benefit, IconName> = { export: 'share', aiEntry: 'camera', recurring: 'swap' };
 
 type Phase = 'idle' | 'buying' | 'activating' | 'done' | 'pending';
 
-// Premium para los dos · a modal, opened from a locked feature (?from=history|budgets|export) or Ajustes.
+// Premium para los dos · a modal, opened from a locked feature (?from=export|aiEntry) or Ajustes.
 // Store rules (docs/PLAN.md › Phase 6): the billed amount is the most prominent price, a yearly plan is never shown as
 // a monthly price, a trial says how long it lasts and what is charged after, and once the couple is Premium the
 // partner is offered no second subscription.

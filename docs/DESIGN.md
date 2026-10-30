@@ -26,11 +26,11 @@ rest reached from them. Home is the hub; every screen is at most two taps away.
 | 9 | Settle up (Saldar cuentas) | `settle/index` | Home balance card | Todo / La mitad / custom (never more than owed), ¿Cómo se pagó? → Registrar pago |
 | 10 | Payment recorded (Pago registrado) | `settle/done` | Settle up | Volver al inicio · Ver movimientos |
 | 11 | Summary (Resumen) | `(tabs)/summary` | Tab | Month switcher, Ver presupuestos |
-| 12 | Budgets (Presupuestos) | `budgets` | Home, Resumen (Premium) | − / + in steps of $50.000 (10 € / US$10) |
+| 12 | Budgets (Presupuestos) | `budgets` | Inicio (shortcut and card), Resumen | − / + in steps of $50.000 (10 € / US$10) |
 | 13 | Settings (Ajustes) | `(tabs)/settings` | Tab | In order: Tu avatar (12 characters or the initial, `src/ui/AvatarArt.tsx`); Ustedes (names, Código de pareja); Tu plan; División predeterminada; Moneda; Apariencia; Idioma; Recordatorios y avisos (Pronto); Exportar movimientos; Información legal; Cuenta (Cerrar sesión, Borrar cuenta) |
 | — | Exportar movimientos | `export` | Ajustes › Exportar movimientos (Premium) | Periodo (5 presets) · Formato CSV / PDF → Exportar (share sheet) |
 | — | Borrar tu cuenta | `delete-account` (outside the guards) | Ajustes › Cuenta, Setup | What is deleted (partner too), the subscription note → tick → Borrar cuenta (red); code by email if the sign-in is older than 10 min |
-| — | Premium para los dos (paywall) | `paywall` (modal, `?from=history\|budgets\|export`) | Ajustes › Tu plan › Ver Premium, every Premium lock | Benefits, Anual / Mensual → Probar 7 días gratis / Suscribirme · Restaurar compras · Términos · Privacidad |
+| — | Premium para los dos (paywall) | `paywall` (modal, `?from=export\|aiEntry`) | Ajustes › Tu plan › Ver Premium, every Premium lock | Benefits, Anual / Mensual → Probar 7 días gratis / Suscribirme · Restaurar compras · Términos · Privacidad |
 
 The `+` in the tab bar always opens a new expense. Every routed screen is built; `Todo` in
 [src/ui/Screen.tsx](../src/ui/Screen.tsx) remains for marking a future placeholder with the feature section that builds it.

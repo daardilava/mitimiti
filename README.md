@@ -70,7 +70,7 @@ Dark mode follows the phone, or Ajustes › Apariencia:
 | Export | The expenses and payments of a period as a CSV for spreadsheets, or a PDF report with totals and the balance, through the share sheet | Built |
 | Notifications | Partner activity, Sunday reminder | Planned (v1.1) |
 | Offline logging, recurring expenses | Save without signal; rent and subscriptions each month | Planned (v1.2) |
-| Premium | One subscription per couple in the App Store / Google Play: full history, budgets, export | Built; store testing open (Phase 6) |
+| Premium | One subscription per couple in the App Store / Google Play: export, quick entry with AI (budgets and the full history are free) | Built; store testing open (Phase 6) |
 
 **Product principles:** two people, never a group · fair, not just 50/50 · fast to log · the app records
 payments, it never moves money · neutral, no-blame language.

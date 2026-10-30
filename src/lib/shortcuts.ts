@@ -18,7 +18,7 @@ const SHORTCUTS: Record<ShortcutId, { route: ShortcutRoute; premium?: Benefit }>
   quick: { route: { pathname: '/expense/quick' } },
   scan: { route: { pathname: '/expense/quick', params: { start: 'receipt' } }, premium: 'aiEntry' },
   dictate: { route: { pathname: '/expense/quick', params: { start: 'voice' } } },
-  budgets: { route: { pathname: '/budgets' }, premium: 'budgets' },
+  budgets: { route: { pathname: '/budgets' } },
   export: { route: { pathname: '/export' }, premium: 'export' },
   history: { route: { pathname: '/activity' } },
 };

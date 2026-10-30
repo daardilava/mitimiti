@@ -37,10 +37,15 @@ describe('defaultPackage and sortPlans', () => {
 
 describe('benefitOrder', () => {
   it('what opened the paywall comes first', () => {
-    expect(benefitOrder('export')).toEqual(['export', 'history', 'budgets', 'aiEntry', 'recurring']);
-    expect(benefitOrder('aiEntry')[0]).toBe('aiEntry');
-    expect(benefitOrder('budgets')[0]).toBe('budgets');
-    expect(benefitOrder('history')[0]).toBe('history');
+    expect(benefitOrder('export')).toEqual(['export', 'aiEntry', 'recurring']);
+    expect(benefitOrder('aiEntry')).toEqual(['aiEntry', 'export', 'recurring']);
+  });
+
+  it('Presupuestos and the full history are free: an old ?from=budgets|history link shows the default order', () => {
+    expect(BENEFITS).not.toContain('budgets');
+    expect(BENEFITS).not.toContain('history');
+    expect(benefitOrder('budgets')).toEqual([...BENEFITS]);
+    expect(benefitOrder('history')).toEqual([...BENEFITS]);
   });
 
   it('nothing, or something unknown: the default order', () => {
@@ -50,7 +55,7 @@ describe('benefitOrder', () => {
 
   it('recurring expenses are not built yet', () => {
     expect(AVAILABLE.has('recurring')).toBe(false);
-    expect([...AVAILABLE]).toEqual(['history', 'budgets', 'export', 'aiEntry']);
+    expect([...AVAILABLE]).toEqual(['export', 'aiEntry']);
   });
 });
 
