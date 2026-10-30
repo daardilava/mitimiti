@@ -38,8 +38,8 @@ const errorOf = (code: ExpoSpeechRecognitionErrorCode): DictationError | null =>
   code === 'aborted' ? null : code === 'not-allowed' ? 'denied' : code === 'no-speech' || code === 'speech-timeout' ? 'none' : 'failed';
 
 /**
- * Hold to talk: start() on press, stop() on release. `onText` gets the transcript as it grows (final = true once the
- * phone is done). `locale` is a BCP-47 tag such as "es-CO" (src/lib/quickSheet.ts › recognitionLocale).
+ * Tap to talk: start() on the first tap, stop() on the second (or silence ends it). `onText` gets the transcript as it
+ * grows (final = true once the phone is done). `locale` is a BCP-47 tag such as "es-CO" (src/lib/quickSheet.ts › recognitionLocale).
  */
 export function useDictation(locale: string, onText: (text: string, final: boolean) => void) {
   const [state, setState] = useState<DictationState>('idle');

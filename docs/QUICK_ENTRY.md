@@ -100,10 +100,18 @@ Decisions taken while building it:
 
 ### Slice 2 — Quick-add sheet (still no AI) — built
 
-Built as `src/app/expense/quick.tsx`, rules in `src/lib/quickSheet.ts`, toast in `src/ui/Toast.tsx`. Two changes from
-the plan below: **nothing saves by itself** (Return or Agregar gasto is the tap that saves; voice and receipts
-only fill the chips), and the save **waits for the server** before closing instead of an optimistic insert, so a
-failed save never loses the entry. When something is missing the button reads "Revisar en el formulario".
+Built as `src/app/expense/quick.tsx` with the draft card in `src/ui/QuickDraftCard.tsx`, rules in
+`src/lib/quickSheet.ts`, toast in `src/ui/Toast.tsx`. Changes from the plan below (2026-10-30, after trying it):
+- **A draft card instead of chips.** It shows what will be saved: where it came from, the amount, and one row per
+  field; tapping a row opens its choices in place (category grid, the two people, the four splits, Hoy / Ayer /
+  Antier / Otra fecha), so nothing has to be cycled through. A row that needs an answer says "Elige".
+- **Formulario is in the header**, always one tap away (it used to sit under the button, behind the keyboard).
+- **Receipts keep their photo** next to what was read (tap to enlarge), with "Quitar el recibo".
+- **Nothing saves by itself**: Return or Agregar gasto is the tap. The button stays disabled until nothing is missing,
+  and one notice says what is. "The AI guessed" (`review`) asks for a look but doesn't block: seeing the card and
+  tapping Agregar is the check.
+- The save **waits for the server** before closing instead of an optimistic insert, so a failed save never loses the
+  entry.
 
 - New route `src/app/expense/quick.tsx` (modal sheet). The tab bar's **+** opens it; "Más opciones" opens the
   current `/expense/new` with the draft.

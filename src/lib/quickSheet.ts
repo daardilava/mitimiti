@@ -19,6 +19,7 @@ export interface ChipChoices {
   split?: SplitChoice;
   spentOn?: string;
   category?: CategoryId;
+  description?: string;
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -93,6 +94,7 @@ export function withChoices(result: QuickEntryResult, choices: ChipChoices, ctx:
       ...storedSplit(split, payer, ctx),
       spentOn: choices.spentOn ?? result.draft.spentOn,
       category: choices.category ?? result.draft.category,
+      description: choices.description !== undefined ? choices.description.trim().slice(0, 80) : result.draft.description,
     },
     split,
     confidence: missing.size === 0 ? 'high' : 'low',
@@ -100,9 +102,12 @@ export function withChoices(result: QuickEntryResult, choices: ChipChoices, ctx:
   };
 }
 
-/** Saved straight from the sheet: an amount read for sure and nothing left to ask. Otherwise the full form opens. */
+/**
+ * Can be added from the sheet: an amount read for sure and no question left. 'review' (the AI said it guessed) doesn't
+ * block: the sheet shows every field read and asks the person to check them; tapping Agregar is that check.
+ */
 export function canSaveQuick(result: QuickEntryResult): boolean {
-  return result.draft.amountMinor !== undefined && result.missing.length === 0;
+  return result.draft.amountMinor !== undefined && result.missing.every((g) => g === 'review');
 }
 
 // ─── One tap per chip ─────────────────────────────────────────────────────

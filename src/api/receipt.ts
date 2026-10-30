@@ -1,5 +1,6 @@
 // Receipt photo for quick entry (docs/QUICK_ENTRY.md, slice 5): take or pick a photo, shrink it on the phone, and
-// hand back JPEG base64 for parse-expense. The photo is never stored (not on the phone by us, not on the server).
+// hand back JPEG base64 for parse-expense. The photo is never kept: the server reads it and forgets it, and the shrunk
+// copy only sits in the app's cache (which the system clears) while the sheet shows it next to what was read.
 // Both modules are in Expo Go.
 import { SaveFormat, ImageManipulator } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
@@ -7,7 +8,8 @@ import * as ImagePicker from 'expo-image-picker';
 /** Long side of the image sent: enough to read a receipt's total, small enough to send fast. */
 const MAX_SIDE = 1024;
 
-export type ReceiptPick = { kind: 'image'; base64: string } | { kind: 'cancelled' } | { kind: 'denied' } | { kind: 'failed' };
+/** `uri`: the shrunk photo on the phone, shown next to what was read while the sheet is open (never uploaded as a file). */
+export type ReceiptPick = { kind: 'image'; base64: string; uri: string } | { kind: 'cancelled' } | { kind: 'denied' } | { kind: 'failed' };
 
 export async function pickReceipt(from: 'camera' | 'library'): Promise<ReceiptPick> {
   try {
@@ -26,7 +28,7 @@ export async function pickReceipt(from: 'camera' | 'library'): Promise<ReceiptPi
     }
     const image = await context.renderAsync();
     const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.7, base64: true });
-    return saved.base64 ? { kind: 'image', base64: saved.base64 } : { kind: 'failed' };
+    return saved.base64 ? { kind: 'image', base64: saved.base64, uri: saved.uri } : { kind: 'failed' };
   } catch {
     return { kind: 'failed' };
   }

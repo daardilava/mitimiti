@@ -81,10 +81,12 @@ describe('draftFromAi', () => {
     expect(draftFromAi(ai({ spentOn: '27/10/2026' }), ctx).draft.spentOn).toBe('2026-10-29');
   });
 
-  it('asks for a look when the model says it guessed', () => {
+  it('asks for a look when the model says it guessed, without blocking the save', () => {
     const r = draftFromAi(ai({ sure: false }), ctx);
     expect(r).toMatchObject({ confidence: 'low', missing: ['review'] });
     expect(r.draft.amountMinor).toBe(45_000);
+    expect(canSaveQuick(r)).toBe(true);
+    expect(canSaveQuick(draftFromAi(ai({ sure: false, payer: 'unknown' }), ctx))).toBe(false);
   });
 });
 
@@ -99,6 +101,13 @@ describe('chips', () => {
     expect(canSaveQuick(fixed)).toBe(true);
     expect(withChoices(typed('uber 9.000 ayer el lunes'), { spentOn: '2026-10-28' }, ctx).missing).toEqual([]);
     expect(withChoices(typed('mercado 100.000 a medias personal'), { split: 'half' }, ctx).draft.splitMode).toBe('half');
+  });
+
+  it('takes an edited description, trimmed, and keeps it while typing on', () => {
+    const r = typed('almuerzo 25.000');
+    expect(withChoices(r, { description: '  Almuerzo con el equipo  ' }, ctx).draft.description).toBe('Almuerzo con el equipo');
+    expect(withChoices(r, { description: 'x'.repeat(120) }, ctx).draft.description).toHaveLength(80);
+    expect(withChoices(typed('almuerzo 26.000'), { description: 'Almuerzo' }, ctx).draft).toMatchObject({ description: 'Almuerzo', amountMinor: 26_000 });
   });
 
   it('never fixes a missing amount or another currency', () => {

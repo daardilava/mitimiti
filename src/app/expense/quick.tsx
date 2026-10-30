@@ -1,7 +1,8 @@
-// Quick entry (docs/QUICK_ENTRY.md, slices 2–5): one line, "almuerzo 25.000 pagó Ana", and the expense is logged.
-// The phone reads the phrase as it is typed or dictated (src/lib/quickEntry.ts); chips show what it understood and
-// change with one tap. Only when the phone isn't sure, a Premium couple's phrase goes to the AI (src/api/quickEntry.ts),
-// which also reads receipt photos. Nothing is saved without a tap; saving goes through upsert_expense like the form.
+// Quick entry (docs/QUICK_ENTRY.md): one line, "almuerzo 25.000 pagó Ana", and the expense is logged.
+// The phone reads the phrase as it's typed or dictated (src/lib/quickEntry.ts); the draft card shows exactly what will
+// be saved, and any field changes in place (src/ui/QuickDraftCard.tsx). Only when the phone isn't sure, a Premium
+// couple's phrase goes to the AI (src/api/quickEntry.ts), which also reads receipt photos. Nothing is saved without a
+// tap on Agregar gasto; it goes through upsert_expense like the form. Formulario (top right) opens the full form.
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocales } from 'expo-localization';
 import { router } from 'expo-router';
@@ -17,17 +18,24 @@ import { dictationAvailable, dictationNeedsExplanation, useDictation } from '@/a
 import { daysAgo } from '@/lib/dates';
 import { formatMoney, type Currency } from '@/lib/money';
 import { canUseFeature } from '@/lib/plans';
-import { parseQuickEntry, type QuickEntryContext, type QuickEntryResult, type Who } from '@/lib/quickEntry';
-import { canSaveQuick, draftFromAi, nextCategory, nextDate, nextPayer, nextSplit, recognitionLocale, withChoices, type ChipChoices, type EntrySource } from '@/lib/quickSheet';
+import { parseQuickEntry, type QuickEntryContext, type QuickEntryResult } from '@/lib/quickEntry';
+import { canSaveQuick, draftFromAi, recognitionLocale, withChoices, type ChipChoices, type EntrySource } from '@/lib/quickSheet';
+import { Callout, Field } from '@/ui/Form';
 import { Icon, type IconName } from '@/ui/Icon';
 import { openPaywall } from '@/ui/Premium';
+import { QuickDraftCard, type DraftOrigin } from '@/ui/QuickDraftCard';
 import { Loading, NavButton } from '@/ui/Screen';
 import { showToast } from '@/ui/Toast';
 import { font, noFocusRing, radius, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
 
-const EXAMPLE_AMOUNT: Record<Currency, string> = { COP: '25.000', EUR: '12,50', USD: '12.50' };
+/** Example amounts for the placeholder and the "Prueba con" lines, in each currency's own format. */
+const EXAMPLES: Record<Currency, { small: string; medium: string; large: string }> = {
+  COP: { small: '4.500', medium: '85.000', large: '2,4 M' },
+  EUR: { small: '3,80', medium: '42,50', large: '1.200' },
+  USD: { small: '4.50', medium: '42.50', large: '1,800' },
+};
 /** Ask the AI once typing pauses, not on every key. */
 const AI_DELAY_MS = 900;
 
@@ -41,7 +49,7 @@ export default function QuickExpense() {
 }
 
 function QuickSheet({ couple }: { couple: Couple }) {
-  const { m, d: dl, language } = useI18n();
+  const { m, language } = useI18n();
   const { color, type, categories } = useTheme();
   const styles = useStyles();
   const client = useQueryClient();
@@ -51,33 +59,32 @@ function QuickSheet({ couple }: { couple: Couple }) {
 
   const today = daysAgo(0);
   const ctx = useMemo<QuickEntryContext>(() => ({ ...couple, today, language }), [couple, today, language]);
+  const examples = EXAMPLES[couple.currency];
+  const input = useRef<TextInput>(null);
 
   const [text, setText] = useState('');
   const [source, setSource] = useState<EntrySource>('text');
   const [choices, setChoices] = useState<ChipChoices>({});
   // The AI's reading of one exact text; typing on makes it stale and the phone's reading shows again.
   const [ai, setAi] = useState<{ text: string; result: QuickEntryResult } | null>(null);
-  // A receipt's reading; while it's there, the field edits its description.
-  const [receipt, setReceipt] = useState<QuickEntryResult | null>(null);
+  // A receipt's reading and its photo; typing a phrase replaces it.
+  const [receipt, setReceipt] = useState<{ result: QuickEntryResult | null; uri: string } | null>(null);
   const [aiStatus, setAiStatus] = useState<AiStatus>('idle');
   const [notice, setNotice] = useState<string | null>(null);
-  const input = useRef<TextInput>(null);
   const asked = useRef(0);
 
   const local = useMemo(() => parseQuickEntry(text, ctx), [text, ctx]);
-  const base: QuickEntryResult = receipt
-    ? { ...receipt, draft: { ...receipt.draft, description: text.trim() || receipt.draft.description } }
-    : ai?.text === text
-      ? ai.result
-      : local;
+  const fromAi = !receipt && ai?.text === text;
+  const base: QuickEntryResult = receipt?.result ?? (fromAi && ai ? ai.result : local);
   const result = withChoices(base, choices, ctx);
   const ready = canSaveQuick(result);
-  const hasInput = text.trim() !== '' || receipt !== null;
+  const reading = aiStatus === 'reading';
+  const hasDraft = text.trim() !== '' || receipt !== null;
 
   // The AI only when the phone isn't sure, and never for another currency (it can't change that).
   const worthAsking = !receipt && local.confidence === 'low' && text.trim().length >= 3 && local.missing.some((g) => g !== 'currency');
   // A receipt being read shows whatever is typed; an answer about an older text doesn't.
-  const shownStatus: AiStatus = aiStatus === 'reading' || worthAsking ? aiStatus : 'idle';
+  const shownStatus: AiStatus = reading || worthAsking ? aiStatus : 'idle';
   useEffect(() => {
     const trimmed = text.trim();
     if (!worthAsking) {
@@ -104,11 +111,21 @@ function QuickSheet({ couple }: { couple: Couple }) {
   const onChangeText = (value: string) => {
     setText(value);
     setNotice(null);
-    if (value.trim() === '') {
+    // Typing starts a new expense: a receipt read before is dropped, and so are the choices made for an empty draft.
+    if (receipt) {
       setReceipt(null);
       setChoices({});
       setSource('text');
     }
+    if (value.trim() === '') {
+      setChoices({});
+      setSource('text');
+    }
+  };
+  // An example fills the field and keeps the keyboard up, so it can be edited straight away.
+  const tryExample = (example: string) => {
+    onChangeText(example);
+    input.current?.focus();
   };
 
   // ─── Voice ───
@@ -120,8 +137,9 @@ function QuickSheet({ couple }: { couple: Couple }) {
     setText(heard);
     setNotice(null);
   });
+  const listening = dictation.state === 'listening';
   const toggleDictation = async () => {
-    if (dictation.state === 'listening') return dictation.stop();
+    if (listening) return dictation.stop();
     if (await dictationNeedsExplanation()) {
       Alert.alert(m.quick.micTitle, m.quick.micWhy, [
         { text: m.quick.cancel, style: 'cancel' },
@@ -139,15 +157,19 @@ function QuickSheet({ couple }: { couple: Couple }) {
     if (picked.kind === 'denied') return setNotice(m.quick.receiptDenied);
     if (picked.kind === 'failed') return setNotice(m.quick.receiptFailed);
     if (picked.kind === 'cancelled') return;
+    setText('');
+    setAi(null);
+    setChoices({});
+    setSource('receipt');
+    setReceipt({ result: null, uri: picked.uri });
     setAiStatus('reading');
     const answer = await askAi({ mode: 'receipt', image: picked.base64, today, language });
-    if (answer.kind !== 'draft') return setAiStatus(answer.kind);
-    const read = draftFromAi(answer.draft, ctx);
-    setReceipt(read);
-    setText(read.draft.description);
-    setSource('receipt');
-    setChoices({});
-    setAi(null);
+    if (answer.kind !== 'draft') {
+      setReceipt(null);
+      setSource('text');
+      return setAiStatus(answer.kind);
+    }
+    setReceipt({ result: draftFromAi(answer.draft, ctx), uri: picked.uri });
     setAiStatus('idle');
   };
   const openReceipt = () => {
@@ -158,10 +180,14 @@ function QuickSheet({ couple }: { couple: Couple }) {
       { text: m.quick.receiptLibrary, onPress: () => void readReceipt('library') },
     ]);
   };
+  const removeReceipt = () => {
+    setReceipt(null);
+    setChoices({});
+    setSource('text');
+  };
 
   // ─── Save, or hand over to the form ───
   const { draft } = result;
-  const category = categories[draft.category];
   const undo = async (id: string) => {
     try {
       await deleteExpense(id);
@@ -172,12 +198,12 @@ function QuickSheet({ couple }: { couple: Couple }) {
     }
   };
   const submit = () => {
-    if (!ready || draft.amountMinor === undefined || save.isPending) return;
+    if (!ready || draft.amountMinor === undefined || save.isPending || reading) return;
     const expense: ExpenseInput = {
       paidBy: draft.paidBy,
       amountMinor: draft.amountMinor,
       category: draft.category,
-      description: draft.description || category.name,
+      description: draft.description || categories[draft.category].name,
       spentOn: draft.spentOn,
       splitMode: draft.splitMode,
       splitPct: draft.splitPct,
@@ -194,50 +220,34 @@ function QuickSheet({ couple }: { couple: Couple }) {
     });
   };
   const openForm = () => {
-    if (!hasInput) return router.replace('/expense/new');
+    if (!hasDraft || reading) return router.replace('/expense/new');
     router.replace({ pathname: '/expense/new', params: { draft: JSON.stringify(draft), source } });
   };
 
-  // ─── What the chips say ───
-  const payer: Who = draft.paidBy === couple.partner.id && couple.partner.id ? 'partner' : 'me';
-  const payerName = payer === 'me' ? couple.me.name : couple.partner.name;
-  const otherName = payer === 'me' ? couple.partner.name : couple.me.name;
-  const myPct = draft.splitPct == null ? null : payer === 'me' ? draft.splitPct : 100 - draft.splitPct;
-  const splitLabel =
-    draft.splitMode === 'half'
-      ? m.expense.splitHalf
-      : draft.splitMode === 'pct' && myPct != null
-        ? `${couple.me.name} ${myPct}% · ${couple.partner.name} ${100 - myPct}%`
-        : draft.splitMode === 'other'
-          ? m.expense.splitOther(otherName)
-          : m.expenseForm.personal(payerName);
-  const amountLabel = draft.amountMinor !== undefined ? formatMoney(draft.amountMinor, couple.currency) : m.quick.amountMissing;
-  const asks = new Set(hasInput ? result.missing : []);
-
-  const gap = result.missing[0];
-  const gapLine = !hasInput || !gap
+  // ─── What to say: one blocking question first, then what the AI or the phone reports ───
+  const gap = result.missing.find((g) => g !== 'review');
+  const gapLine = !hasDraft || reading || !gap
     ? null
     : gap === 'currency' && result.foreignCurrency
       ? m.quick.gaps.currency(result.foreignCurrency, couple.currency)
       : gap === 'currency'
         ? m.quick.gaps.amount
         : m.quick.gaps[gap];
-  const aiLine =
-    shownStatus === 'thinking' ? m.quick.thinking
-      : shownStatus === 'reading' ? m.quick.readingReceipt
-        : shownStatus === 'premium' ? m.quick.aiUpsell
-          : shownStatus === 'limit' ? m.quick.aiLimit
-            : shownStatus === 'offline' ? m.quick.aiOffline
-              : shownStatus === 'unreadable' ? m.quick.aiUnreadable
-                : shownStatus === 'failed' ? m.quick.aiFailed
-                  : null;
+  const reviewLine = receipt?.result ? m.quick.receiptReview : hasDraft && result.missing.includes('review') ? m.quick.gaps.review : null;
+  const statusLine =
+    shownStatus === 'premium' ? m.quick.aiUpsell
+      : shownStatus === 'limit' ? m.quick.aiLimit
+        : shownStatus === 'offline' ? m.quick.aiOffline
+          : shownStatus === 'unreadable' ? m.quick.aiUnreadable
+            : shownStatus === 'failed' ? m.quick.aiFailed
+              : null;
   const micLine =
-    dictation.state === 'listening' ? m.quick.listening
-      : dictation.error === 'denied' ? m.quick.micDenied
-        : dictation.error === 'none' ? m.quick.micNone
-          : dictation.error === 'failed' ? m.quick.micFailed
-            : null;
-  const lines = [save.isError ? m.expense.saveFailed : null, notice, micLine, gapLine, aiLine].filter((l): l is string => !!l);
+    dictation.error === 'denied' ? m.quick.micDenied
+      : dictation.error === 'none' ? m.quick.micNone
+        : dictation.error === 'failed' ? m.quick.micFailed
+          : null;
+  const messages = [save.isError ? m.expense.saveFailed : null, notice, micLine, gapLine, reviewLine, statusLine].filter((l): l is string => !!l);
+  const origin: DraftOrigin = receipt ? 'receipt' : fromAi ? 'ai' : source === 'voice' ? 'voice' : 'text';
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -246,145 +256,127 @@ function QuickSheet({ couple }: { couple: Couple }) {
           <Pressable accessibilityRole="button" accessibilityLabel={m.ui.close} onPress={() => router.back()} style={styles.iconButton}>
             <Icon name="close" size={22} color={color.ink} />
           </Pressable>
-          <Text style={type.bar} accessibilityRole="header">
+          <Text style={[type.bar, styles.flex]} accessibilityRole="header">
             {m.quick.title}
           </Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={m.quick.formA11y} onPress={openForm} style={styles.headerAction}>
+            <Text style={styles.headerActionText}>{m.quick.form}</Text>
+          </Pressable>
         </View>
 
         <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <TextInput
-            ref={input}
-            accessibilityLabel={m.quick.inputA11y}
-            accessibilityHint={m.quick.hint}
-            value={text}
-            onChangeText={onChangeText}
-            placeholder={m.quick.placeholder(m.quick.example, EXAMPLE_AMOUNT[couple.currency], couple.partner.name)}
-            placeholderTextColor={color.disabled}
-            autoFocus
-            autoCorrect={false}
-            maxLength={MAX_TEXT}
-            returnKeyType="done"
-            submitBehavior={ready ? 'blurAndSubmit' : 'submit'}
-            onSubmitEditing={submit}
-            style={styles.input}
-          />
-          {!hasInput && <Text style={styles.hint}>{m.quick.hint}</Text>}
+          <Field label={m.quick.inputLabel} hint={hasDraft || listening ? undefined : m.quick.inputHint}>
+            <View style={[styles.composer, listening && styles.composerOn]}>
+              <TextInput
+                ref={input}
+                accessibilityLabel={m.quick.inputA11y}
+                accessibilityHint={m.quick.inputHint}
+                value={text}
+                onChangeText={onChangeText}
+                placeholder={m.quick.placeholder(examples.medium, couple.partner.name)}
+                placeholderTextColor={color.textSecondary}
+                autoFocus
+                autoCorrect={false}
+                maxLength={MAX_TEXT}
+                returnKeyType="done"
+                submitBehavior={ready ? 'blurAndSubmit' : 'submit'}
+                onSubmitEditing={submit}
+                style={styles.input}
+              />
+              {canDictate && (
+                <ToolButton
+                  icon="mic"
+                  label={listening ? m.quick.stopDictatingA11y : m.quick.dictateA11y}
+                  on={listening}
+                  onPress={() => void toggleDictation()}
+                />
+              )}
+              <ToolButton icon="camera" label={m.quick.receiptA11y} busy={reading} onPress={openReceipt} />
+            </View>
+          </Field>
+          {listening && (
+            <Text style={styles.listening} accessibilityLiveRegion="polite">
+              {m.quick.listening}
+            </Text>
+          )}
 
-          <View style={styles.tools}>
-            {canDictate && (
-              <Tool
-                icon="mic"
-                label={dictation.state === 'listening' ? m.quick.stopDictating : m.quick.dictate}
-                a11y={dictation.state === 'listening' ? m.quick.stopDictatingA11y : m.quick.dictateA11y}
-                on={dictation.state === 'listening'}
-                onPress={() => void toggleDictation()}
-              />
-            )}
-            <Tool icon="camera" label={m.quick.receipt} a11y={m.quick.receiptA11y} busy={aiStatus === 'reading'} onPress={openReceipt} />
-          </View>
-
-          {hasInput && (
-            <View style={styles.chips}>
-              <Chip
-                label={amountLabel}
-                a11y={draft.amountMinor !== undefined ? m.quick.amountA11y(amountLabel) : m.quick.amountMissingA11y}
-                ask={asks.has('amount') || asks.has('currency')}
-                onPress={() => input.current?.focus()}
-              />
-              <Chip
-                label={category.name}
-                a11y={m.quick.categoryA11y(category.name)}
-                icon={<View style={[styles.catTile, { backgroundColor: category.tint }]}><Icon name={category.icon as IconName} size={16} color={category.color} /></View>}
-                onPress={() => setChoices((c) => ({ ...c, category: nextCategory(draft.category) }))}
-              />
-              <Chip
-                label={m.quick.payer(payerName)}
-                a11y={m.quick.payerA11y(payerName)}
-                hint={couple.partnerJoined ? undefined : m.expenseForm.partnerNotYet}
-                ask={asks.has('payer')}
-                onPress={() => setChoices((c) => ({ ...c, payer: nextPayer(payer, ctx) }))}
-              />
-              <Chip
-                label={splitLabel}
-                a11y={m.quick.splitA11y(splitLabel)}
-                ask={asks.has('split')}
-                onPress={() => setChoices((c) => ({ ...c, split: nextSplit(result.split, payer, ctx) }))}
-              />
-              <Chip
-                label={dl.chipDate(draft.spentOn)}
-                a11y={m.quick.dateA11y(dl.longDate(draft.spentOn))}
-                ask={asks.has('date')}
-                onPress={() => setChoices((c) => ({ ...c, spentOn: nextDate(draft.spentOn, today) }))}
-              />
+          {!hasDraft && !listening && (
+            <View style={styles.examples}>
+              <Text style={styles.examplesLabel}>{m.quick.tryLabel}</Text>
+              <View style={styles.exampleChips}>
+                {[m.quick.example1(examples.small), m.quick.example2(examples.medium, couple.partner.name), m.quick.example3(examples.large)].map((e) => (
+                  <Pressable
+                    key={e}
+                    accessibilityRole="button"
+                    accessibilityLabel={m.quick.exampleA11y(e)}
+                    onPress={() => tryExample(e)}
+                    style={({ pressed }) => [styles.example, pressed && styles.examplePressed]}
+                  >
+                    <Text style={styles.exampleText}>{e}</Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
           )}
 
-          {lines.length > 0 && (
-            <View style={styles.lines} accessibilityLiveRegion="polite">
-              {lines.map((line) => (
-                <Text key={line} style={styles.line}>
+          {messages.length > 0 && (
+            <View style={{ gap: space[2] }} accessibilityLiveRegion="polite">
+              {messages.map((line) => (
+                <Callout key={line} icon="bell" tone={line === gapLine ? 'info' : 'neutral'}>
                   {line}
-                </Text>
+                </Callout>
               ))}
-              {shownStatus === 'premium' && (
-                <Pressable accessibilityRole="button" onPress={() => openPaywall('aiEntry')} style={styles.link}>
-                  <Text style={styles.linkText}>{m.premium.see}</Text>
-                </Pressable>
-              )}
+              {shownStatus === 'premium' && <NavButton label={m.premium.see} kind="secondary" onPress={() => openPaywall('aiEntry')} />}
             </View>
+          )}
+
+          {(hasDraft || reading) && (
+            <QuickDraftCard
+              couple={couple}
+              result={result}
+              origin={origin}
+              today={today}
+              photoUri={receipt?.uri}
+              reading={reading}
+              thinking={shownStatus === 'thinking'}
+              onChoose={(choice) => setChoices((c) => ({ ...c, ...choice }))}
+              onRemoveReceipt={receipt?.result ? removeReceipt : undefined}
+            />
           )}
         </ScrollView>
 
         <View style={styles.footer}>
           <NavButton
-            label={save.isPending ? m.expenseForm.saving : ready ? m.quick.save : m.quick.review}
-            disabled={!hasInput || aiStatus === 'reading'}
+            label={save.isPending ? m.expenseForm.saving : m.quick.save}
+            disabled={!ready || reading}
             loading={save.isPending}
-            onPress={ready ? submit : openForm}
+            onPress={submit}
           />
-          <Pressable accessibilityRole="button" onPress={openForm} style={styles.link}>
-            <Text style={styles.linkText}>{m.quick.more}</Text>
-          </Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-/** One tap changes it. A chip that needs an answer has a heavier border, and the line below says why in words. */
-function Chip({ label, a11y, hint, icon, ask, onPress }: { label: string; a11y: string; hint?: string; icon?: React.ReactNode; ask?: boolean; onPress: () => void }) {
-  const { type } = useTheme();
-  const styles = useStyles();
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel={a11y} accessibilityHint={hint} onPress={onPress} style={[styles.chip, ask && styles.chipAsk]}>
-      {icon}
-      <Text style={[type.label, styles.chipText]} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function Tool({ icon, label, a11y, on, busy, onPress }: { icon: IconName; label: string; a11y: string; on?: boolean; busy?: boolean; onPress: () => void }) {
-  const { color, type } = useTheme();
+function ToolButton({ icon, label, on, busy, onPress }: { icon: IconName; label: string; on?: boolean; busy?: boolean; onPress: () => void }) {
+  const { color } = useTheme();
   const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={a11y}
+      accessibilityLabel={label}
       accessibilityState={{ busy: !!busy, selected: !!on }}
       disabled={busy}
       onPress={onPress}
-      style={[styles.tool, on && styles.toolOn, busy && { opacity: 0.5 }]}
+      style={[styles.tool, on && styles.toolOn, busy && { opacity: 0.4 }]}
     >
-      <Icon name={icon} size={20} color={on ? color.onPrimary : color.ink} />
-      <Text style={[type.label, styles.toolText, on && { color: color.onPrimary }]}>{label}</Text>
+      <Icon name={icon} size={22} color={on ? color.onPrimary : color.ink} />
     </Pressable>
   );
 }
 
 const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
-  safe: { flex: 1, backgroundColor: color.surface },
+  safe: { flex: 1, backgroundColor: color.background },
   flex: { flex: 1 },
   header: {
     height: 56,
@@ -392,54 +384,44 @@ const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
     alignItems: 'center',
     gap: space[1],
     paddingHorizontal: space[2],
+    backgroundColor: color.surface,
     borderBottomWidth: 1,
     borderBottomColor: color.line,
   },
   iconButton: { width: touch, height: touch, alignItems: 'center', justifyContent: 'center' },
+  headerAction: { minHeight: touch, minWidth: touch, paddingHorizontal: space[3], alignItems: 'center', justifyContent: 'center' },
+  headerActionText: { ...type.row, color: color.ink, fontFamily: font.bodyBold, textDecorationLine: 'underline' },
   content: { padding: space[5], gap: space[4] },
-  input: {
-    ...type.body,
-    fontSize: 20,
-    minHeight: 56,
-    borderBottomWidth: 2,
-    borderBottomColor: color.ink,
-    paddingVertical: space[2],
-    color: color.ink,
-    ...noFocusRing,
-  },
-  hint: { ...type.label, color: color.textSecondary, fontFamily: font.body },
-  tools: { flexDirection: 'row', gap: space[2] },
-  tool: {
-    minHeight: touch,
+  composer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space[2],
+    minHeight: 60,
+    paddingLeft: space[4],
+    paddingRight: space[1],
+    gap: space[1],
+    borderRadius: radius.control,
+    borderWidth: 1,
+    borderColor: color.fieldBorder,
+    backgroundColor: color.surface,
+  },
+  composerOn: { borderColor: color.ink, borderWidth: 2 },
+  input: { ...type.body, flex: 1, fontSize: 18, minHeight: 56, color: color.ink, ...noFocusRing },
+  tool: { width: touch, height: touch, borderRadius: touch / 2, alignItems: 'center', justifyContent: 'center' },
+  toolOn: { backgroundColor: color.ink },
+  listening: { ...type.label, color: color.ink, fontFamily: font.bodyBold },
+  examples: { gap: space[2] },
+  examplesLabel: { ...type.label, color: color.textSecondary },
+  exampleChips: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  example: {
+    minHeight: touch,
     paddingHorizontal: space[4],
     borderRadius: touch / 2,
     borderWidth: 1,
     borderColor: color.fieldBorder,
-  },
-  toolOn: { backgroundColor: color.ink, borderColor: color.ink },
-  toolText: { color: color.ink, fontFamily: font.bodyBold, fontSize: 14 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  chip: {
-    minHeight: touch,
-    maxWidth: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[2],
-    paddingHorizontal: 14,
-    borderRadius: radius.option,
-    borderWidth: 1,
-    borderColor: color.line,
     backgroundColor: color.surface,
+    justifyContent: 'center',
   },
-  chipAsk: { borderWidth: 2, borderColor: color.ink, borderStyle: 'dashed' },
-  chipText: { color: color.ink, fontFamily: font.bodyBold, fontSize: 14, flexShrink: 1 },
-  catTile: { width: 24, height: 24, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  lines: { gap: space[1] },
-  line: { ...type.label, color: color.textSecondary, fontFamily: font.body, fontSize: 14, lineHeight: 20 },
-  link: { minHeight: touch, alignSelf: 'center', justifyContent: 'center', paddingHorizontal: space[3] },
-  linkText: { ...type.label, color: color.ink, fontFamily: font.bodyBold, textDecorationLine: 'underline' },
-  footer: { paddingHorizontal: space[5], paddingTop: space[3], paddingBottom: space[3], gap: space[1], borderTopWidth: 1, borderTopColor: color.line },
+  examplePressed: { backgroundColor: color.neutralTint },
+  exampleText: { ...type.row, color: color.ink },
+  footer: { paddingHorizontal: space[5], paddingTop: space[3], paddingBottom: space[3], backgroundColor: color.surface, borderTopWidth: 1, borderTopColor: color.line },
 }));
