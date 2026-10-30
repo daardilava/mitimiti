@@ -24,6 +24,7 @@ const pairs: Pair[] = [
   ['textSecondary', 'surface', TEXT, 'labels and metadata on cards'],
   ['textSecondary', 'background', TEXT, 'day headings, hints on the background'],
   ['textSecondary', 'neutralTint', TEXT, 'neutral notices'],
+  ['ink', 'neutralTint', TEXT, 'days inside a picked range (Movimientos › Rango)'],
   ['tabInactive', 'surface', TEXT, 'inactive tab labels'],
   ['me', 'surface', TEXT, 'links ("Ver todos"), my avatar letter'],
   ['me', 'meTint', TEXT, 'my avatar'],

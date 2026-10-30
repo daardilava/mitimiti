@@ -381,6 +381,18 @@ export const es = {
     goToday: 'Ir a hoy',
     /** Calendar cell: "Lunes 12 de octubre, con movimientos" */
     withActivity: (label: string) => `${label}, con movimientos`,
+    range: 'Rango',
+    periodLabel: 'Ver por',
+    pickRange: 'Elegir fechas',
+    rangeTapFirst: 'Toca el primer día',
+    rangeTapFirstHint: 'Luego toca el último. Para un solo día, tócalo dos veces.',
+    rangeTapLast: (start: string) => `Desde ${start}`,
+    rangeTapLastHint: 'Ahora toca el último día, o muestra solo este.',
+    rangeDays: (days: number) => (days === 1 ? '1 día' : `${days} días`),
+    showRange: 'Ver movimientos',
+    emptyRange: 'Sin movimientos en estas fechas',
+    /** Calendar cell inside the picked range: "Lunes 12 de octubre, en el rango" */
+    inRange: (label: string) => `${label}, en el rango`,
   },
 
   summaryScreen: {

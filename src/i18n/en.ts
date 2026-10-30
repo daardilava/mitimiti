@@ -352,6 +352,17 @@ export const en: Messages = {
     pickMonth: 'Choose a month',
     goToday: 'Go to today',
     withActivity: (label) => `${label}, has activity`,
+    range: 'Range',
+    periodLabel: 'Show by',
+    pickRange: 'Choose dates',
+    rangeTapFirst: 'Tap the first day',
+    rangeTapFirstHint: 'Then tap the last one. For a single day, tap it twice.',
+    rangeTapLast: (start) => `From ${start}`,
+    rangeTapLastHint: 'Now tap the last day, or show just this one.',
+    rangeDays: (days) => (days === 1 ? '1 day' : `${days} days`),
+    showRange: 'Show activity',
+    emptyRange: 'Nothing on these dates',
+    inRange: (label) => `${label}, in the range`,
   },
 
   summaryScreen: {

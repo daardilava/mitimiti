@@ -355,6 +355,17 @@ export const de: Messages = {
     pickMonth: 'Monat wählen',
     goToday: 'Zu heute',
     withActivity: (label) => `${label}, mit Umsätzen`,
+    range: 'Zeitraum',
+    periodLabel: 'Anzeigen nach',
+    pickRange: 'Zeitraum wählen',
+    rangeTapFirst: 'Tippe auf den ersten Tag',
+    rangeTapFirstHint: 'Dann auf den letzten. Für einen einzelnen Tag tippe ihn zweimal an.',
+    rangeTapLast: (start) => `Ab ${start}`,
+    rangeTapLastHint: 'Tippe jetzt auf den letzten Tag oder zeige nur diesen.',
+    rangeDays: (days) => (days === 1 ? '1 Tag' : `${days} Tage`),
+    showRange: 'Umsätze anzeigen',
+    emptyRange: 'Keine Umsätze in diesem Zeitraum',
+    inRange: (label) => `${label}, im Zeitraum`,
   },
 
   summaryScreen: {

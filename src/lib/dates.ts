@@ -36,6 +36,14 @@ export function addDays(iso: string, n: number): string {
   return isoDate(new Date(y, m - 1, d + n));
 }
 
+/** Calendar days from `from` to `to` (YYYY-MM-DD): 0 for the same day, negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  const [y1, m1, d1] = parts(from);
+  const [y2, m2, d2] = parts(to);
+  // UTC on both sides, so a daylight-saving change in between doesn't shift the count by an hour.
+  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86_400_000);
+}
+
 /** Monday of the week that holds `iso` (weeks run Monday to Sunday). */
 export function weekStart(iso: string): string {
   const [y, m, d] = parts(iso);
@@ -105,6 +113,14 @@ export function dateLabels(w: DateWords) {
       const [, m2, d2] = parts(sunday);
       return m1 === m2 ? w.sameMonthWeek(d1, d2, w.monthsShort[m2 - 1]) : `${shortDate(monday)} – ${shortDate(sunday)}`;
     },
+    /** Any from–to range: "Hoy, 15 oct" (one day) · "13 – 19 oct" · "29 sep – 5 oct" · "20 dic 2025 – 5 ene 2026". */
+    rangeLabel: (start: string, end: string, today = new Date()) => {
+      if (start === end) return longDate(start, today);
+      const [y1, m1, d1] = parts(start);
+      const [y2, m2, d2] = parts(end);
+      if (y1 !== y2) return `${shortDate(start)} ${y1} – ${shortDate(end)} ${y2}`;
+      return m1 === m2 ? w.sameMonthWeek(d1, d2, w.monthsShort[m2 - 1]) : `${shortDate(start)} – ${shortDate(end)}`;
+    },
     /** Short month names, January first: "ene" · "Jan" · "Jan.". */
     monthsShort: w.monthsShort,
     /** One letter per weekday for chart axes, Monday first. */
@@ -115,5 +131,5 @@ export function dateLabels(w: DateWords) {
 export type DateLabels = ReturnType<typeof dateLabels>;
 
 const spanish = dateLabels(es.dates);
-export const { shortDate, chipDate, longDate, dayHeading, monthLabel, monthTitle, monthName, monthNameOf, weekLabel } = spanish;
+export const { shortDate, chipDate, longDate, dayHeading, monthLabel, monthTitle, monthName, monthNameOf, weekLabel, rangeLabel } = spanish;
 export const WEEKDAY_INITIALS = spanish.weekdayInitials;
