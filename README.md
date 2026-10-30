@@ -136,7 +136,7 @@ Set `EXPO_PUBLIC_DEV_BYPASS_AUTH=1` in `.env`. Sign-in is skipped and every scre
 sample data.
 
 ```bash
-npx expo start            # scan the QR code with Expo Go, or press a / i / w
+npm run go                # = npx expo start --go: scan the QR code with Expo Go, or press a / i / w
 ```
 
 ### 3. Run against a real backend
@@ -176,15 +176,18 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 | --- | --- |
 | `REVENUECAT_WEBHOOK_AUTH` | The billing webhook: the secret RevenueCat sends in its Authorization header (with or without `Bearer `) |
 | `REVENUECAT_SECRET_API_KEY` | `billing-sync`: RevenueCat secret API key (`sk_…`), to read a customer's current state |
+| `ANTHROPIC_API_KEY` | `parse-expense`: Claude API key, for quick entry's AI reading (Premium) |
 
 ## Scripts
 
 | Command | What it does |
 | --- | --- |
-| `npx expo start` | Start the dev server |
+| `npm run go` | Start the dev server for **Expo Go** (`expo start --go`). Plain `npx expo start` targets a development build, because `expo-dev-client` is installed, and Expo Go can't open its QR code |
+| `npx expo start` | Start the dev server for a development build |
 | `npm run typecheck` | TypeScript, no emit |
 | `npx expo lint` | ESLint (Expo config) |
 | `npm test` | All Vitest suites, app logic and SQL |
+| `npm run eval:quick-entry` | Quick entry's golden phrases against the real model (needs `ANTHROPIC_API_KEY`; costs money, never in CI) |
 | `npm run clerk:check` | Check that the Clerk instance in `.env` is configured the way the app signs in |
 | `npm run db:start` | Start local Supabase (Docker) |
 | `npm run db:reset` | Recreate the local database from `supabase/migrations` |
@@ -280,6 +283,34 @@ a purchase, or Restaurar compras) to read the person's current state from Revenu
 4. The function answers 200 for everything it handled (duplicates and `TEST` included), 401 without the right
    header, 400 for a body that isn't an event, and 500 when the database fails, so RevenueCat retries.
    Logs: Supabase Dashboard › Edge Functions › revenuecat-webhook › Logs.
+
+### Deploy quick entry
+
+Quick entry ([docs/QUICK_ENTRY.md](docs/QUICK_ENTRY.md)) reads a typed or dictated phrase on the phone. Only for
+Premium couples, and only when the phone isn't sure (or for a receipt photo), the
+[`parse-expense`](supabase/functions/parse-expense/index.ts) function asks Claude (`claude-haiku-5-5`). Push
+`20261029000000_quick_entry.sql` first: it adds `expenses.source`, `upsert_expense(…, p_source)` and
+`claim_ai_call()`, the Premium check and daily limit per couple.
+
+1. Store the Claude API key (Claude Console › API keys):
+   ```bash
+   npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-your-key
+   ```
+2. Deploy it. Like `billing-sync`, the app sends Clerk's token, which the gateway can't verify, so the function checks
+   the caller itself through Supabase (`claim_ai_call()` with the caller's token):
+   ```bash
+   npx supabase functions deploy parse-expense --no-verify-jwt
+   ```
+3. Check it against the golden phrases before shipping a prompt change (costs a few cents per run):
+   ```bash
+   ANTHROPIC_API_KEY=sk-ant-your-key npm run eval:quick-entry
+   ```
+4. It answers 200 with a draft, 401 without a valid session, 403 for a Free couple, 429 past the daily limit, 422 when
+   the model can't read it and 502 when the model fails. It never logs the phrase or the image.
+
+Dictation uses the phone's speech recognition (`expo-speech-recognition`, native code): it needs a development build
+(`npx expo run:android` / `run:ios`, or `eas build --profile development`). In Expo Go the mic button is hidden and
+typing, receipts and the AI still work.
 
 ## Engineering rules
 

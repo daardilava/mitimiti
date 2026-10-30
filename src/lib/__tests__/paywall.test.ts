@@ -37,7 +37,8 @@ describe('defaultPackage and sortPlans', () => {
 
 describe('benefitOrder', () => {
   it('what opened the paywall comes first', () => {
-    expect(benefitOrder('export')).toEqual(['export', 'history', 'budgets', 'recurring']);
+    expect(benefitOrder('export')).toEqual(['export', 'history', 'budgets', 'aiEntry', 'recurring']);
+    expect(benefitOrder('aiEntry')[0]).toBe('aiEntry');
     expect(benefitOrder('budgets')[0]).toBe('budgets');
     expect(benefitOrder('history')[0]).toBe('history');
   });
@@ -49,7 +50,7 @@ describe('benefitOrder', () => {
 
   it('recurring expenses are not built yet', () => {
     expect(AVAILABLE.has('recurring')).toBe(false);
-    expect([...AVAILABLE]).toEqual(['history', 'budgets', 'export']);
+    expect([...AVAILABLE]).toEqual(['history', 'budgets', 'export', 'aiEntry']);
   });
 });
 

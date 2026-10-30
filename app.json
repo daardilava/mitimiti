@@ -73,7 +73,22 @@
           }
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "MitiMiti usa el micrófono solo mientras mantienes pulsado el botón de dictar, para escribir el gasto por ti.",
+          "speechRecognitionPermission": "MitiMiti convierte lo que dictas en texto para registrar el gasto. El reconocimiento lo hace tu teléfono."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "MitiMiti usa la cámara para fotografiar un recibo y leer el total. La foto no se guarda.",
+          "photosPermission": "MitiMiti abre tus fotos para que elijas un recibo y leer el total. La foto no se guarda.",
+          "microphonePermission": "MitiMiti usa el micrófono solo mientras mantienes pulsado el botón de dictar, para escribir el gasto por ti."
+        }
+      ]
     ],
     "scheme": "mitimiti",
     "experiments": {
@@ -84,6 +99,11 @@
       "eas": {
         "projectId": "4c3c3e27-80bb-41ae-a3a2-dc00768e600b"
       }
+    },
+    "locales": {
+      "es": "./locales/es.json",
+      "en": "./locales/en.json",
+      "de": "./locales/de.json"
     }
   }
 }

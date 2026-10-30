@@ -5,8 +5,11 @@ import { isoDate, monthOf, shiftMonth } from './dates';
 
 export type Plan = 'free' | 'premium';
 
-/** Premium features. `recurring` and `receiptPhoto` don't exist yet; the paywall lists them as Pronto. */
-export type Feature = 'history' | 'budgets' | 'export' | 'recurring' | 'receiptPhoto';
+/**
+ * Premium features. `aiEntry`: quick entry with AI (phrases the phone can't read, receipt photos); typing and dictation
+ * stay free. `recurring` and `receiptPhoto` (a picture kept on an expense) don't exist yet; the paywall lists them as Pronto.
+ */
+export type Feature = 'history' | 'budgets' | 'export' | 'aiEntry' | 'recurring' | 'receiptPhoto';
 
 /** Free opens the current month and the 2 before it in Movimientos and Resumen. */
 export const FREE_HISTORY_MONTHS = 3;

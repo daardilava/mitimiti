@@ -1,12 +1,13 @@
 // Expense reads and writes. With EXPO_PUBLIC_DEV_BYPASS_AUTH=1 they work on the in-memory sample
 // month from src/lib/sample.ts; otherwise they go to Supabase (tables for reads, RPCs for writes).
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toAvatarId, type AvatarId } from '@/lib/avatars';
 import { myDefaultPct, type MemberRole } from '@/lib/coupleSettings';
 import type { Currency } from '@/lib/money';
 import { balanceKeys } from './balance';
 import { avatars, ME, names, PARTNER, sampleExpenses, sampleHousehold } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
+import type { EntrySource } from '@/lib/quickSheet';
 import type { SplitMode } from '@/lib/splits';
 import { supabase } from '@/lib/supabase';
 import type { CategoryId } from '@/ui/tokens';
@@ -24,8 +25,8 @@ export interface Expense {
   splitPct?: number | null;
 }
 
-/** What the form sends. No id creates a new expense. */
-export type ExpenseInput = Omit<Expense, 'id'> & { id?: string };
+/** What the form sends. No id creates a new expense; `source` (how it was entered) is only kept on create. */
+export type ExpenseInput = Omit<Expense, 'id'> & { id?: string; source?: EntrySource };
 
 export interface Person {
   id: string;
@@ -130,7 +131,8 @@ export async function upsertExpense(input: ExpenseInput): Promise<Expense> {
   const splitPct = input.splitMode === 'pct' ? (input.splitPct ?? null) : null;
   const description = input.description.trim();
   if (DEV_BYPASS_AUTH) {
-    const saved: Expense = { ...input, id: input.id ?? `e${Date.now()}`, description, splitPct };
+    const { source: _source, ...fields } = input;
+    const saved: Expense = { ...fields, id: input.id ?? `e${Date.now()}`, description, splitPct };
     const i = sampleExpenses.findIndex((e) => e.id === saved.id);
     if (i >= 0) sampleExpenses[i] = saved;
     else sampleExpenses.unshift(saved);
@@ -145,6 +147,9 @@ export async function upsertExpense(input: ExpenseInput): Promise<Expense> {
     p_spent_on: input.spentOn,
     p_split_mode: input.splitMode,
     p_split_pct: splitPct,
+    // Only quick entries send it (the column defaults to manual), so the form also works on a database without
+    // 20261029000000_quick_entry.sql.
+    ...(input.source && !input.id ? { p_source: input.source } : {}),
   });
   if (error) throw error;
   return fromRow(data as unknown as ExpenseRow);
@@ -196,16 +201,18 @@ export function useUpsertExpense() {
   });
 }
 
+/** After a delete: drop the cache entry without refetching (no "not found" flash), then refresh lists and balance. */
+export function forgetExpense(client: QueryClient, id: string) {
+  client.removeQueries({ queryKey: expenseKeys.one(id), exact: true });
+  client.invalidateQueries({ queryKey: balanceKeys.balance });
+  return client.invalidateQueries({ queryKey: expenseKeys.all, exact: true });
+}
+
 export function useDeleteExpense() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: deleteExpense,
-    onSuccess: (_void, id) => {
-      // Drop the cache entry without refetching, so the detail screen doesn't flash "not found" while it closes.
-      client.removeQueries({ queryKey: expenseKeys.one(id), exact: true });
-      client.invalidateQueries({ queryKey: balanceKeys.balance });
-      return client.invalidateQueries({ queryKey: expenseKeys.all, exact: true });
-    },
+    onSuccess: (_void, id) => forgetExpense(client, id),
   });
 }
 

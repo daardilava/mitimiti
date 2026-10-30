@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email, city } = LEGAL_CONTACT;
 
 export const privacyDe: LegalDoc = {
-  effective: 'Gültig ab dem 23. Oktober 2026',
+  effective: 'Gültig ab dem 29. Oktober 2026',
   intro:
     'Diese Erklärung beschreibt, welche personenbezogenen Daten MitiMiti speichert, wofür, mit wem sie geteilt werden, wie lange sie aufbewahrt werden und wie du sie einsehen, berichtigen oder löschen lassen kannst.',
   sections: [
@@ -17,7 +17,8 @@ export const privacyDe: LegalDoc = {
       paragraphs: [
         'Aus deinem Konto: deinen Namen, deine E-Mail-Adresse und dein Passwort. Das Passwort speichert unser Anmeldedienst verschlüsselt; wir sehen es nie. Wenn du dich mit Google oder Apple anmeldest, erhalten wir von dort deinen Namen, deine E-Mail-Adresse und eine Kennung. Aus Sicherheitsgründen erfasst der Anbieter außerdem deine Sitzungen, das Gerät und die IP-Adresse, von der du dich anmeldest.',
         'Vom Paar: den Namen jeder Person (auch den Namen, mit dem du deinen Partner oder deine Partnerin einlädst, bevor er oder sie beitritt), den Avatar, die Währung, die Standardaufteilung und den Einladungscode.',
-        'Was ihr erfasst: jede Ausgabe (Betrag, Beschreibung, Kategorie, Datum, wer bezahlt hat und wie sie aufgeteilt wird), jede Zahlung zwischen euch (Betrag, Zahlungsart und Datum) und die Budgets.',
+        'Was ihr erfasst: jede Ausgabe (Betrag, Beschreibung, Kategorie, Datum, wer bezahlt hat, wie sie aufgeteilt wird und wie sie erfasst wurde: im Formular, getippt, diktiert oder per Belegfoto), jede Zahlung zwischen euch (Betrag, Zahlungsart und Datum) und die Budgets.',
+        'Wenn du die schnelle Erfassung nutzt: Beim Diktieren übernimmt dein Telefon die Spracherkennung (die von Apple oder Google, nach deren Richtlinien), und MitiMiti erhält nur den Text, nie den Ton. Wenn ihr das Lesen mit KI nutzt (Premium), wird der getippte Satz oder das Belegfoto gesendet, um die Ausgabe vorzuschlagen, und nicht gespeichert: Weder das Foto noch der Satz bleiben bei MitiMiti, nur die Ausgabe, die du bestätigst.',
         'Einen Änderungsverlauf: wer jede Ausgabe oder Zahlung erstellt, bearbeitet oder gelöscht hat, und wann. Außerdem speichern wir Versuche, mit einem Code beizutreten, um Missbrauch zu verhindern.',
         'Wenn das Paar Premium kauft: Der Store (Apple oder Google) wickelt die Zahlung ab, und wir sehen weder deine Karte noch deine Zahlungsdaten. Über RevenueCat erhalten wir den Status des Abos, verknüpft mit deinem Konto: das Produkt, den Store, ob es ein Test ist, die Kauf-, Verlängerungs- und Enddaten und die Meldungen des Stores zu diesem Kauf.',
         'Auf deinem Telefon bleiben deine Sitzung, im sicheren Speicher des Systems, und deine Einstellungen für Sprache und Darstellung.',
@@ -45,6 +46,7 @@ export const privacyDe: LegalDoc = {
         'Mit deinem Partner oder deiner Partnerin: Diese Person sieht alles, was in eurem Bereich geteilt wird, auch deinen Namen und deinen Avatar.',
         'Mit den Anbietern, die uns beim Betrieb helfen und deine Daten nur dafür und nach unseren Anweisungen nutzen: Clerk (Anmeldung, Vereinigte Staaten) und Supabase (Datenbank, gehostet in Irland, Europäische Union). Wenn du dich mit Google oder Apple anmeldest, sind auch sie an der Anmeldung beteiligt.',
         'Wenn ihr Premium kauft: RevenueCat (Abo-Verwaltung, Vereinigte Staaten) erhält deine Konto-Kennung und den Status des Kaufs, und Apple oder Google wickeln die Zahlung als Verantwortliche ihres eigenen Stores nach ihren Richtlinien ab.',
+        'Wenn ihr das Lesen mit KI nutzt: Anthropic (KI-Modell, Vereinigte Staaten) erhält den Satz oder das Belegfoto, das heutige Datum, die Währung des Paares und den Vornamen von jedem von euch, nur um den Entwurf der Ausgabe vorzuschlagen. Anthropic erhält weder den Saldo noch eure anderen Ausgaben.',
         'Mit Behörden, nur wenn das Gesetz es verlangt.',
       ],
     },

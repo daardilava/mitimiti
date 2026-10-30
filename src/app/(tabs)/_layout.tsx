@@ -39,10 +39,10 @@ export default function TabsLayout() {
           ),
         }}
         listeners={{
-          // The centre button opens the New expense modal instead of a tab.
+          // The centre button opens quick entry instead of a tab; its "Más opciones" leads to the full form.
           tabPress: (e) => {
             e.preventDefault();
-            router.push('/expense/new');
+            router.push('/expense/quick');
           },
         }}
       />

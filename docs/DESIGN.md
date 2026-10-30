@@ -19,7 +19,8 @@ rest reached from them. Home is the hub; every screen is at most two taps away.
 | 3 | Invite partner — "Invita a Ana" (Paso 2 de 2) | `invite` | Setup, Ajustes › Código de pareja | Copiar · Enviar por WhatsApp · Otras apps · Ir a la app; Generar un código nuevo when expired (7 days) |
 | 4 | Join with code — "Únete a tu pareja" | `(onboarding)/join` | Tengo una invitación de mi pareja, Setup, an invite link (`mitimiti://join?code=AM482X`, code filled in) | 6-char code, validated as typed → Unirme |
 | 5 | Home (Inicio) | `(tabs)/index` | After onboarding | Saldar cuentas, Presupuesto del mes card, Ver todos, open expense, + |
-| 6 | New / edit expense — "Nuevo gasto" / "Editar gasto" | `expense/new`, `expense/[id]/edit` (modal) | + button, Editar gasto | Agregar gasto / Guardar cambios (footer previews the new balance) |
+| 6a | Quick expense — "Gasto rápido" | `expense/quick` (modal) | + button | One line typed or dictated; chips (amount, category, who paid, split, date) change with one tap · Dictar · Recibo (Premium) → Agregar gasto, or Revisar en el formulario when something is missing · Más opciones. Saved → toast "Gasto agregado · Deshacer · Editar" ([QUICK_ENTRY.md](QUICK_ENTRY.md)) |
+| 6 | New / edit expense — "Nuevo gasto" / "Editar gasto" | `expense/new`, `expense/[id]/edit` (modal) | Gasto rápido › Más opciones / Revisar (prefilled), Editar gasto | Agregar gasto / Guardar cambios (footer previews the new balance) |
 | 7 | Expense detail — "Detalle del gasto" | `expense/[id]` | Any expense row | Editar gasto, Eliminar gasto (confirmation) |
 | 8 | Activity (Movimientos) | `(tabs)/activity` | Tab, "Ver todos" | Día / Semana / Mes, chart, search, filters, calendar, open expense, + |
 | 9 | Settle up (Saldar cuentas) | `settle/index` | Home balance card | Todo / La mitad / custom (never more than owed), ¿Cómo se pagó? → Registrar pago |

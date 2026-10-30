@@ -15,7 +15,7 @@ import { font, radius, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
 
-const ICONS: Record<Benefit, IconName> = { history: 'calendar', budgets: 'chart', export: 'share', recurring: 'swap' };
+const ICONS: Record<Benefit, IconName> = { history: 'calendar', budgets: 'chart', export: 'share', aiEntry: 'camera', recurring: 'swap' };
 
 type Phase = 'idle' | 'buying' | 'activating' | 'done' | 'pending';
 

@@ -28,8 +28,8 @@ export interface QuickEntryContext {
   language: Language;
 }
 
-/** What a 'low' result needs from the person before it can be saved. */
-export type QuickEntryGap = 'amount' | 'currency' | 'payer' | 'split' | 'date';
+/** What a 'low' result needs from the person before it can be saved. 'review': the AI said it guessed. */
+export type QuickEntryGap = 'amount' | 'currency' | 'payer' | 'split' | 'date' | 'review';
 
 /** An ExpenseInput without an id; the amount only when it was read for sure. */
 export interface QuickDraft {
@@ -46,6 +46,8 @@ export interface QuickDraft {
 
 export interface QuickEntryResult {
   draft: QuickDraft;
+  /** The split as it was said, so it can follow the payer when a chip changes who paid. */
+  split: SplitChoice;
   /** 'high': safe to save as is. 'low': show the draft and ask about `missing`. */
   confidence: 'high' | 'low';
   missing: QuickEntryGap[];
@@ -53,7 +55,23 @@ export interface QuickEntryResult {
   foreignCurrency?: Currency;
 }
 
-type Who = 'me' | 'partner';
+export type Who = 'me' | 'partner';
+
+/** A split as people say it ("a medias", "60/40", "todo de Ana", "personal"), before it's turned into the stored form. */
+export type SplitChoice = 'default' | 'half' | 'personal' | { myPct: number } | { owner: Who };
+
+/**
+ * The stored form, which is from the payer's side: splitPct is the payer's share; 'other' is all for whoever didn't
+ * pay, 'personal' all for whoever did. 'default' is the couple's setting (Ajustes › División predeterminada).
+ */
+export function storedSplit(choice: SplitChoice, payer: Who, ctx: Pick<QuickEntryContext, 'defaultSplit' | 'myDefaultPct'>): { splitMode: SplitMode; splitPct: number | null } {
+  const pct = (myPct: number) =>
+    myPct === 50 ? { splitMode: 'half' as const, splitPct: null } : { splitMode: 'pct' as const, splitPct: payer === 'me' ? myPct : 100 - myPct };
+  if (choice === 'default') return ctx.defaultSplit === 'pct' ? pct(ctx.myDefaultPct) : { splitMode: 'half', splitPct: null };
+  if (choice === 'half' || choice === 'personal') return { splitMode: choice, splitPct: null };
+  if ('myPct' in choice) return pct(choice.myPct);
+  return { splitMode: choice.owner === payer ? 'personal' : 'other', splitPct: null };
+}
 
 /** Lowercase without accents, one character per character so indexes still point into the original text. */
 function fold(text: string): string {
@@ -256,18 +274,18 @@ export function parseQuickEntry(input: string, ctx: QuickEntryContext): QuickEnt
   const payer: Who = paidBy === ctx.me.id ? 'me' : 'partner';
 
   // How it's split. Each signal is turned into the stored form; two different ones are a question.
-  const splits = new Set<string>();
-  const owner = (who: Who) => splits.add(who === payer ? 'personal' : 'other');
-  for (const m of ratios) splits.add(Number(m[2]) === 50 ? 'half' : `pct:${payer === 'me' ? Number(m[2]) : Number(m[3])}`);
+  const choices: SplitChoice[] = [];
+  const owner = (who: Who) => choices.push({ owner: who });
+  for (const m of ratios) choices.push({ myPct: Number(m[2]) });
   if (
     take(
       p,
       /\b(?:a\s+medias|(?:la\s+)?mitad(?:\s+y\s+mitad|\s+mitad)?|entre\s+(?:los\s+)?dos|compartido|split(?:\s+it)?(?:\s+evenly)?|half(?:\s+and\s+half)?|fifty[\s-]+fifty|shared|halbe[\s-]+halbe|halb[\s-]+halb|(?:die\s+)?halfte|geteilt|gemeinsam)\b/g,
     ).length
   ) {
-    splits.add('half');
+    choices.push('half');
   }
-  if (take(p, /\b(?:personal|privat|personlich)\b/g).length) splits.add('personal');
+  if (take(p, /\b(?:personal|privat|personlich)\b/g).length) choices.push('personal');
   const ownerRules: [RegExp, Who][] = [
     [/\b(?:todo\s+|solo\s+)?mi[oa]\b|\bsolo\s+(?:yo|para\s+mi)\b|\bpara\s+mi\b(?!\s+[a-z])/g, 'me'],
     [/\b(?:all\s+)?(?:just|only)\s+(?:for\s+)?me\b|\b(?:all\s+)?for\s+me\b|\bmine\b/g, 'me'],
@@ -296,16 +314,15 @@ export function parseQuickEntry(input: string, ctx: QuickEntryContext): QuickEnt
     if (category === 'regalos') missing.add('split');
     else for (const [, who] of forName) owner(who);
   }
-  if (splits.size > 1) missing.add('split');
-
-  const chosen = splits.size === 1 && !missing.has('split') ? [...splits][0] : null;
-  const defaultPct = payer === 'me' ? ctx.myDefaultPct : 100 - ctx.myDefaultPct;
-  const [splitMode, splitPct]: [SplitMode, number | null] = !chosen
-    ? ctx.defaultSplit === 'pct' ? ['pct', defaultPct] : ['half', null]
-    : chosen.startsWith('pct:') ? ['pct', Number(chosen.slice(4))] : [chosen as SplitMode, null];
+  // Two signals that end up the same ("personal" and "mío" when I paid) are one answer; different ones are a question.
+  const stored = new Map(choices.map((c) => [JSON.stringify(storedSplit(c, payer, ctx)), c]));
+  if (stored.size > 1) missing.add('split');
+  const split = stored.size === 1 && !missing.has('split') ? [...stored.values()][0] : 'default';
+  const { splitMode, splitPct } = storedSplit(split, payer, ctx);
 
   return {
     draft: { amountMinor, description: describe(p), category, paidBy, splitMode, splitPct, spentOn },
+    split,
     confidence: missing.size === 0 ? 'high' : 'low',
     missing: [...missing],
     ...(foreignCurrency ? { foreignCurrency } : {}),

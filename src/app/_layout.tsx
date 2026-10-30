@@ -12,6 +12,7 @@ import { usePlanSync } from '@/api/plan';
 import { DEV_BYPASS_AUTH, useSessionStore, useSessionSync } from '@/lib/session';
 import { I18nProvider } from '@/i18n';
 import { ThemeProvider, useTheme } from '@/ui/theme';
+import { ToastHost } from '@/ui/Toast';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 2 } },
@@ -108,6 +109,7 @@ function App() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="invite" />
             <Stack.Screen name="expense/new" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="expense/quick" options={{ presentation: 'modal' }} />
             <Stack.Screen name="expense/[id]/index" />
             <Stack.Screen name="expense/[id]/edit" options={{ presentation: 'modal' }} />
             <Stack.Screen name="settle/index" />
@@ -126,6 +128,7 @@ function App() {
           {/* Borrar cuenta: from Ajustes, and from Setup for an account without a couple. */}
           <Stack.Screen name="delete-account" />
         </Stack>
+        <ToastHost />
       </NavigationThemeProvider>
     </QueryClientProvider>
   );

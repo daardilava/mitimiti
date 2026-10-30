@@ -1,0 +1,8 @@
+{
+  "ios": {
+    "NSMicrophoneUsageDescription": "MitiMiti uses the microphone only while you hold the dictate button, to type the expense for you.",
+    "NSSpeechRecognitionUsageDescription": "MitiMiti turns what you dictate into text to log the expense. Your phone does the recognition.",
+    "NSCameraUsageDescription": "MitiMiti uses the camera to photograph a receipt and read the total. The photo is not kept.",
+    "NSPhotoLibraryUsageDescription": "MitiMiti opens your photos so you can pick a receipt and read the total. The photo is not kept."
+  }
+}

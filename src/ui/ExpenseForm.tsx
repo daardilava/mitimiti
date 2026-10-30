@@ -20,28 +20,31 @@ interface ExpenseFormProps {
   couple: Couple;
   /** Pre-fills the form when editing. */
   initial?: Expense;
+  /** Pre-fills a new expense (from quick entry's "Revisar" / "Más opciones"). */
+  draft?: Partial<ExpenseInput>;
   saving: boolean;
   error?: string | null;
   onSave: (input: ExpenseInput) => void;
 }
 
-export function ExpenseForm({ title, saveLabel, couple, initial, saving, error, onSave }: ExpenseFormProps) {
+export function ExpenseForm({ title, saveLabel, couple, initial, draft: prefill, saving, error, onSave }: ExpenseFormProps) {
   const { m, d: dl } = useI18n();
   const { color, type, categories } = useTheme();
   const styles = useStyles();
   const { me, partner, currency } = couple;
-  const [amountText, setAmountText] = useState(initial ? toInputText(initial.amountMinor, currency) : '');
-  const [description, setDescription] = useState(initial?.description ?? '');
-  const [paidBy, setPaidBy] = useState(initial?.paidBy ?? me.id);
-  const [category, setCategory] = useState<CategoryId>(initial?.category ?? 'super');
+  const start = initial ?? prefill;
+  const [amountText, setAmountText] = useState(start?.amountMinor ? toInputText(start.amountMinor, currency) : '');
+  const [description, setDescription] = useState(start?.description ?? '');
+  const [paidBy, setPaidBy] = useState(start?.paidBy || me.id);
+  const [category, setCategory] = useState<CategoryId>(start?.category ?? 'super');
   // New expenses start from the couple's default (Ajustes › División predeterminada).
-  const [splitMode, setSplitMode] = useState<SplitMode>(initial?.splitMode ?? couple.defaultSplit);
+  const [splitMode, setSplitMode] = useState<SplitMode>(start?.splitMode ?? couple.defaultSplit);
   // The chips read "me / partner"; the database stores the payer's percentage.
   const [myPct, setMyPct] = useState(() => {
-    if (initial?.splitMode !== 'pct' || initial.splitPct == null) return couple.myDefaultPct;
-    return initial.paidBy === me.id ? initial.splitPct : 100 - initial.splitPct;
+    if (start?.splitMode !== 'pct' || start.splitPct == null) return couple.myDefaultPct;
+    return (start.paidBy || me.id) === me.id ? start.splitPct : 100 - start.splitPct;
   });
-  const [spentOn, setSpentOn] = useState(initial?.spentOn ?? daysAgo(0));
+  const [spentOn, setSpentOn] = useState(start?.spentOn ?? daysAgo(0));
 
   const amountMinor = parseMoneyInput(amountText, currency);
   const payerPct = paidBy === me.id ? myPct : 100 - myPct;

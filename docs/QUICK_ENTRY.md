@@ -4,7 +4,8 @@ Goal: **logging an expense takes about 3 seconds** from intent to saved, by typi
 receipt or tapping a home-screen shortcut. Fits the product principle *Fast to log* (today: < 10 s, three taps
 after the amount) and tightens it. Linked from [PLAN.md](PLAN.md).
 
-**Status:** Slice 1 (local parser) built. Slices 2–6 not started.
+**Status:** Slices 1–5 built (parser, quick-add sheet, AI fallback, dictation, receipt photo). Slice 6 (shortcuts and
+widget) not started. Not yet tried on a real phone or against the deployed function: see *Acceptance checks*.
 
 ---
 
@@ -33,13 +34,16 @@ These follow `CLAUDE.md`; the AI must never bend them.
    the two first names needed to resolve "pagó Ana". Receipt images are not stored (v1). Mention the AI
    processor in the privacy policy (users in Germany: GDPR, data-processing agreement with the model provider).
 
-### Open decisions (answer before slice 3)
+### Open decisions (answered 2026-10-29)
 
-- [ ] Model provider and model (a small, fast model is enough for text; receipts need vision).
-- [ ] Is AI entry free, or part of the paid plan (see *Billing*)? Each call costs money; rate limit either way.
-- [ ] Voice: on-device speech recognition (fast, private, needs a dev build) or cloud transcription?
-- [ ] Should we record `source` (manual / text / voice / receipt / widget) on each expense to measure adoption?
-  If yes it's a new migration + `upsert_expense` parameter, and `splits_parity.test.ts` must keep passing.
+- [x] Model provider and model: **Claude Haiku** (`claude-haiku-5-5`), for text and receipts (it reads images), with
+  structured output held to the draft schema.
+- [x] AI entry is **Premium**, with a limit of 60 calls per couple per day (`claim_ai_call()`). Typing and dictation
+  stay free: they never leave the phone.
+- [x] Voice: **on the phone** (the phone's own speech recognition, `expo-speech-recognition`; needs a development build).
+- [x] Record `source`: **yes**, `expenses.source` = manual / text / voice / receipt, set on create and kept on edit
+  (`20261029000000_quick_entry.sql`; `splits_parity.test.ts` still passes). The widget will open the sheet, so its
+  expenses are text or voice.
 
 ---
 
@@ -94,7 +98,12 @@ Decisions taken while building it:
 - Golden file: `src/lib/__tests__/quickEntry.golden.json`. The phrases were written from the examples above, not
   collected from use; add real phrases as they come (and every phrase the parser got wrong).
 
-### Slice 2 — Quick-add sheet (still no AI)
+### Slice 2 — Quick-add sheet (still no AI) — built
+
+Built as `src/app/expense/quick.tsx`, rules in `src/lib/quickSheet.ts`, toast in `src/ui/Toast.tsx`. Two changes from
+the plan below: **nothing saves by itself** (Return or Agregar gasto is the tap that saves; voice and receipts
+only fill the chips), and the save **waits for the server** before closing instead of an optimistic insert, so a
+failed save never loses the entry. When something is missing the button reads "Revisar en el formulario".
 
 - New route `src/app/expense/quick.tsx` (modal sheet). The tab bar's **+** opens it; "Más opciones" opens the
   current `/expense/new` with the draft.
@@ -112,7 +121,15 @@ Decisions taken while building it:
 
 **Check:** 20 entries typed by hand on a real phone, median ≤ 3 s from opening the sheet to the toast.
 
-### Slice 3 — AI fallback for text
+### Slice 3 — AI fallback for text — built
+
+Built as `supabase/functions/parse-expense/` (one function for text and receipts), contract in
+`supabase/functions/_shared/quickEntry.ts` (instead of `src/lib/quickEntrySchema.ts`: like `_shared/billing.ts`, the
+function, the app and Vitest all import it). Premium check, daily limit and the two first names come from
+`claim_ai_call()`, run with the caller's token. The model answers about "me" / "partner" (never ids) and gives the
+amount as text; `src/lib/quickSheet.ts › draftFromAi` applies the same rules as the phone's parser. Timeouts: 6 s
+in the app, 8 s in the function (the plan's ~3 s is the goal; measure on the deployed function).
+Eval: `npm run eval:quick-entry`. Deploy: README › Deploy quick entry.
 
 - `supabase/functions/parse-expense/` (Deno Edge Function):
   verify the Clerk JWT, confirm the caller is in a couple, rate-limit (e.g. N calls / couple / day in a small
@@ -128,7 +145,11 @@ Decisions taken while building it:
   not in CI.
 - New secret documented in `.env.example` comments / README (`supabase secrets set …`), never committed.
 
-### Slice 4 — Voice
+### Slice 4 — Voice — built
+
+Built as `src/api/voice.ts`. **Tap to start, tap (or silence) to stop** instead of press-and-hold, so it also works
+with a screen reader. The language is the app's, in the phone's region when it matches (es-CO stays es-CO). The mic
+is hidden where the native module isn't there (Expo Go, web). Before the first system dialog the sheet says why.
 
 - Mic button in the quick sheet: press, speak, release → transcript goes through **the same** `parseQuickEntry`
   (+ AI fallback). One pipeline for text and voice.
@@ -140,7 +161,10 @@ Decisions taken while building it:
   the field still works.
 - Locale of recognition = the app's language.
 
-### Slice 5 — Receipt photo
+### Slice 5 — Receipt photo — built
+
+Built as `src/api/receipt.ts` (camera or library, shrunk to 1024 px JPEG on the phone) plus the same `parse-expense`
+function (`mode: 'receipt'`, not a separate `parse-receipt`). Premium; a Free couple's Recibo button opens the paywall.
 
 - Camera button in the quick sheet → take or pick a photo → shrink it on the phone (~1024 px, JPEG) → Edge
   Function `parse-receipt` (vision model) → draft with total, merchant as description, date, currency.
@@ -175,8 +199,17 @@ Do it in this order (cheapest first):
 - [ ] The partner's phone shows the new expense within seconds, like any other.
 - [ ] No model key in the app bundle (`grep` the built JS); calls without a valid Clerk token are refused.
 - [ ] Rate limit reached → a clear message, the manual form still works.
-- [ ] es / en / de: placeholder, chips, errors and toast all translated.
+- [x] es / en / de: placeholder, chips, errors and toast all translated. (`messages.test.ts`: every text translated,
+  every value kept.)
 - [ ] Widget / quick actions open the right mode on iOS and Android.
+
+Open on the device and the deployed function: the timings, airplane mode, Deshacer on both phones, a call to the
+deployed function without a session (`claim_ai_call()` refuses it on PGlite), and the limit message (tested in SQL and
+drawn in the sheet, not yet seen on a phone). Bundle grep done on 2026-10-29 (`npx expo export -p android`): no
+`sk-ant`, `ANTHROPIC_API_KEY`, `@anthropic-ai` or model id in the built JS; only the function's name.
+
+Also before AI entry goes live for users in Germany: a data-processing agreement with Anthropic (GDPR). The privacy
+policy already names Anthropic, what it receives and that nothing is kept (2026-10-29).
 
 ## Risks
 
