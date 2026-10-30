@@ -5,8 +5,8 @@
 // tap on Agregar gasto; it goes through upsert_expense like the form. Formulario (top right) opens the full form.
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocales } from 'expo-localization';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MAX_TEXT } from '../../../supabase/functions/_shared/quickEntry';
@@ -20,6 +20,7 @@ import { formatMoney, type Currency } from '@/lib/money';
 import { canUseFeature } from '@/lib/plans';
 import { parseQuickEntry, type QuickEntryContext, type QuickEntryResult } from '@/lib/quickEntry';
 import { canSaveQuick, draftFromAi, recognitionLocale, withChoices, type ChipChoices, type EntrySource } from '@/lib/quickSheet';
+import { readQuickStart } from '@/lib/shortcuts';
 import { Callout, Field } from '@/ui/Form';
 import { Icon, type IconName } from '@/ui/Icon';
 import { openPaywall } from '@/ui/Premium';
@@ -185,6 +186,19 @@ function QuickSheet({ couple }: { couple: Couple }) {
     setChoices({});
     setSource('text');
   };
+
+  // Inicio's Escanear / Dictar shortcuts open this sheet already asking for the photo or listening, once.
+  const start = readQuickStart(useLocalSearchParams<{ start?: string }>().start);
+  const started = useRef(false);
+  const startWith = useEffectEvent((how: 'receipt' | 'voice') => {
+    if (how === 'receipt') openReceipt();
+    else if (canDictate) void toggleDictation();
+  });
+  useEffect(() => {
+    if (started.current || !start) return;
+    started.current = true;
+    startWith(start);
+  }, [start]);
 
   // ─── Save, or hand over to the form ───
   const { draft } = result;

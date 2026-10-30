@@ -16,13 +16,14 @@ import { ExpenseRow } from '@/ui/ExpenseRow';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { Icon } from '@/ui/Icon';
 import { openPaywall, PremiumBadge } from '@/ui/Premium';
+import { Shortcuts } from '@/ui/Shortcuts';
 import { font, radius, space, type Palette } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
 
 const RECENT = 4;
 
-// 05 · Inicio: the live balance, this month's shared spending by who paid, and the latest expenses.
+// 05 · Inicio: the live balance, the shortcut row, this month's shared spending by who paid, and the latest expenses.
 export default function Home() {
   const { m, d } = useI18n();
   const { color, type } = useTheme();
@@ -87,6 +88,8 @@ export default function Home() {
           </View>
         )}
       </View>
+
+      <Shortcuts />
 
       <View style={styles.card}>
         <View style={styles.cardTitle}>

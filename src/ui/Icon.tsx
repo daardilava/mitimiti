@@ -64,6 +64,9 @@ const paths: Record<string, React.ReactNode> = {
   lock: <Path d="M6 10.5h12a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8.5a1 1 0 0 1 1-1zM8 10.5V7.5a4 4 0 0 1 8 0v3M12 15v2.5" />,
   eye: <Path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />,
   eyeOff: <Path d="M4 4l16 16M10.6 6.6A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.7 3.4M6.6 7.6C4 9.3 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1M9.9 9.9a3 3 0 0 0 4.2 4.2" />,
+  crown: <Path d="M4 18.5h16M5 15.5L4 7l5 4 3-6 3 6 5-4-1 8.5z" />,
+  gauge: <Path d="M3.5 17a8.5 8.5 0 0 1 17 0M12 17l4-5M3.5 20h17" />,
+  history: <Path d="M3.5 12a8.5 8.5 0 1 0 2.5-6M3.5 4v4h4M12 7.5V12l3 2" />,
 };
 
 export type IconName = keyof typeof paths;

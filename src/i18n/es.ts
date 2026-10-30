@@ -343,6 +343,15 @@ export const es = {
     budgetA11y: (pct: number, ofAmount: string, status: string) => `Presupuesto del mes: ${pct} por ciento. ${ofAmount}. ${status}`,
     budgetSetUpA11y: 'Presupuestos: poner límites por categoría',
     budgetSetUp: 'Pongan un límite por categoría y vean cuánto les queda.',
+    shortcuts: {
+      quick: { label: 'Rápido', a11y: 'Gasto rápido' },
+      scan: { label: 'Escanear', a11y: 'Escanear un recibo' },
+      dictate: { label: 'Dictar', a11y: 'Dictar un gasto' },
+      budgets: { label: 'Presupuestos', a11y: 'Presupuestos' },
+      export: { label: 'Exportar', a11y: 'Exportar movimientos' },
+      history: { label: 'Historial', a11y: 'Historial: todos los movimientos' },
+      crownLegend: 'La corona marca lo que es de Premium.',
+    },
   },
 
   activityScreen: {

@@ -317,6 +317,15 @@ export const en: Messages = {
     budgetA11y: (pct, ofAmount, status) => `This month’s budget: ${pct} percent. ${ofAmount}. ${status}`,
     budgetSetUpA11y: 'Budgets: set limits per category',
     budgetSetUp: 'Set a limit per category and see how much you have left.',
+    shortcuts: {
+      quick: { label: 'Quick', a11y: 'Quick expense' },
+      scan: { label: 'Scan', a11y: 'Scan a receipt' },
+      dictate: { label: 'Dictate', a11y: 'Dictate an expense' },
+      budgets: { label: 'Budgets', a11y: 'Budgets' },
+      export: { label: 'Export', a11y: 'Export activity' },
+      history: { label: 'History', a11y: 'History: all your activity' },
+      crownLegend: 'The crown marks Premium features.',
+    },
   },
 
   activityScreen: {
