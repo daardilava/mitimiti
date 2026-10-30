@@ -114,6 +114,7 @@ function App() {
             <Stack.Screen name="expense/[id]/edit" options={{ presentation: 'modal' }} />
             <Stack.Screen name="settle/index" />
             <Stack.Screen name="settle/done" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="profile" />
             <Stack.Screen name="budgets" />
             <Stack.Screen name="export" />
             <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />

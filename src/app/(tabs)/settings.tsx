@@ -9,25 +9,26 @@ import { coupleKey, useCouple, useExpenses, type Couple } from '@/api/expenses';
 import { householdKey, useHousehold, useUpdateCoupleSettings, type CoupleSettingsInput } from '@/api/household';
 import { planKey, usePlan, useRestorePurchases } from '@/api/plan';
 import { manageSubscriptions } from '@/api/purchases';
-import { AVATAR_IDS, type AvatarId } from '@/lib/avatars';
 import { DEFAULT_PCT_MAX, DEFAULT_PCT_MIN, DEFAULT_PCT_PRESETS, parseSharePct, settingsErrorMessage, shareLabel } from '@/lib/coupleSettings';
 import { CURRENCIES } from '@/lib/money';
-import { canUseFeature, planLine } from '@/lib/plans';
+import { planLine } from '@/lib/plans';
 import { setSamplePlan } from '@/lib/sample';
 import { DEV_BYPASS_AUTH, useSessionStore } from '@/lib/session';
 import { TextLink } from '@/ui/Auth';
 import { Avatar } from '@/ui/Avatar';
-import { Callout, Chip, TextField } from '@/ui/Form';
-import { Icon } from '@/ui/Icon';
+import { Callout, Chip, Segmented, TextField } from '@/ui/Form';
+import { Icon, type IconName } from '@/ui/Icon';
 import { openPaywall } from '@/ui/Premium';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { font, radius, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme, type AppearancePreference } from '@/ui/theme';
 import { LANGUAGES, messages, useI18n, type LanguagePreference } from '@/i18n';
 
-type Section = 'avatar' | 'names' | 'split' | 'currency';
+type Section = 'split' | 'currency';
 
-// 13 · Ajustes: avatar, names, couple code, default split, currency, what is coming (reminders, CSV) and sign-out.
+// 13 · Ajustes: who you are (Tu perfil opens from the top card), the couple code until the partner joins, the plan,
+// default split, currency, appearance, language, what is coming (reminders), legal and the account. Exportar lives on
+// Inicio's shortcut row.
 export default function Settings() {
   const { m } = useI18n();
   const client = useQueryClient();
@@ -46,13 +47,12 @@ export default function Settings() {
 
 function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple; joinCode: string | null; joinCodeExpiresAt: string | null }) {
   const { m } = useI18n();
+  const { color, categories } = useTheme();
   const styles = useStyles();
   const update = useUpdateCoupleSettings();
   const expenses = useExpenses();
   const settlements = useSettlements();
   const email = useSessionStore((s) => s.email);
-  const { gate } = usePlan();
-  const canExport = canUseFeature(gate, 'export');
   const [status, setStatus] = useState<{ section: Section; error?: string } | null>(null);
 
   const save = (section: Section, input: CoupleSettingsInput) =>
@@ -66,29 +66,16 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
 
   return (
     <Screen title={m.settings.title}>
-      <Card title={m.settings.avatar} detail={m.settings.avatarDetail(couple.partner.name)}>
-        {/* Keyed on the saved avatar, so a failed save falls back to it once the couple refetches. */}
-        <AvatarChoice key={couple.me.avatar ?? 'initial'} me={couple.me} onSave={(avatar) => save('avatar', { avatar })} />
-        <Status status={status} section="avatar" />
-      </Card>
-
-      <Card title={m.settings.you}>
-        {/* Keyed on the saved names: when they change elsewhere (the partner renames themselves), the fields follow. */}
-        <NameFields key={`${couple.me.name}|${couple.partner.name}`} couple={couple} onSave={(input) => save('names', input)} />
-        {couple.partnerJoined && <Hint>{m.settings.partnerRenames(couple.partner.name)}</Hint>}
-        <Status status={status} section="names" />
-
-        <CoupleCode partnerJoined={couple.partnerJoined} partnerName={couple.partner.name} code={expired ? null : joinCode} />
-      </Card>
+      <ProfileHeader couple={couple} email={email} code={expired ? null : joinCode} />
 
       <PlanCard partnerName={couple.partner.name} />
 
-      <Card title={m.settings.defaultSplit} detail={m.settings.defaultSplitDetail}>
+      <Card title={m.settings.defaultSplit} detail={m.settings.defaultSplitDetail} icon={{ name: 'swap', fg: color.partnerText, bg: color.partnerTint }}>
         <DefaultSplitChoice couple={couple} onSave={(input) => save('split', input)} />
         <Status status={status} section="split" />
       </Card>
 
-      <Card title={m.settings.currency}>
+      <Card title={m.settings.currency} icon={{ name: 'cash', fg: categories.transporte.color, bg: categories.transporte.tint }}>
         <View style={styles.row} accessibilityRole="radiogroup">
           {CURRENCIES.map((c) => (
             <Chip key={c} label={c} selected={couple.currency === c} disabled={hasMoney} onPress={() => save('currency', { currency: c })} />
@@ -106,80 +93,20 @@ function SettingsForm({ couple, joinCode, joinCodeExpiresAt }: { couple: Couple;
 
       <LanguageCard />
 
-      <Card title={m.settings.reminders} badge={m.settings.soon}>
+      <Card title={m.settings.reminders} badge={m.settings.soon} icon={{ name: 'bell', fg: categories.otros.color, bg: categories.otros.tint }}>
         <Coming title={m.settings.settleReminder} detail={m.settings.settleReminderDetail} />
         <Coming title={m.settings.newExpenseAlert} detail={m.settings.newExpenseAlertDetail(couple.partner.name)} />
       </Card>
 
-      <Card title={m.settings.exportCsv} detail={m.settings.exportCsvDetail} badge={canExport ? undefined : m.premium.badge}>
-        {canExport ? (
-          <NavButton label={m.settings.exportOpen} kind="secondary" href="/export" />
-        ) : (
-          <NavButton label={m.premium.see} kind="secondary" onPress={() => openPaywall('export')} />
-        )}
-      </Card>
-
       {DEV_BYPASS_AUTH && <DevPlanCard />}
 
-      <Card title={m.settings.legal}>
+      <Card title={m.settings.legal} icon={{ name: 'doc', fg: categories.otros.color, bg: categories.otros.tint }}>
         <NavButton label={m.terms.title} kind="secondary" href="/terms" />
         <NavButton label={m.privacy.title} kind="secondary" href="/privacy" />
       </Card>
 
       <SignOut email={email} />
     </Screen>
-  );
-}
-
-/** A grid of characters, Duolingo style, plus the initial. The pick shows at once and saves on tap. */
-function AvatarChoice({ me, onSave }: { me: Couple['me']; onSave: (avatar: AvatarId | null) => void }) {
-  const { m } = useI18n();
-  const { color, type } = useTheme();
-  const styles = useStyles();
-  const [picked, setPicked] = useState<AvatarId | null>(me.avatar);
-
-  const pick = (avatar: AvatarId | null) => {
-    if (avatar === picked) return;
-    setPicked(avatar);
-    onSave(avatar);
-  };
-  const options: (AvatarId | null)[] = [null, ...AVATAR_IDS];
-
-  return (
-    <View style={{ gap: space[4] }}>
-      <View style={styles.avatarPreview}>
-        <Avatar name={me.name} isMe avatar={picked} size={72} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={[type.row, { fontFamily: font.bodyBold }]} numberOfLines={1}>
-            {me.name}
-          </Text>
-          <Text style={[type.label, { color: color.textSecondary, fontFamily: font.body }]}>{picked ? m.avatars[picked] : m.settings.avatarInitial}</Text>
-        </View>
-      </View>
-      <View style={styles.avatarGrid} accessibilityRole="radiogroup">
-        {options.map((id) => {
-          const selected = picked === id;
-          const label = id ? m.avatars[id] : m.settings.avatarInitial;
-          return (
-            <Pressable
-              key={id ?? 'initial'}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: selected }}
-              accessibilityLabel={m.settings.avatarA11y(label)}
-              onPress={() => pick(id)}
-              style={({ pressed }) => [styles.avatarOption, selected && styles.avatarOptionSelected, pressed && { opacity: 0.7 }]}
-            >
-              <Avatar name={me.name} isMe avatar={id} size={56} />
-              {selected && (
-                <View style={styles.avatarCheck}>
-                  <Icon name="check" size={14} color={color.onPrimary} />
-                </View>
-              )}
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
   );
 }
 
@@ -258,19 +185,15 @@ function DefaultSplitChoice({ couple, onSave }: { couple: Couple; onSave: (input
 /** Automático follows the phone; Claro / Oscuro stay on this phone only (not shared with the partner). */
 function AppearanceCard() {
   const { m } = useI18n();
-  const { preference, setPreference } = useTheme();
-  const options: { id: AppearancePreference; label: string }[] = [
-    { id: 'system', label: m.settings.automatic },
-    { id: 'light', label: m.settings.light },
-    { id: 'dark', label: m.settings.dark },
+  const { preference, setPreference, categories } = useTheme();
+  const options: { id: AppearancePreference; label: string; icon: IconName }[] = [
+    { id: 'system', label: m.settings.automatic, icon: 'contrast' },
+    { id: 'light', label: m.settings.light, icon: 'sun' },
+    { id: 'dark', label: m.settings.dark, icon: 'moon' },
   ];
   return (
-    <Card title={m.settings.appearance} detail={m.settings.appearanceDetail}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[2] }} accessibilityRole="radiogroup">
-        {options.map((o) => (
-          <Chip key={o.id} label={o.label} selected={preference === o.id} onPress={() => setPreference(o.id)} />
-        ))}
-      </View>
+    <Card title={m.settings.appearance} detail={m.settings.appearanceDetail} icon={{ name: 'contrast', fg: categories.ocio.color, bg: categories.ocio.tint }}>
+      <Segmented label={m.settings.appearance} options={options} value={preference} onChange={setPreference} />
     </Card>
   );
 }
@@ -278,12 +201,13 @@ function AppearanceCard() {
 /** Automático follows the phone's language; the others stay on this phone. Each language is named in itself. */
 function LanguageCard() {
   const { m, preference, setPreference } = useI18n();
+  const { color } = useTheme();
   const options: { id: LanguagePreference; label: string }[] = [
     { id: 'system', label: m.settings.automatic },
     ...LANGUAGES.map((l) => ({ id: l, label: messages[l].language.name })),
   ];
   return (
-    <Card title={m.settings.language} detail={m.settings.languageDetail}>
+    <Card title={m.settings.language} detail={m.settings.languageDetail} icon={{ name: 'globe', fg: color.me, bg: color.meTint }}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[2] }} accessibilityRole="radiogroup">
         {options.map((o) => (
           <Chip key={o.id} label={o.label} selected={preference === o.id} onPress={() => setPreference(o.id)} />
@@ -293,40 +217,45 @@ function LanguageCard() {
   );
 }
 
-/** Saves when a field loses focus, and only what changed. */
-function NameFields({ couple, onSave }: { couple: Couple; onSave: (input: CoupleSettingsInput) => void }) {
+/** Ajustes' top card: you (opens Tu perfil), and the partner, or the couple code while they haven't joined. */
+function ProfileHeader({ couple, email, code }: { couple: Couple; email: string | null; code: string | null }) {
   const { m } = useI18n();
   const { color, type } = useTheme();
   const styles = useStyles();
-  const [myName, setMyName] = useState(couple.me.name);
-  const [partnerName, setPartnerName] = useState(couple.partner.name);
-
-  const saveNames = () => {
-    const input: CoupleSettingsInput = {};
-    if (myName.trim() !== couple.me.name) input.myName = myName;
-    if (!couple.partnerJoined && partnerName.trim() !== couple.partner.name) input.partnerName = partnerName;
-    if (Object.keys(input).length > 0) onSave(input);
-  };
-
+  const openProfile = () => router.push('/profile');
   return (
-    <View style={styles.names}>
-      <View style={{ flex: 1 }}>
-        <TextField label={m.settings.myName} value={myName} onChangeText={setMyName} onBlur={saveNames} autoCapitalize="words" maxLength={40} returnKeyType="done" />
-      </View>
-      <View style={{ flex: 1 }}>
-        {couple.partnerJoined ? (
-          <View style={{ gap: space[2] }}>
-            <Text style={[type.label, { color: color.textSecondary }]}>{m.settings.partner}</Text>
-            <View style={styles.readOnly}>
-              <Text style={type.body} numberOfLines={1}>
-                {couple.partner.name}
-              </Text>
-            </View>
+    <View style={styles.card}>
+      <View style={styles.profileRow}>
+        <Pressable accessibilityRole="button" accessibilityLabel={m.settings.changeAvatarA11y} onPress={openProfile} style={({ pressed }) => [styles.profileAvatar, pressed && { opacity: 0.7 }]}>
+          <Avatar name={couple.me.name} isMe avatar={couple.me.avatar} size={64} />
+          <View style={styles.editBadge}>
+            <Icon name="edit" size={12} color={color.onPrimary} />
           </View>
-        ) : (
-          <TextField label={m.settings.partner} value={partnerName} onChangeText={setPartnerName} onBlur={saveNames} autoCapitalize="words" maxLength={40} returnKeyType="done" />
-        )}
+        </Pressable>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={type.heading} numberOfLines={1} accessibilityRole="header">
+            {couple.me.name}
+          </Text>
+          {email && (
+            <Text style={[type.label, { color: color.textSecondary, fontFamily: font.body, fontSize: 14 }]} numberOfLines={1}>
+              {email}
+            </Text>
+          )}
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel={m.settings.editProfileA11y} onPress={openProfile} style={({ pressed }) => [styles.editButton, pressed && { opacity: 0.7 }]}>
+          <Text style={[type.label, { fontFamily: font.bodyBold, fontSize: 14 }]}>{m.settings.edit}</Text>
+        </Pressable>
       </View>
+      {couple.partnerJoined ? (
+        <View style={styles.partnerRow}>
+          <Avatar name={couple.partner.name} isMe={false} avatar={couple.partner.avatar} size={36} />
+          <Text style={[type.row, { flex: 1 }]} numberOfLines={1}>
+            {m.settings.sharingWith(couple.partner.name)}
+          </Text>
+        </View>
+      ) : (
+        <CoupleCode partnerJoined={false} partnerName={couple.partner.name} code={code} />
+      )}
     </View>
   );
 }
@@ -383,7 +312,7 @@ function CoupleCode({ partnerJoined, partnerName, code }: { partnerJoined: boole
 /** Cerrar sesión asks once more, so a stray tap doesn't sign the person out. */
 function SignOut({ email }: { email: string | null }) {
   const { m } = useI18n();
-  const { type } = useTheme();
+  const { type, categories } = useTheme();
   const styles = useStyles();
   const setHousehold = useSessionStore((s) => s.setHousehold);
   const [confirming, setConfirming] = useState(false);
@@ -397,7 +326,7 @@ function SignOut({ email }: { email: string | null }) {
   };
 
   return (
-    <Card title={m.settings.account} detail={email ? m.settings.signedInAs(email) : undefined}>
+    <Card title={m.settings.account} detail={email ? m.settings.signedInAs(email) : undefined} icon={{ name: 'user', fg: categories.otros.color, bg: categories.otros.tint }}>
       {confirming ? (
         <View style={{ gap: space[3] }}>
           <Text style={type.body}>{m.settings.signOutConfirm}</Text>
@@ -426,7 +355,8 @@ function SignOut({ email }: { email: string | null }) {
  */
 function PlanCard({ partnerName }: { partnerName: string }) {
   const { m, d } = useI18n();
-  const { color, type } = useTheme();
+  const { color, type, categories } = useTheme();
+  const icon: CardIcon = { name: 'crown', fg: categories.servicios.color, bg: categories.servicios.tint };
   const plan = usePlan();
   const restore = useRestorePurchases();
   const [note, setNote] = useState<string | null>(null);
@@ -456,7 +386,7 @@ function PlanCard({ partnerName }: { partnerName: string }) {
 
   if (line.kind === 'free') {
     return (
-      <Card title={m.settings.planTitle}>
+      <Card title={m.settings.planTitle} icon={icon}>
         <View style={{ gap: 2 }}>
           <Text style={[type.row, { fontFamily: font.bodyBold }]}>{m.settings.planFree}</Text>
           <Hint>{m.settings.planFreeDetail}</Hint>
@@ -474,7 +404,7 @@ function PlanCard({ partnerName }: { partnerName: string }) {
     : line.kind === 'ends' ? m.settings.ends(day(line.date))
     : m.settings.trialEnds(day(line.date));
   return (
-    <Card title={m.settings.planTitle}>
+    <Card title={m.settings.planTitle} icon={icon}>
       <View style={{ gap: 2 }}>
         <Text style={[type.row, { fontFamily: font.bodyBold }]}>{m.settings.planPremium}</Text>
         <Hint>{info.isPayer ? m.settings.payerYou : m.settings.payerPartner(partnerName)}</Hint>
@@ -516,12 +446,20 @@ function DevPlanCard() {
   );
 }
 
-function Card({ title, detail, badge, children }: { title: string; detail?: string; badge?: string; children?: ReactNode }) {
+/** An icon on its tile: pairs checked at 3:1 in tokens.test.ts (category and avatar tiles). */
+type CardIcon = { name: IconName; fg: string; bg: string };
+
+function Card({ title, detail, badge, icon, children }: { title: string; detail?: string; badge?: string; icon?: CardIcon; children?: ReactNode }) {
   const { color, type } = useTheme();
   const styles = useStyles();
   return (
     <View style={styles.card}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[3] }}>
+        {icon && (
+          <View style={[styles.cardIcon, { backgroundColor: icon.bg }]}>
+            <Icon name={icon.name} size={20} color={icon.fg} />
+          </View>
+        )}
         <Text style={[type.row, { fontFamily: font.bodyBold, fontSize: 17, flex: 1 }]} accessibilityRole="header">
           {title}
         </Text>
@@ -565,18 +503,16 @@ function Status({ status, section }: { status: { section: Section; error?: strin
 
 const useStyles = makeStyles(({ color }) => StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: radius.card, borderWidth: 1, borderColor: color.line, padding: space[4], gap: space[3] },
-  names: { flexDirection: 'row', gap: space[3] },
-  readOnly: { height: 52, borderRadius: radius.control, backgroundColor: color.background, paddingHorizontal: space[4], justifyContent: 'center' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   codeBox: { backgroundColor: color.background, borderRadius: radius.option, padding: space[4], gap: 2 },
   codeRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   code: { fontFamily: font.display, fontSize: 24, letterSpacing: 6, color: color.ink },
   copy: { width: touch + 4, height: touch + 4, borderRadius: (touch + 4) / 2, borderWidth: 1, borderColor: color.fieldBorder, backgroundColor: color.surface, alignItems: 'center', justifyContent: 'center' },
-  avatarPreview: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
-  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  // 56 px art inside a 3 px ring, with room for it: 68 × 68, well over the 44 px touch target.
-  avatarOption: { width: 68, height: 68, borderRadius: 34, borderWidth: 3, borderColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
-  avatarOptionSelected: { borderColor: color.ink },
-  avatarCheck: { position: 'absolute', right: -2, bottom: -2, width: 22, height: 22, borderRadius: 11, backgroundColor: color.ink, borderWidth: 2, borderColor: color.surface, alignItems: 'center', justifyContent: 'center' },
   badge: { paddingHorizontal: space[2], paddingVertical: 2, borderRadius: radius.pill, backgroundColor: color.neutralTint },
+  cardIcon: { width: 36, height: 36, borderRadius: radius.tile - 2, alignItems: 'center', justifyContent: 'center' },
+  profileRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
+  profileAvatar: { minWidth: touch, minHeight: touch },
+  editBadge: { position: 'absolute', right: -2, bottom: -2, width: 26, height: 26, borderRadius: 13, backgroundColor: color.ink, borderWidth: 3, borderColor: color.surface, alignItems: 'center', justifyContent: 'center' },
+  editButton: { minHeight: touch, minWidth: touch, paddingHorizontal: space[4], borderRadius: radius.pill, borderWidth: 1, borderColor: color.fieldBorder, alignItems: 'center', justifyContent: 'center' },
+  partnerRow: { flexDirection: 'row', alignItems: 'center', gap: space[3], minHeight: touch, paddingTop: space[3], borderTopWidth: 1, borderTopColor: color.line },
 }));

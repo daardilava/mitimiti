@@ -67,6 +67,11 @@ const paths: Record<string, React.ReactNode> = {
   crown: <Path d="M4 18.5h16M5 15.5L4 7l5 4 3-6 3 6 5-4-1 8.5z" />,
   gauge: <Path d="M3.5 17a8.5 8.5 0 0 1 17 0M12 17l4-5M3.5 20h17" />,
   history: <Path d="M3.5 12a8.5 8.5 0 1 0 2.5-6M3.5 4v4h4M12 7.5V12l3 2" />,
+  globe: <Path d="M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17zM3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5S9.7 5.9 12 3.5z" />,
+  contrast: <Path d="M12 3.5a8.5 8.5 0 1 0 0 17zM12 3.5a8.5 8.5 0 0 1 0 17" />,
+  sun: <Path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />,
+  moon: <Path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z" />,
+  doc: <Path d="M7 3.5h7l4.5 4.5v12a.5.5 0 0 1-.5.5H7a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1zM14 3.5V8h4.5M9 12.5h6M9 16h6" />,
 };
 
 export type IconName = keyof typeof paths;

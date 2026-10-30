@@ -197,6 +197,34 @@ function StepButton({ icon, label, enabled, onPress }: { icon: IconName; label: 
   );
 }
 
+/** Two to four options side by side, one picked (a radiogroup). Every segment has text; the picked one is ink. */
+export function Segmented<T extends string>({ label, options, value, onChange }: { label: string; options: { id: T; label: string; icon?: IconName }[]; value: T; onChange: (id: T) => void }) {
+  const { color } = useTheme();
+  const styles = useStyles();
+  return (
+    <View style={styles.segmented} accessibilityRole="radiogroup" accessibilityLabel={label}>
+      {options.map((o) => {
+        const selected = o.id === value;
+        return (
+          <Pressable
+            key={o.id}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: selected }}
+            accessibilityLabel={o.label}
+            onPress={() => onChange(o.id)}
+            style={({ pressed }) => [styles.segment, selected && styles.segmentOn, pressed && !selected && { opacity: 0.7 }]}
+          >
+            {o.icon && <Icon name={o.icon} size={16} color={selected ? color.onPrimary : color.textSecondary} />}
+            <Text style={[styles.segmentText, selected && styles.segmentTextOn]} numberOfLines={1}>
+              {o.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 /** Info (blue) or neutral (grey) notice with an icon. */
 export function Callout({ icon, tone = 'info', children }: { icon: IconName; tone?: 'info' | 'neutral'; children: ReactNode }) {
   const { color, type } = useTheme();
@@ -212,6 +240,11 @@ export function Callout({ icon, tone = 'info', children }: { icon: IconName; ton
 
 const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
   label: { ...type.label, color: color.textSecondary },
+  segmented: { flexDirection: 'row', gap: space[1], padding: space[1], borderRadius: radius.control, backgroundColor: color.background },
+  segment: { flex: 1, minHeight: touch, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: space[2], borderRadius: radius.control - space[1] },
+  segmentOn: { backgroundColor: color.ink },
+  segmentText: { ...type.label, fontSize: 14, color: color.textSecondary },
+  segmentTextOn: { color: color.onPrimary, fontFamily: font.bodyBold },
   input: {
     ...type.body,
     height: 52,
