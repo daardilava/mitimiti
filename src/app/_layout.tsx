@@ -3,6 +3,7 @@ import { tokenCache } from '@clerk/expo/token-cache';
 import { DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold, useFonts } from '@expo-google-fonts/dm-sans';
 import { Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { isRunningInExpoGo } from 'expo';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider as NavigationThemeProvider, type Theme as NavigationTheme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -23,7 +24,8 @@ const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
 // The splash (app.json › expo-splash-screen) stays up until the fonts and the session are ready, so no blank frame
 // shows between it and the first screen; then it fades out. Module scope, as the Expo docs recommend.
 SplashScreen.preventAutoHideAsync().catch(() => {});
-SplashScreen.setOptions({ duration: 300, fade: true });
+// Expo Go can't customise the splash and warns on every launch; development and store builds fade it.
+if (!isRunningInExpoGo()) SplashScreen.setOptions({ duration: 300, fade: true });
 
 export default function RootLayout() {
   // Sample-data mode never talks to Clerk, so it runs without a key.
