@@ -323,7 +323,6 @@ export const de: Messages = {
     budgetSetUp: 'Legt ein Limit pro Kategorie fest und seht, wie viel euch bleibt.',
     shortcuts: {
       quick: { label: 'Schnell', a11y: 'Schnelle Ausgabe' },
-      scan: { label: 'Scannen', a11y: 'Einen Beleg scannen' },
       dictate: { label: 'Diktieren', a11y: 'Eine Ausgabe diktieren' },
       budgets: { label: 'Budgets', a11y: 'Budgets' },
       export: { label: 'Export', a11y: 'Umsätze exportieren' },

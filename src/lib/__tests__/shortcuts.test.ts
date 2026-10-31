@@ -2,21 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { isLocked, readQuickStart, shortcutIds, shortcutTarget } from '../shortcuts';
 
 describe('shortcutIds', () => {
-  it('lists the six shortcuts in order when the phone can dictate', () => {
-    expect(shortcutIds(true)).toEqual(['quick', 'scan', 'dictate', 'budgets', 'export', 'history']);
+  it('lists the five shortcuts in order when the phone can dictate', () => {
+    expect(shortcutIds(true)).toEqual(['quick', 'dictate', 'budgets', 'export', 'history']);
   });
 
   it('leaves Dictar out when speech recognition is unavailable', () => {
-    expect(shortcutIds(false)).toEqual(['quick', 'scan', 'budgets', 'export', 'history']);
+    expect(shortcutIds(false)).toEqual(['quick', 'budgets', 'export', 'history']);
   });
 });
 
 describe('isLocked', () => {
-  it('locks the Premium shortcuts on Free only', () => {
-    for (const id of ['scan', 'export'] as const) {
-      expect(isLocked(id, 'free')).toBe(true);
-      expect(isLocked(id, 'premium')).toBe(false);
-    }
+  it('locks Exportar on Free only', () => {
+    expect(isLocked('export', 'free')).toBe(true);
+    expect(isLocked('export', 'premium')).toBe(false);
   });
 
   it('never locks typing, dictation, Presupuestos or Movimientos', () => {
@@ -27,14 +25,12 @@ describe('isLocked', () => {
 });
 
 describe('shortcutTarget', () => {
-  it('opens quick entry, starting with the receipt or the microphone', () => {
+  it('opens quick entry, or starts it with the microphone', () => {
     expect(shortcutTarget('quick', 'free')).toEqual({ kind: 'route', route: { pathname: '/expense/quick' } });
     expect(shortcutTarget('dictate', 'free')).toEqual({ kind: 'route', route: { pathname: '/expense/quick', params: { start: 'voice' } } });
-    expect(shortcutTarget('scan', 'premium')).toEqual({ kind: 'route', route: { pathname: '/expense/quick', params: { start: 'receipt' } } });
   });
 
   it('sends Free to the paywall with the benefit it tapped', () => {
-    expect(shortcutTarget('scan', 'free')).toEqual({ kind: 'paywall', from: 'aiEntry' });
     expect(shortcutTarget('export', 'free')).toEqual({ kind: 'paywall', from: 'export' });
   });
 

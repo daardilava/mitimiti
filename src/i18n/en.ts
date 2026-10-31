@@ -320,7 +320,6 @@ export const en: Messages = {
     budgetSetUp: 'Set a limit per category and see how much you have left.',
     shortcuts: {
       quick: { label: 'Quick', a11y: 'Quick expense' },
-      scan: { label: 'Scan', a11y: 'Scan a receipt' },
       dictate: { label: 'Dictate', a11y: 'Dictate an expense' },
       budgets: { label: 'Budgets', a11y: 'Budgets' },
       export: { label: 'Export', a11y: 'Export activity' },

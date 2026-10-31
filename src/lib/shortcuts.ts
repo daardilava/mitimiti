@@ -1,9 +1,10 @@
 // Inicio's shortcut row (docs/DESIGN.md › 05): where each shortcut goes. A Premium one opens the paywall on Free, so a
-// tap always leads somewhere; what is Premium stays decided in plans.ts.
+// tap always leads somewhere; what is Premium stays decided in plans.ts. The receipt photo has no shortcut: it is the
+// camera inside quick entry, next to the mic.
 import type { Benefit } from './paywall';
 import { canUseFeature, type Plan } from './plans';
 
-export type ShortcutId = 'quick' | 'scan' | 'dictate' | 'budgets' | 'export' | 'history';
+export type ShortcutId = 'quick' | 'dictate' | 'budgets' | 'export' | 'history';
 
 /** What quick entry starts with when a shortcut opens it (src/app/expense/quick.tsx). */
 export type QuickStart = 'receipt' | 'voice';
@@ -16,7 +17,6 @@ export type ShortcutTarget = { kind: 'route'; route: ShortcutRoute } | { kind: '
 
 const SHORTCUTS: Record<ShortcutId, { route: ShortcutRoute; premium?: Benefit }> = {
   quick: { route: { pathname: '/expense/quick' } },
-  scan: { route: { pathname: '/expense/quick', params: { start: 'receipt' } }, premium: 'aiEntry' },
   dictate: { route: { pathname: '/expense/quick', params: { start: 'voice' } } },
   budgets: { route: { pathname: '/budgets' } },
   export: { route: { pathname: '/export' }, premium: 'export' },

@@ -13,7 +13,7 @@ export type Benefit = (typeof BENEFITS)[number];
 /** Built today; the others are labelled Pronto. */
 export const AVAILABLE: ReadonlySet<Benefit> = new Set(['export', 'aiEntry']);
 
-/** What opened the paywall comes first (Exportar → export, quick entry or Escanear → aiEntry). */
+/** What opened the paywall comes first (Exportar → export, quick entry → aiEntry). */
 export function benefitOrder(from: string | undefined): Benefit[] {
   const first = BENEFITS.find((b) => b === from);
   return first ? [first, ...BENEFITS.filter((b) => b !== first)] : [...BENEFITS];

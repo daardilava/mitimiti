@@ -1,4 +1,4 @@
-// Inicio's shortcut row (docs/DESIGN.md › 05): Rápido · Escanear · Dictar · Presupuestos · Exportar · Historial. Where
+// Inicio's shortcut row (docs/DESIGN.md › 05): Rápido · Dictar · Presupuestos · Exportar · Historial. Where
 // each goes is src/lib/shortcuts.ts. A Premium one shows a crown and opens the paywall on Free; its spoken label says
 // Premium, and a line under the row says what the crown means, so the icon is never the only cue.
 import { router } from 'expo-router';
@@ -15,7 +15,6 @@ import { useI18n } from '@/i18n';
 
 const ICON: Record<ShortcutId, IconName> = {
   quick: 'bolt',
-  scan: 'camera',
   dictate: 'mic',
   budgets: 'gauge',
   export: 'share',
@@ -33,7 +32,6 @@ export function Shortcuts() {
   // Icon on its tile: pairs already checked at 3:1 in tokens.test.ts (avatar and category tiles).
   const look: Record<ShortcutId, { fg: string; bg: string }> = {
     quick: { fg: color.partnerText, bg: color.partnerTint },
-    scan: { fg: color.me, bg: color.meTint },
     dictate: { fg: categories.casa.color, bg: categories.casa.tint },
     budgets: { fg: categories.ocio.color, bg: categories.ocio.tint },
     export: { fg: categories.transporte.color, bg: categories.transporte.tint },

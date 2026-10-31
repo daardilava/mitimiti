@@ -346,7 +346,6 @@ export const es = {
     budgetSetUp: 'Pongan un límite por categoría y vean cuánto les queda.',
     shortcuts: {
       quick: { label: 'Rápido', a11y: 'Gasto rápido' },
-      scan: { label: 'Escanear', a11y: 'Escanear un recibo' },
       dictate: { label: 'Dictar', a11y: 'Dictar un gasto' },
       budgets: { label: 'Presupuestos', a11y: 'Presupuestos' },
       export: { label: 'Exportar', a11y: 'Exportar movimientos' },

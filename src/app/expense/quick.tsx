@@ -187,7 +187,7 @@ function QuickSheet({ couple }: { couple: Couple }) {
     setSource('text');
   };
 
-  // Inicio's Escanear / Dictar shortcuts open this sheet already asking for the photo or listening, once.
+  // Inicio's Dictar shortcut opens this sheet already listening (start=receipt asks for the photo), once.
   const start = readQuickStart(useLocalSearchParams<{ start?: string }>().start);
   const started = useRef(false);
   const startWith = useEffectEvent((how: 'receipt' | 'voice') => {

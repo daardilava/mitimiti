@@ -362,7 +362,7 @@ Free keeps the whole core, and no plan ever changes the balance.
 - [x] **Gating:** only through `canUseFeature` ([src/lib/plans.ts](../src/lib/plans.ts)); `usePlan().gate` is
   Premium while the plan loads, so a paying couple never sees a lock flash.
   - Movimientos, Resumen and Presupuestos have no lock: every month and the limits are free (since 2026-10-30).
-  - Exportar in Ajustes and Inicio's Exportar / Escanear shortcuts say **Premium** (in text, or a crown with its
+  - Exportar in Ajustes and Inicio's Exportar shortcut both say **Premium** (in text, or a crown with its
     spoken label and a legend line) and open the paywall. Exportar is locked too if reached another way
     ([src/ui/Premium.tsx](../src/ui/Premium.tsx)).
   - The balance, settle up and *Gastado juntos* ignore the plan: checked identical on Free and Premium.
