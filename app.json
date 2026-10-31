@@ -97,13 +97,14 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "4c3c3e27-80bb-41ae-a3a2-dc00768e600b"
+        "projectId": "8648d437-b63c-485a-a1fd-49751e4eae06"
       }
     },
     "locales": {
       "es": "./locales/es.json",
       "en": "./locales/en.json",
       "de": "./locales/de.json"
-    }
+    },
+    "owner": "diegovargas"
   }
 }
