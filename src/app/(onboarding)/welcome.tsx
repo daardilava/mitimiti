@@ -1,7 +1,9 @@
-import { Link, type Href } from 'expo-router';
+import { router, type Href } from 'expo-router';
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { signOut } from '@/api/auth';
 import { DEV_BYPASS_AUTH, useSessionStore, type NextStep } from '@/lib/session';
 import { Callout } from '@/ui/Form';
 import { Miti, Wordmark } from '@/ui/Miti';
@@ -15,13 +17,27 @@ export default function Welcome() {
   const { m } = useI18n();
   const { type } = useTheme();
   const styles = useStyles();
-  const signedIn = useSessionStore((s) => s.userId !== null) || DEV_BYPASS_AUTH;
+  const clerkSignedIn = useSessionStore((s) => s.userId !== null);
+  const signedIn = clerkSignedIn || DEV_BYPASS_AUTH;
   // Both paths need a signed-in person: new people create an account first, then continue to the chosen one.
   const to = (next: NextStep): Href => (signedIn ? `/${next}` : { pathname: '/sign-up', params: { next } });
   // Why someone is back here: their account was deleted, or their partner's deletion took the couple with it. The
   // session store clears it once something new happens (a sign-in, a new couple), not when this screen unmounts:
   // navigation and React's development double-mount remount it, which erased the notice before anyone saw it.
   const notice = useSessionStore((s) => s.notice);
+  // An account without a couple lands here too: its link signs it out first, so another account can log in.
+  const [leaving, setLeaving] = useState(false);
+  const logIn = async () => {
+    if (clerkSignedIn) {
+      setLeaving(true);
+      try {
+        await signOut();
+      } finally {
+        setLeaving(false);
+      }
+    }
+    router.push('/sign-in');
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -40,12 +56,11 @@ export default function Welcome() {
       <View style={{ gap: space[3] }}>
         <NavButton href={to('setup')} label={m.welcome.create} kind="brand" />
         <NavButton href={to('join')} label={m.welcome.haveCode} kind="outline" />
-        {!signedIn && (
-          <Link href="/sign-in" asChild>
-            <Pressable accessibilityRole="link" hitSlop={12} style={styles.signIn}>
-              <Text style={[type.row, styles.signInText]}>{m.welcome.signIn}</Text>
-            </Pressable>
-          </Link>
+        {/* Sample-data mode has no Clerk to log in to. */}
+        {!DEV_BYPASS_AUTH && (
+          <Pressable accessibilityRole="link" hitSlop={12} style={styles.signIn} onPress={logIn} disabled={leaving}>
+            <Text style={[type.row, styles.signInText]}>{clerkSignedIn ? m.welcome.otherAccount : m.welcome.signIn}</Text>
+          </Pressable>
         )}
       </View>
     </SafeAreaView>

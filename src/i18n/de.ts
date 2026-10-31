@@ -131,6 +131,7 @@ export const de: Messages = {
     create: 'Konto erstellen',
     haveCode: 'Ich habe eine Einladung',
     signIn: 'Anmelden',
+    otherAccount: 'Mit einem anderen Konto anmelden',
   },
 
   signIn: {

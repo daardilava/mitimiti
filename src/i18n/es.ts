@@ -145,6 +145,7 @@ export const es = {
     create: 'Crear cuenta',
     haveCode: 'Tengo una invitación de mi pareja',
     signIn: 'Iniciar sesión',
+    otherAccount: 'Iniciar sesión con otra cuenta',
   },
 
   signIn: {

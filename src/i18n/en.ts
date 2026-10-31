@@ -128,6 +128,7 @@ export const en: Messages = {
     create: 'Create account',
     haveCode: 'I have an invite from my partner',
     signIn: 'Log in',
+    otherAccount: 'Log in with another account',
   },
 
   signIn: {
