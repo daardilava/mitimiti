@@ -1,7 +1,7 @@
 // Pieces shared by Iniciar sesión, Crea tu cuenta and ¿Olvidaste tu contraseña?
 import { Link, type Href } from 'expo-router';
 import { useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type TextInput } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type TextInputInstance } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { authErrorMessage, useOAuth, type Provider } from '@/api/auth';
 import { CODE_LENGTH } from '@/lib/authFlow';
@@ -136,7 +136,7 @@ export function CodeStep({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
-  const input = useRef<TextInput>(null);
+  const input = useRef<TextInputInstance>(null);
   // `busy` only updates on the next render; Android can fire onChangeText twice for the same text before that, which
   // sent the code twice ("verification_already_verified"). A ref blocks the second call synchronously.
   const inFlight = useRef(false);

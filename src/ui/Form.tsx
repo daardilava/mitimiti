@@ -1,6 +1,6 @@
 // Form pieces from the "Componentes" board: labelled fields, pill chips, radio cards and notices.
 import { useState, type ReactNode, type Ref } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { font, radius, space, touch, noFocusRing } from './tokens';
 import { useI18n } from '@/i18n';
@@ -28,7 +28,7 @@ export function Field({ label, hint, error, children }: { label: string; hint?: 
 }
 
 type TextFieldProps = TextInputProps & {
-  ref?: Ref<TextInput>;
+  ref?: Ref<TextInputInstance>;
   label: string;
   hint?: string;
   error?: string | null;

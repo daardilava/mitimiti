@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useLocales } from 'expo-localization';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MAX_TEXT } from '../../../supabase/functions/_shared/quickEntry';
 import { deleteExpense, forgetExpense, useCouple, useUpsertExpense, type Couple, type ExpenseInput } from '@/api/expenses';
@@ -61,7 +61,7 @@ function QuickSheet({ couple }: { couple: Couple }) {
   const today = daysAgo(0);
   const ctx = useMemo<QuickEntryContext>(() => ({ ...couple, today, language }), [couple, today, language]);
   const examples = EXAMPLES[couple.currency];
-  const input = useRef<TextInput>(null);
+  const input = useRef<TextInputInstance>(null);
 
   const [text, setText] = useState('');
   const [source, setSource] = useState<EntrySource>('text');
