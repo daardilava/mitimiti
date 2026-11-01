@@ -1,16 +1,16 @@
 // Terms and conditions of MitiMiti, in English: a translation of terms.es.ts, which is the binding version.
 import { LEGAL_CONTACT, type LegalDoc } from './types';
 
-const { owner, email } = LEGAL_CONTACT;
+const { owner, email, address } = LEGAL_CONTACT;
 
 export const termsEn: LegalDoc = {
-  effective: 'Effective from October 23, 2026',
+  effective: 'Effective from November 1, 2026',
   intro:
     'These terms explain what MitiMiti is, what you can expect from the app and what we expect from the people who use it. By creating your account you accept them. If you don’t agree, don’t use the app.',
   sections: [
     {
       heading: '1. Who offers the app',
-      paragraphs: [`MitiMiti is offered by ${owner}, an individual domiciled in Colombia ("we"). You can write to us at ${email}.`],
+      paragraphs: [`MitiMiti is offered by ${owner}, an individual, ${address}, Germany ("we"). You can write to us at ${email}.`],
     },
     {
       heading: '2. What MitiMiti is',
@@ -57,22 +57,22 @@ export const termsEn: LegalDoc = {
     {
       heading: '7. Your data',
       paragraphs: [
-        'We process your personal data under Colombian Law 1581 of 2012 and its regulations, and the MitiMiti Privacy Policy. It explains what data we keep, why, who we share it with and how to exercise your rights.',
+        'We process your personal data under the EU General Data Protection Regulation (GDPR) and the MitiMiti Privacy Policy. It explains what data we keep, why, who we share it with and how to exercise your rights.',
         'You can delete your account at any time from Settings › Account, or by writing to us.',
       ],
     },
     {
       heading: '8. The service',
       paragraphs: [
-        'We work to keep MitiMiti running well and its calculations exact, but the app is offered as is and may have errors or interruptions. We may change, improve or remove features.',
+        'We work to keep MitiMiti running well and its calculations exact, but we can’t guarantee it will always work without errors or interruptions. We may change, improve or remove features for valid reasons, such as improvements, security or legal changes, at no cost to you. If a change significantly affects what you paid for with Premium, we’ll tell you in advance.',
         'If we stop offering the app, we’ll tell you at least 30 days in advance so you can keep your information.',
       ],
     },
     {
       heading: '9. Liability',
       paragraphs: [
-        'To the extent the law allows, we are not liable for decisions or agreements between you based on the app’s information, nor for losses caused by incorrectly recorded data or misuse of your account.',
-        'Nothing in these terms limits the rights you have under Colombian Law 1480 of 2011 (Consumer Statute) or other rules that can’t be waived.',
+        'We are liable without limit for intent and gross negligence, for injury to life, body or health, and under the German Product Liability Act. For slight negligence we are only liable if we breach an essential contractual obligation, meaning one without which the service couldn’t be provided and on which you rely, and only for typical, foreseeable damage.',
+        'We are not liable for decisions or agreements between you based on the app’s information, nor for losses caused by incorrectly recorded data or misuse of your account, unless we are at fault. Nothing in these terms limits the statutory warranty or the rights consumer protection law gives you that can’t be waived.',
       ],
     },
     {
@@ -91,13 +91,13 @@ export const termsEn: LegalDoc = {
     {
       heading: '12. Changes to these terms',
       paragraphs: [
-        'If we change these terms, we’ll update the date above and tell you in the app before important changes apply. If you keep using MitiMiti after that date, you accept the new version.',
+        'If we change these terms, we’ll update the date above and tell you in the app in advance. Important changes only apply if you accept them; if you don’t, you can stop using MitiMiti and delete your account.',
       ],
     },
     {
       heading: '13. Governing law',
       paragraphs: [
-        'These terms are governed by the laws of the Republic of Colombia. If you have a complaint, write to us first; if we don’t resolve it, you can go to the Superintendence of Industry and Commerce (SIC) or the courts of Colombia.',
+        'These terms are governed by the law of the Federal Republic of Germany, excluding the UN Convention on Contracts for the International Sale of Goods. If you are a consumer, you keep the protection of the mandatory rules of the country where you live. If you have a complaint, write to us first. We do not take part in dispute resolution proceedings before a consumer arbitration board.',
         'These terms are offered in Spanish, English and German. If the versions differ, the Spanish version prevails.',
       ],
     },

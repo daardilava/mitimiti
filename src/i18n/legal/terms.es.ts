@@ -1,17 +1,17 @@
 // Términos y condiciones de MitiMiti, en español: la versión que vale.
 import { LEGAL_CONTACT, type LegalDoc } from './types';
 
-const { owner, email } = LEGAL_CONTACT;
+const { owner, email, address } = LEGAL_CONTACT;
 
 export const termsEs: LegalDoc = {
-  effective: 'Vigentes desde el 23 de octubre de 2026',
+  effective: 'Vigentes desde el 1 de noviembre de 2026',
   intro:
     'Estos términos explican qué es MitiMiti, qué puedes esperar de la app y qué esperamos de quienes la usan. Al crear tu cuenta los aceptas. Si no estás de acuerdo, no uses la app.',
   sections: [
     {
       heading: '1. Quién ofrece la app',
       paragraphs: [
-        `MitiMiti es ofrecida por ${owner}, persona natural domiciliada en Colombia ("nosotros"). Puedes escribirnos a ${email}.`,
+        `MitiMiti es ofrecida por ${owner}, persona natural, ${address}, Alemania ("nosotros"). Puedes escribirnos a ${email}.`,
       ],
     },
     {
@@ -59,22 +59,22 @@ export const termsEs: LegalDoc = {
     {
       heading: '7. Tus datos',
       paragraphs: [
-        'Tratamos tus datos personales según la Ley 1581 de 2012 y sus decretos reglamentarios, y la Política de privacidad de MitiMiti. Allí explicamos qué datos guardamos, para qué, con quién los compartimos y cómo ejercer tus derechos.',
+        'Tratamos tus datos personales según el Reglamento General de Protección de Datos de la Unión Europea (RGPD) y la Política de privacidad de MitiMiti. Allí explicamos qué datos guardamos, para qué, con quién los compartimos y cómo ejercer tus derechos.',
         'Puedes borrar tu cuenta cuando quieras desde Ajustes › Cuenta, o escribiéndonos.',
       ],
     },
     {
       heading: '8. El servicio',
       paragraphs: [
-        'Trabajamos para que MitiMiti funcione bien y para que sus cálculos sean exactos, pero la app se ofrece tal como está y puede tener fallas o interrupciones. Podemos cambiar, mejorar o retirar funciones.',
+        'Trabajamos para que MitiMiti funcione bien y para que sus cálculos sean exactos, pero no podemos garantizar que funcione siempre sin fallas ni interrupciones. Podemos cambiar, mejorar o retirar funciones por motivos válidos, como mejoras, seguridad o cambios legales, sin costo para ti. Si un cambio afecta de forma importante lo que pagaste con Premium, te avisaremos con anticipación.',
         'Si vamos a dejar de ofrecer la app, te avisaremos con al menos 30 días de anticipación para que puedas guardar tu información.',
       ],
     },
     {
       heading: '9. Responsabilidad',
       paragraphs: [
-        'En la medida en que la ley lo permita, no respondemos por decisiones o acuerdos entre ustedes basados en la información de la app, ni por pérdidas causadas por datos registrados de forma incorrecta o por el uso indebido de tu cuenta.',
-        'Nada en estos términos limita los derechos que te da la Ley 1480 de 2011 (Estatuto del Consumidor) ni otras normas que no se puedan renunciar.',
+        'Respondemos sin límite cuando hay dolo o culpa grave, por daños a la vida, el cuerpo o la salud, y según la ley alemana de responsabilidad por productos. Por culpa leve solo respondemos si incumplimos una obligación esencial del contrato, es decir, una sin la cual no se podría prestar el servicio y en la que confías, y solo por el daño típico y previsible.',
+        'No respondemos por decisiones o acuerdos entre ustedes basados en la información de la app, ni por pérdidas causadas por datos registrados de forma incorrecta o por el uso indebido de tu cuenta, salvo que sean culpa nuestra. Nada en estos términos limita la garantía legal ni los derechos que te dan las normas de protección al consumidor que no se puedan renunciar.',
       ],
     },
     {
@@ -93,13 +93,13 @@ export const termsEs: LegalDoc = {
     {
       heading: '12. Cambios a estos términos',
       paragraphs: [
-        'Si cambiamos estos términos, actualizaremos la fecha de arriba y te avisaremos en la app antes de que los cambios importantes apliquen. Si sigues usando MitiMiti después de esa fecha, aceptas la nueva versión.',
+        'Si cambiamos estos términos, actualizaremos la fecha de arriba y te avisaremos en la app con anticipación. Los cambios importantes solo aplican si los aceptas; si no los aceptas, puedes dejar de usar MitiMiti y borrar tu cuenta.',
       ],
     },
     {
       heading: '13. Ley aplicable',
       paragraphs: [
-        'Estos términos se rigen por las leyes de la República de Colombia. Si tienes un reclamo, escríbenos primero; si no lo resolvemos, puedes acudir a la Superintendencia de Industria y Comercio o a los jueces de Colombia.',
+        'Estos términos se rigen por el derecho de la República Federal de Alemania, sin la Convención de las Naciones Unidas sobre la compraventa internacional de mercaderías. Si eres consumidor, conservas la protección de las normas imperativas del país donde vives. Si tienes un reclamo, escríbenos primero. No participamos en procedimientos de resolución de conflictos ante una entidad de arbitraje de consumo.',
         'Estos términos se ofrecen en español, inglés y alemán. Si hay diferencias entre versiones, vale la versión en español.',
       ],
     },

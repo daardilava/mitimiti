@@ -1,16 +1,16 @@
 // AGB von MitiMiti auf Deutsch: eine Übersetzung von terms.es.ts, das die verbindliche Fassung ist.
 import { LEGAL_CONTACT, type LegalDoc } from './types';
 
-const { owner, email } = LEGAL_CONTACT;
+const { owner, email, address } = LEGAL_CONTACT;
 
 export const termsDe: LegalDoc = {
-  effective: 'Gültig ab dem 23. Oktober 2026',
+  effective: 'Gültig ab dem 1. November 2026',
   intro:
     'Diese Bedingungen erklären, was MitiMiti ist, was du von der App erwarten kannst und was wir von den Menschen erwarten, die sie nutzen. Mit dem Erstellen deines Kontos akzeptierst du sie. Wenn du nicht einverstanden bist, nutze die App nicht.',
   sections: [
     {
       heading: '1. Wer die App anbietet',
-      paragraphs: [`MitiMiti wird von ${owner} angeboten, einer Privatperson mit Wohnsitz in Kolumbien („wir“). Du erreichst uns unter ${email}.`],
+      paragraphs: [`MitiMiti wird von ${owner} angeboten, Privatperson, ${address}, Deutschland („wir“). Du erreichst uns unter ${email}.`],
     },
     {
       heading: '2. Was MitiMiti ist',
@@ -57,22 +57,22 @@ export const termsDe: LegalDoc = {
     {
       heading: '7. Deine Daten',
       paragraphs: [
-        'Wir verarbeiten deine personenbezogenen Daten nach dem kolumbianischen Gesetz 1581 von 2012 und seinen Durchführungsbestimmungen sowie nach der Datenschutzerklärung von MitiMiti. Dort erklären wir, welche Daten wir speichern, wofür, mit wem wir sie teilen und wie du deine Rechte ausübst.',
+        'Wir verarbeiten deine personenbezogenen Daten nach der Datenschutz-Grundverordnung der EU (DSGVO) und der Datenschutzerklärung von MitiMiti. Dort erklären wir, welche Daten wir speichern, wofür, mit wem wir sie teilen und wie du deine Rechte ausübst.',
         'Du kannst dein Konto jederzeit unter Einstellungen › Konto löschen oder uns dafür schreiben.',
       ],
     },
     {
       heading: '8. Der Dienst',
       paragraphs: [
-        'Wir arbeiten daran, dass MitiMiti gut funktioniert und genau rechnet, aber die App wird so angeboten, wie sie ist, und kann Fehler oder Ausfälle haben. Wir können Funktionen ändern, verbessern oder entfernen.',
+        'Wir arbeiten daran, dass MitiMiti gut funktioniert und genau rechnet, aber wir können nicht garantieren, dass sie immer ohne Fehler oder Ausfälle läuft. Wir können Funktionen aus triftigem Grund ändern, verbessern oder entfernen, etwa für Verbesserungen, Sicherheit oder rechtliche Änderungen, ohne Kosten für dich. Beeinträchtigt eine Änderung wesentlich, wofür du mit Premium bezahlt hast, sagen wir es dir vorher.',
         'Wenn wir die App nicht mehr anbieten, sagen wir es dir mindestens 30 Tage vorher, damit du deine Informationen sichern kannst.',
       ],
     },
     {
       heading: '9. Haftung',
       paragraphs: [
-        'Soweit gesetzlich zulässig, haften wir nicht für Entscheidungen oder Vereinbarungen zwischen euch, die auf den Informationen der App beruhen, und nicht für Verluste durch falsch erfasste Daten oder den Missbrauch deines Kontos.',
-        'Nichts in diesen Bedingungen schränkt deine Rechte aus dem kolumbianischen Gesetz 1480 von 2011 (Verbraucherschutzgesetz) oder anderen unverzichtbaren Vorschriften ein.',
+        'Wir haften unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei Verletzung von Leben, Körper oder Gesundheit und nach dem Produkthaftungsgesetz. Bei leichter Fahrlässigkeit haften wir nur, wenn wir eine wesentliche Vertragspflicht verletzen, also eine Pflicht, ohne die der Dienst nicht erbracht werden könnte und auf die du vertraust, und nur für den typischen, vorhersehbaren Schaden.',
+        'Wir haften nicht für Entscheidungen oder Vereinbarungen zwischen euch, die auf den Informationen der App beruhen, und nicht für Verluste durch falsch erfasste Daten oder den Missbrauch deines Kontos, es sei denn, wir haben sie verschuldet. Nichts in diesen Bedingungen schränkt die gesetzliche Gewährleistung oder deine unverzichtbaren Rechte als Verbraucher oder Verbraucherin ein.',
       ],
     },
     {
@@ -91,13 +91,13 @@ export const termsDe: LegalDoc = {
     {
       heading: '12. Änderungen dieser Bedingungen',
       paragraphs: [
-        'Wenn wir diese Bedingungen ändern, aktualisieren wir das Datum oben und informieren dich in der App, bevor wichtige Änderungen gelten. Wenn du MitiMiti nach diesem Datum weiter nutzt, akzeptierst du die neue Fassung.',
+        'Wenn wir diese Bedingungen ändern, aktualisieren wir das Datum oben und informieren dich vorher in der App. Wichtige Änderungen gelten nur, wenn du ihnen zustimmst; stimmst du nicht zu, kannst du MitiMiti nicht mehr nutzen und dein Konto löschen.',
       ],
     },
     {
       heading: '13. Anwendbares Recht',
       paragraphs: [
-        'Diese Bedingungen unterliegen dem Recht der Republik Kolumbien. Wenn du eine Beschwerde hast, schreib uns zuerst; lösen wir sie nicht, kannst du dich an die Superintendencia de Industria y Comercio (SIC) oder an die Gerichte Kolumbiens wenden.',
+        'Diese Bedingungen unterliegen dem Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts. Bist du Verbraucher oder Verbraucherin, behältst du den Schutz der zwingenden Vorschriften des Landes, in dem du lebst. Wenn du eine Beschwerde hast, schreib uns zuerst. Wir nehmen nicht an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teil.',
         'Diese Bedingungen gibt es auf Spanisch, Englisch und Deutsch. Bei Abweichungen gilt die spanische Fassung.',
       ],
     },

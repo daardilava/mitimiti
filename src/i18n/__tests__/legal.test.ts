@@ -43,9 +43,10 @@ describe.each([
   ['en', privacyEn],
   ['de', privacyDe],
 ] as const)('Privacy in %s', (_, doc) => {
-  // Decreto 1377 de 2013: the controller's domicile; and the processors that actually hold the data, and where.
-  it('names the controller’s domicile, both processors and where the data is hosted', () => {
-    expect(text(doc)).toContain(LEGAL_CONTACT.city);
+  // Art. 13 GDPR: the controller's address, the authority to complain to; and the processors that hold the data, and where.
+  it('names the controller’s address, the supervisory authority, both processors and where the data is hosted', () => {
+    expect(text(doc)).toContain(LEGAL_CONTACT.address);
+    expect(text(doc)).toMatch(/Hessische Beauftragte/);
     expect(text(doc)).toMatch(/Clerk/);
     expect(text(doc)).toMatch(/Supabase/);
     expect(text(doc)).toMatch(/Irlanda|Ireland|Irland/);
