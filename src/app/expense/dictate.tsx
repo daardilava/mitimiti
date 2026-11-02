@@ -174,6 +174,7 @@ function Listening({ couple }: { couple: Couple }) {
                 ) : (
                   transcript
                 )}
+                {listening ? '…' : ''}
               </Text>
             ) : (
               <Text style={[styles.transcript, { color: color.textSecondary }]}>
@@ -265,7 +266,7 @@ const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
   iconButton: { width: touch, height: touch, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, textAlign: 'center' },
   headerAction: { minHeight: touch, minWidth: touch, paddingHorizontal: space[3], alignItems: 'center', justifyContent: 'center' },
-  headerActionText: { ...type.row, color: color.ink, fontFamily: font.bodyBold, textDecorationLine: 'underline' },
+  headerActionText: { ...type.row, color: color.me, fontFamily: font.bodyBold },
   content: { flexGrow: 1, alignItems: 'center', gap: space[4], paddingHorizontal: space[5], paddingVertical: space[4] },
   notice: { flex: 1, justifyContent: 'center', alignSelf: 'stretch', gap: space[4] },
   indicator: { width: 220, height: 220, alignItems: 'center', justifyContent: 'center', marginTop: space[2] },

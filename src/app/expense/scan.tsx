@@ -12,6 +12,7 @@ import { canUse } from '@/lib/premium';
 import { readingFromAi } from '@/lib/receiptDraft';
 import { PremiumGate } from '@/ui/Capture';
 import { Icon } from '@/ui/Icon';
+import { Miti } from '@/ui/Miti';
 import { Loading, NavButton } from '@/ui/Screen';
 import { font, radius, space, touch } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
@@ -183,7 +184,7 @@ function Camera({ couple }: { couple: Couple }) {
         )}
         <View style={styles.middle}>
           <View style={styles.hint}>
-            <Icon name="doc" size={16} color={color.onHero} />
+            <Miti size={20} />
             <Text style={styles.hintText}>{t.frameHint}</Text>
           </View>
           <View style={styles.frame} aria-hidden>
@@ -191,6 +192,7 @@ function Camera({ couple }: { couple: Couple }) {
             <View style={[styles.corner, styles.tr]} />
             <View style={[styles.corner, styles.bl]} />
             <View style={[styles.corner, styles.br]} />
+            <View style={styles.scanLine} />
           </View>
           <Text style={[styles.lead, styles.note]}>{t.notSaved}</Text>
         </View>
@@ -276,9 +278,11 @@ const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
   hint: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingHorizontal: space[3], paddingVertical: 6, borderRadius: radius.pill, backgroundColor: color.hero },
   hintText: { ...type.label, color: color.onHero },
   frame: { width: '100%', maxWidth: 320, aspectRatio: 0.68 },
+  // Brand colours, like Miti: green on top, coral below (decoration; the hint says what to do).
   corner: { position: 'absolute', width: CORNER, height: CORNER, borderColor: color.wordmarkCoral },
-  tl: { top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: radius.tile },
-  tr: { top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: radius.tile },
+  tl: { top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: radius.tile, borderColor: color.wordmarkGreen },
+  tr: { top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: radius.tile, borderColor: color.wordmarkGreen },
+  scanLine: { position: 'absolute', top: '52%', left: space[3], right: space[3], height: 2, borderRadius: 1, backgroundColor: color.wordmarkGreen, opacity: 0.8 },
   bl: { bottom: 0, left: 0, borderBottomWidth: 4, borderLeftWidth: 4, borderBottomLeftRadius: radius.tile },
   br: { bottom: 0, right: 0, borderBottomWidth: 4, borderRightWidth: 4, borderBottomRightRadius: radius.tile },
   lead: { ...type.body, color: color.onInk, fontSize: 15, lineHeight: 22 },

@@ -74,12 +74,13 @@ function Review({ reading, couple, net }: { reading: ReceiptReading; couple: Cou
     reading.totalMinor !== null ? fmt(reading.totalMinor) : unknownForeign && reading.totalText ? `${reading.totalText} ${reading.foreignCurrency}` : t.totalUnread;
 
   // ─── The balance after this expense: balance_view + splits.ts ───
-  let preview: string | null = null;
+  let preview: { lead: string; part: string } | string | null = null;
   if (usable && draft.amountMinor) {
     const effect = expenseEffect({ paidBy, amountMinor: draft.amountMinor, splitMode, splitPct: choice.splitPct }, me.id);
     const after = net + effect;
     const own = (n: number) => formatMoney(n, couple.currency);
-    preview = effect === 0 ? t.noChange : after > 0 ? t.owesYou(partner.name, own(after)) : after < 0 ? t.youOwe(partner.name, own(after)) : t.even;
+    const part = after > 0 ? t.owesYou(partner.name, own(after)) : after < 0 ? t.youOwe(partner.name, own(after)) : t.even;
+    preview = effect === 0 ? t.noChange : { lead: t.lead, part };
   }
 
   const payerName = paidBy === me.id ? me.name : partner.name;
@@ -144,35 +145,43 @@ function Review({ reading, couple, net }: { reading: ReceiptReading; couple: Cou
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {/* The paper receipt: white with dark print in both modes (onHero / hero, checked in tokens.test.ts). */}
+        <View>
         <View style={styles.receipt} accessible accessibilityLabel={[reading.merchant, category.name, total].filter(Boolean).join('. ')}>
           {reading.merchant ? (
-            <Text style={[type.heading, { textAlign: 'center' }]} numberOfLines={2}>
+            <Text style={[type.heading, { textAlign: 'center', color: color.hero }]} numberOfLines={2}>
               {reading.merchant}
             </Text>
           ) : null}
-          <View style={[styles.catChip, { backgroundColor: category.tint }]}>
-            <Icon name={category.icon as IconName} size={14} color={category.color} />
-            <Text style={[type.effect, { color: category.color }]}>{category.name}</Text>
+          <View style={styles.catChip}>
+            <Icon name={category.icon as IconName} size={14} color={color.partnerText} />
+            <Text style={[type.effect, { color: color.partnerText }]}>{category.name}</Text>
           </View>
           <View style={styles.dashed} />
           <View style={styles.line}>
             <Text style={styles.lineLabel}>{t.date}</Text>
-            <Text style={styles.lineValue}>{reading.date ? d.longDate(reading.date) : t.noDate}</Text>
+            <Text style={[styles.lineValue, { fontFamily: font.bodyBold }]}>{reading.date ? `${d.shortDate(reading.date)} ${reading.date.slice(0, 4)}` : t.noDate}</Text>
           </View>
           {reading.items.length > 0 && <View style={styles.dashed} />}
           {reading.items.map((item, i) => (
             <View key={`${i}-${item.name}`} style={styles.line}>
-              <Text style={[styles.lineLabel, { color: color.ink, flex: 1 }]}>{t.line(String(item.qty), item.name)}</Text>
+              <Text style={[styles.lineLabel, { color: color.hero, flex: 1 }]}>{t.line(String(item.qty), item.name)}</Text>
               <Text style={styles.lineValue}>{item.totalMinor !== null ? fmt(item.totalMinor) : '—'}</Text>
             </View>
           ))}
           <View style={styles.dashed} />
           <View style={[styles.line, { alignItems: 'flex-end' }]}>
             <Text style={styles.lineLabel}>{t.total}</Text>
-            <Text style={[type.screenTitle, styles.tabular]} adjustsFontSizeToFit numberOfLines={1}>
+            <Text style={[type.screenTitle, styles.tabular, { color: color.hero }]} adjustsFontSizeToFit numberOfLines={1}>
               {total}
             </Text>
           </View>
+        </View>
+        <View style={styles.tear} aria-hidden>
+          {Array.from({ length: 24 }, (_, i) => (
+            <View key={i} style={styles.tooth} />
+          ))}
+        </View>
         </View>
 
         {!reading.itemsMatchTotal && <Callout icon="doc" tone="neutral">{t.mismatch}</Callout>}
@@ -183,14 +192,20 @@ function Review({ reading, couple, net }: { reading: ReceiptReading; couple: Cou
         ) : null}
 
         <View style={styles.rows}>
-          <Row label={t.paid} value={payerName} onPress={() => setPicker('payer')} />
+          <Row label={t.paid} value={payerName} accent onPress={() => setPicker('payer')} />
           <View style={styles.rowLine} />
           <Row label={t.split} value={splitText} onPress={() => setPicker('split')} />
         </View>
 
         {preview && (
           <Text style={styles.preview} accessibilityLiveRegion="polite">
-            {preview}
+            {typeof preview === 'string' ? (
+              preview
+            ) : (
+              <>
+                {preview.lead} <Text style={{ color: color.partnerText }}>{preview.part}</Text>
+              </>
+            )}
           </Text>
         )}
         {save.isError && (
@@ -276,14 +291,14 @@ function Review({ reading, couple, net }: { reading: ReceiptReading; couple: Cou
   );
 }
 
-function Row({ label, value, onPress }: { label: string; value: string; onPress: () => void }) {
+function Row({ label, value, accent, onPress }: { label: string; value: string; accent?: boolean; onPress: () => void }) {
   const { m } = useI18n();
   const { color, type } = useTheme();
   const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={m.capture.receipt.rowA11y(label, value)} onPress={onPress} style={styles.row}>
       <Text style={[type.row, { color: color.textSecondary, flex: 1 }]}>{label}</Text>
-      <Text style={[type.row, { fontFamily: font.bodyBold, flexShrink: 1, textAlign: 'right' }]} numberOfLines={2}>
+      <Text style={[type.row, { fontFamily: font.bodyBold, flexShrink: 1, textAlign: 'right', color: accent ? color.me : color.ink }]} numberOfLines={2}>
         {value}
       </Text>
       <Icon name="forward" size={18} color={color.textSecondary} />
@@ -307,12 +322,15 @@ const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
     borderColor: color.line,
   },
   content: { padding: space[5], gap: space[4] },
-  receipt: { gap: space[3], padding: space[5], borderRadius: radius.card, backgroundColor: color.surface, borderWidth: 1, borderColor: color.line, alignItems: 'stretch' },
-  catChip: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: space[2], paddingVertical: 3, borderRadius: radius.tile },
-  dashed: { borderTopWidth: 1, borderStyle: 'dashed', borderColor: color.fieldBorder },
+  receipt: { gap: space[3], padding: space[5], paddingBottom: space[6], borderTopLeftRadius: radius.tile, borderTopRightRadius: radius.tile, backgroundColor: color.onHero, alignItems: 'stretch' },
+  catChip: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: space[2], paddingVertical: 3, borderRadius: radius.tile, backgroundColor: color.partnerTint },
+  dashed: { borderTopWidth: 1, borderStyle: 'dashed', borderColor: color.heroLine },
+  // The torn bottom edge: small squares in the background colour, turned 45°, biting into the paper.
+  tear: { flexDirection: 'row', justifyContent: 'space-between', height: 7, marginTop: -7, overflow: 'hidden' },
+  tooth: { width: 10, height: 10, marginTop: 2, backgroundColor: color.background, transform: [{ rotate: '45deg' }] },
   line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space[3] },
-  lineLabel: { ...type.body, fontSize: 15, color: color.textSecondary },
-  lineValue: { ...type.body, fontSize: 15, color: color.ink, fontVariant: ['tabular-nums'] },
+  lineLabel: { ...type.body, fontSize: 15, color: color.heroLine },
+  lineValue: { ...type.body, fontSize: 15, color: color.hero, fontVariant: ['tabular-nums'] },
   tabular: { fontVariant: ['tabular-nums'], flexShrink: 1 },
   rows: { borderRadius: radius.card, backgroundColor: color.surface, borderWidth: 1, borderColor: color.line },
   row: { flexDirection: 'row', alignItems: 'center', gap: space[2], minHeight: touch + 12, paddingHorizontal: space[4] },
