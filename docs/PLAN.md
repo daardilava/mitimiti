@@ -32,6 +32,7 @@ a web app (mobile only), converting between currencies.
 | Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): Export, quick entry with AI (receipts, harder phrases), later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |
+| Scan + Dictate | Escanear a receipt (read by AI) and Dictar an expense, from Inicio › Agregar un gasto; Premium (gate off until billing is tested); see [Scan + Dictate](#scan--dictate-premium) | Built 2026-11-02 (on request) |
 | Quick entry | Type or say "café 4,50 pagó Ana" and it's logged in ~3 s; local parser first, AI fallback and receipt photos for Premium; see [QUICK_ENTRY.md](QUICK_ENTRY.md) | Slices 1–5 built (on request); widget later |
 | Receipt photo / widget | Picture on an expense; home-screen balance + quick add | Later |
 
@@ -415,6 +416,57 @@ Free keeps the whole core, and no plan ever changes the balance.
 - [ ] A billing issue shows the warning in Ajustes, and Premium stays until the store's grace period ends.
 - [ ] Deleting the payer's account erases the couple's data and says the store subscription is cancelled in the store.
 - [ ] For the same data, Home's balance, settle up and *Gastado juntos* are identical on Free and Premium.
+
+### Scan + Dictate (Premium)
+
+Started 2026-11-02, on request, alongside Phase 6. Additive: no change to balance math, splits, SQL views, existing
+RPCs or migrations.
+
+**Goal:** from Inicio, log an expense by photographing the receipt or by saying it, and confirm it in one tap.
+
+**Decisions**
+
+- Both are **Premium**. Until billing is tested, `PREMIUM_ENFORCED = false` in `src/lib/premium.ts`: both open for
+  everyone and the crown is only a label. Turning it on is that constant plus `RECEIPT_PREMIUM_ONLY=1` on the server.
+  (The quick sheet's mic, built before, stays free; whether it follows Dictar is open.)
+- Escanear has **its own Edge Function, `read-receipt`, on `claude-sonnet-5-5`**, with its own allowance (30 scans per
+  couple and day, `receipt_scans`), separate from quick entry's `parse-expense` / `ai_usage`.
+- The model returns amounts **as printed text**; money.ts reads them (QUICK_ENTRY ground rule 2). Another currency is
+  shown and flagged, never converted, and its total never becomes the amount.
+- Dictar reuses quick entry's parser (`parseDictation()` wraps `parseQuickEntry()`), so typing and speaking agree.
+- Drafts move between screens through a zustand store (`src/lib/draftStore.ts`), not URL params.
+
+**Tasks**
+
+- [x] `src/lib/expenseDraft.ts` (`ExpenseDraft`, Zod schema, `mapCategory()`), `src/lib/draftStore.ts`; `expense/new`
+  reads and clears a handed-over draft. Tests: `expenseDraft.test.ts`.
+- [x] Premium gate: `src/lib/premium.ts` (`PREMIUM_ENFORCED`, `canUse()`), `scan` / `dictate` in plans.ts; a short
+  Premium sheet that always offers Escribir. Tests: `premium.test.ts`.
+- [x] Inicio › Agregar un gasto: Escanear and Dictar cards with a crown badge, and the legend line.
+- [x] Dictar (`expense/dictate`): live transcript with the amount highlighted, chips, stop → prefilled form; calm
+  messages for a refused mic, nothing heard, or no speech recognition. `src/lib/parseDictation.ts` + es / en / de tests.
+- [x] Escanear (`expense/scan`): `expo-camera` with frame, flash, photos, Escribir; explains the permission first;
+  shrinks to 1600 px / JPEG 0.6 (`src/api/receipts.ts`); dev bypass answers with the sample receipt.
+- [x] `read-receipt` Edge Function + `_shared/receipt.ts` contract; `20261102000000_receipt_scans.sql`
+  (`receipt_scans`, `claim_receipt_scan()`); SQL tests in `supabase/tests/receipt_scans.test.ts`.
+- [x] Revisar el recibo (`expense/receipt`): receipt card, Pagó / División pickers, balance preview from splits.ts,
+  mismatch / currency / unread-total notes, Editar and Agregar gasto (through `useUpsertExpense`).
+- [x] Copy in es / en / de; new colour pairs in `tokens.test.ts`; docs (DESIGN, ARCHITECTURE, README, .env.example).
+
+**Acceptance checks**
+
+- [x] `npm run typecheck`, `npx expo lint`, `npm test` pass; `splits_parity.test.ts` untouched and green.
+- [x] Tests for the parser (es / en / de), `mapCategory`, draft validation, `canUse` and the scan allowance in SQL.
+- [x] Screenshots at 390 px, light and dark: Inicio, Dictar, the camera and the receipt review
+  (`docs/screenshots/capture-*.png`, Expo web with dev bypass; the camera shows Chrome's fake video feed).
+- [x] Dev bypass: Dictar → prefilled form → saved; Escanear → sample receipt → Agregar gasto → in Recientes, balance
+  updated. Run on Expo web (2026-11-02) with a scripted speech result: "Almuerzo con Ana, 25.000 pesos, pagó Ana, a
+  medias" → form $25.000 / Almuerzo con Ana → saved, $337.950 → $325.450; the sample receipt ($24.800, half) → preview
+  and Home both $337.850. On web, dictation only ran with voice.ts temporarily loading the web speech module (reverted).
+- [ ] Development build on a real phone: camera, photos and dictation (permissions, refusal, flash).
+- [ ] Deployed `read-receipt`: a real receipt read in a few seconds; no session → 401; the 31st scan of the day → 429
+  and the message; nothing about the image in the function's logs.
+- [ ] With `PREMIUM_ENFORCED = true`: a Free couple gets the Premium sheet from both cards and can still type.
 
 ## Open questions
 

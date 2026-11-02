@@ -1,6 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCouple, useUpsertExpense, type ExpenseInput } from '@/api/expenses';
+import { takeDraft, useDraftStore } from '@/lib/draftStore';
+import { readDraft as validDraft } from '@/lib/expenseDraft';
 import type { EntrySource } from '@/lib/quickSheet';
 import { ExpenseForm } from '@/ui/ExpenseForm';
 import { Loading } from '@/ui/Screen';
@@ -20,14 +22,21 @@ function readDraft(raw: string | undefined): Partial<ExpenseInput> | undefined {
 }
 
 // 06 · Nuevo gasto, from the tab bar's +. From quick entry ("Revisar", "Formulario") it starts from that draft, and
-// remembers how it began. Without a draft, "Rápido" (top right) switches to quick entry.
+// remembers how it began; from Dictar and Escanear (Editar) the draft comes through src/lib/draftStore.ts instead of
+// the URL. Without a draft, "Rápido" (top right) switches to quick entry.
 export default function NewExpense() {
   const { m } = useI18n();
   const couple = useCouple();
   const save = useUpsertExpense();
   const params = useLocalSearchParams<{ draft?: string; source?: string }>();
-  const draft = useMemo(() => readDraft(params.draft), [params.draft]);
-  const source = SOURCES.find((s) => s === params.source);
+  // A draft handed over by Dictar / Escanear: read once (pure, so StrictMode's second call sees the same), cleared after.
+  const [handed] = useState(() => useDraftStore.getState().pending);
+  useEffect(() => {
+    if (handed) takeDraft();
+  }, [handed]);
+  const fromParam = useMemo(() => readDraft(params.draft), [params.draft]);
+  const draft = (handed && validDraft(handed.draft)) || fromParam;
+  const source = handed?.source ?? SOURCES.find((s) => s === params.source);
 
   if (!couple.data) return <Loading title={m.expense.newTitle} error={couple.error} />;
 

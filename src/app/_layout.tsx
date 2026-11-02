@@ -112,6 +112,10 @@ function App() {
             <Stack.Screen name="invite" />
             <Stack.Screen name="expense/new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="expense/quick" options={{ presentation: 'modal' }} />
+            {/* Escanear and Dictar (docs/PLAN.md › Scan + Dictate): full screen like a camera; the review is a modal. */}
+            <Stack.Screen name="expense/scan" options={{ presentation: 'fullScreenModal' }} />
+            <Stack.Screen name="expense/dictate" options={{ presentation: 'fullScreenModal' }} />
+            <Stack.Screen name="expense/receipt" options={{ presentation: 'modal' }} />
             <Stack.Screen name="expense/[id]/index" />
             <Stack.Screen name="expense/[id]/edit" options={{ presentation: 'modal' }} />
             <Stack.Screen name="settle/index" />

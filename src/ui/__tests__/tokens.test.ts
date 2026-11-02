@@ -29,6 +29,8 @@ const pairs: Pair[] = [
   ['me', 'surface', TEXT, 'links ("Ver todos"), my avatar letter'],
   ['me', 'meTint', TEXT, 'my avatar'],
   ['partnerText', 'partnerTint', TEXT, "partner's avatar"],
+  ['partnerText', 'background', TEXT, 'the amount highlighted in the Dictar transcript, the listening dot'],
+  ['warningText', 'neutralTint', GRAPHIC, 'crown on the Premium badge of Escanear / Dictar'],
   ['positiveText', 'surface', TEXT, '"Te deben", "Pago"'],
   ['positiveText', 'positiveTint', TEXT, 'balance effect notice'],
   ['warningText', 'surface', TEXT, '"Ojo: quedan"'],

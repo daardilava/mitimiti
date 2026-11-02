@@ -308,6 +308,28 @@ Premium couples, and only when the phone isn't sure (or for a receipt photo), th
 4. It answers 200 with a draft, 401 without a valid session, 403 for a Free couple, 429 past the daily limit, 422 when
    the model can't read it and 502 when the model fails. It never logs the phrase or the image.
 
+### Deploy Escanear (read-receipt)
+
+Escanear ([docs/PLAN.md › Scan + Dictate](docs/PLAN.md#scan--dictate-premium)) sends a shrunk receipt photo to
+[`read-receipt`](supabase/functions/read-receipt/index.ts), which asks Claude (`claude-sonnet-5-5`) to read it. Push
+`20261102000000_receipt_scans.sql` first (`receipt_scans` and `claim_receipt_scan()`: 30 scans per couple and day).
+
+1. It uses the same `ANTHROPIC_API_KEY` secret as quick entry (`npx supabase secrets set ANTHROPIC_API_KEY=…`). The
+   key lives only in Supabase, never in `.env` or the app.
+2. Deploy it, like parse-expense:
+   ```bash
+   npx supabase functions deploy read-receipt --no-verify-jwt
+   ```
+3. When Premium is enforced (`PREMIUM_ENFORCED = true` in `src/lib/premium.ts`), also refuse Free couples on the server:
+   ```bash
+   npx supabase secrets set RECEIPT_PREMIUM_ONLY=1
+   ```
+4. It answers 200 with the reading, 401 without a valid session, 403 outside a couple (or Free, with step 3), 429 past
+   the daily limit, 422 when the photo can't be read and 502 when the model fails. It never logs or keeps the image.
+
+Escanear's camera (`expo-camera`) and Dictar (`expo-speech-recognition`) are native code: they need a new development
+build.
+
 Dictation uses the phone's speech recognition (`expo-speech-recognition`, native code): it needs a development build
 (`npx expo run:android` / `run:ios`, or `eas build --profile development`). In Expo Go the mic button is hidden and
 typing, receipts and the AI still work.
