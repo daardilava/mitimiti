@@ -1,6 +1,6 @@
-// Quick entry (docs/QUICK_ENTRY.md): expenses.source through upsert_expense, and claim_ai_call(), the Premium-only
-// daily allowance the parse-expense Edge Function takes from before each model call
-// (20261029000000_quick_entry.sql).
+// expenses.source through upsert_expense, and claim_ai_call(), the Premium-only daily AI allowance
+// (20261029000000_quick_entry.sql). Its caller, the parse-expense Edge Function, was removed with Gasto rápido; the
+// migration is applied, so the SQL stays and stays tested.
 import type { PGlite } from '@electric-sql/pglite';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createTestDb, type As } from './db';

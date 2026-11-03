@@ -29,11 +29,11 @@ a web app (mobile only), converting between currencies.
 | Notifications | "Ana agregó un gasto"; Sunday reminder when a balance is open | v1.1 |
 | Default split and currency | Per-couple setting used for every new expense | v1.1 |
 | Export (CSV, PDF) | All expenses and payments for a period (this month, last month, last 3 months, this year, all), through the share sheet | v1.1 → built early |
-| Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): Export, quick entry with AI (receipts, harder phrases), later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
+| Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): Export, Escanear and Dictar, later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |
 | Scan + Dictate | Escanear a receipt (read by AI) and Dictar an expense, from Inicio › Agregar un gasto; Premium (gate off until billing is tested); see [Scan + Dictate](#scan--dictate-premium) | Built 2026-11-02 (on request) |
-| Quick entry | Type or say "café 4,50 pagó Ana" and it's logged in ~3 s; local parser first, AI fallback and receipt photos for Premium; see [QUICK_ENTRY.md](QUICK_ENTRY.md) | Slices 1–5 built (on request); widget later |
+| Quick entry | Gasto rápido (one-line screen) and its AI fallback `parse-expense` removed on 2026-11-03; its phrase parser lives on in Dictar. See [QUICK_ENTRY.md](QUICK_ENTRY.md) | Removed (parser kept for Dictar) |
 | Receipt photo / widget | Picture on an expense; home-screen balance + quick add | Later |
 
 ### Balance rules (the core logic)
@@ -288,7 +288,7 @@ Free keeps the whole core, and no plan ever changes the balance.
   trial on the yearly plan, regional prices for COP and USD.
 - **Free, forever:** unlimited expenses, every split mode, the live balance, settle up, Movimientos and Resumen of
   every month, and Presupuestos (made free on 2026-10-30; until then the full history and Presupuestos were
-  Premium). **Premium:** Export CSV/PDF, quick entry with AI (receipt photos, phrases the phone can't read), and
+  Premium). **Premium:** Export CSV/PDF, Escanear and Dictar, and
   later Recurring expenses and Receipt photo.
 - **Data is never deleted, and never hidden from the balance**, on Free: only screens are limited. Limits live in
   the app's queries and screens (`src/lib/plans.ts`), never in RLS: `balance_view` and `monthly_summary` are
@@ -430,7 +430,7 @@ RPCs or migrations.
   everyone and the crown is only a label. Turning it on is that constant plus `RECEIPT_PREMIUM_ONLY=1` on the server.
   (The quick sheet's mic, built before, stays free; whether it follows Dictar is open.)
 - Escanear has **its own Edge Function, `read-receipt`, on `claude-sonnet-5-5`**, with its own allowance (30 scans per
-  couple and day, `receipt_scans`), separate from quick entry's `parse-expense` / `ai_usage`.
+  couple and day, `receipt_scans`), separate from the removed Gasto rápido's `ai_usage`.
 - The model returns amounts **as printed text**; money.ts reads them (QUICK_ENTRY ground rule 2). Another currency is
   shown and flagged, never converted, and its total never becomes the amount.
 - Dictar reuses quick entry's parser (`parseDictation()` wraps `parseQuickEntry()`), so typing and speaking agree.

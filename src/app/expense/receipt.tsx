@@ -97,9 +97,9 @@ function Review({ reading, couple, net }: { reading: ReceiptReading; couple: Cou
     try {
       await deleteExpense(id);
       await forgetExpense(client, id);
-      showToast(m.quick.toast.undone);
+      showToast(m.entry.toast.undone);
     } catch {
-      showToast(m.quick.toast.undoFailed);
+      showToast(m.entry.toast.undoFailed);
     }
   };
 
@@ -120,9 +120,9 @@ function Review({ reading, couple, net }: { reading: ReceiptReading; couple: Cou
         onSuccess: (saved) => {
           setReceipt(null);
           router.back();
-          showToast(m.quick.toast.added(saved.description, formatMoney(saved.amountMinor, couple.currency)), [
-            { label: m.quick.toast.undo, onPress: () => void undo(saved.id) },
-            { label: m.quick.toast.edit, onPress: () => router.push({ pathname: '/expense/[id]/edit', params: { id: saved.id } }) },
+          showToast(m.entry.toast.added(saved.description, formatMoney(saved.amountMinor, couple.currency)), [
+            { label: m.entry.toast.undo, onPress: () => void undo(saved.id) },
+            { label: m.entry.toast.edit, onPress: () => router.push({ pathname: '/expense/[id]/edit', params: { id: saved.id } }) },
           ]);
         },
       },

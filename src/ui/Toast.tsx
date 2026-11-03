@@ -1,5 +1,5 @@
-// A short message at the bottom of the screen, with up to two actions: "Gasto agregado · Deshacer · Editar" after a
-// quick entry (docs/QUICK_ENTRY.md). One at a time; a new one replaces the old. Mounted once in src/app/_layout.tsx.
+// A short message at the bottom of the screen, with up to two actions: "Gasto agregado · Deshacer · Editar" after
+// Escanear adds an expense. One at a time; a new one replaces the old. Mounted once in src/app/_layout.tsx.
 import { useEffect } from 'react';
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

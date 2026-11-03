@@ -1,5 +1,5 @@
-// Dictation for quick entry (docs/QUICK_ENTRY.md, slice 4): the phone's own speech recognition turns speech into
-// text, which goes through the same parser as typing. No audio reaches our servers.
+// Dictation for Dictar (src/app/expense/dictate.tsx): the phone's own speech recognition turns speech into
+// text, which goes through the phrase parser (src/lib/quickEntry.ts). No audio reaches our servers.
 //
 // Native code (expo-speech-recognition): needs a development build. In Expo Go and on web the module isn't there, so
 // dictationAvailable() is false and the sheet hides the mic; typing still works.

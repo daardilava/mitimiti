@@ -2,10 +2,10 @@
 // printed. The answer is only a reading: the app turns the amounts into minor units with money.ts, shows them, and
 // saves through upsert_expense like any other expense. Nothing is stored here: not the image, not what was read.
 //
-// Who is asking comes from their Clerk session token, checked by Supabase itself (as in parse-expense): the function
+// Who is asking comes from their Clerk session token, checked by Supabase itself (as in billing-sync): the function
 // calls claim_receipt_scan() with the caller's token, which refuses anyone outside a couple, takes one scan from the
 // couple's daily allowance and says whether the couple is Premium.
-// Secrets: ANTHROPIC_API_KEY (`npx supabase secrets set ANTHROPIC_API_KEY=…`). README.md › "Deploy quick entry".
+// Secrets: ANTHROPIC_API_KEY (`npx supabase secrets set ANTHROPIC_API_KEY=…`). README.md › "Deploy Escanear (read-receipt)".
 // RECEIPT_PREMIUM_ONLY=1 makes the server refuse Free couples too; leave it unset while src/lib/premium.ts has
 // PREMIUM_ENFORCED = false, and turn both on together.
 import Anthropic from '@anthropic-ai/sdk';

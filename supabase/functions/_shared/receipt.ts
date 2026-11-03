@@ -1,6 +1,6 @@
 // Escanear (docs/PLAN.md › Scan + Dictate): what the app sends to read-receipt, what the model may answer, and what
 // the function returns. Pure: no Deno or Node APIs, so the Edge Function, the app (src/api/receipts.ts) and Vitest
-// share it, like _shared/quickEntry.ts.
+// share it.
 //
 // The model only reads. Amounts come back as the text printed on the receipt ("24,80", "184.000"), never as numbers:
 // the app turns them into minor units with money.ts (src/lib/receiptDraft.ts), so the model never does the money math.

@@ -1,5 +1,10 @@
 # Quick entry with AI — plan
 
+> **Removed on 2026-11-03.** The Gasto rápido screen (`expense/quick`), its draft card and its AI fallback
+> (`parse-expense`, `_shared/quickEntry.ts`, `npm run eval:quick-entry`) are gone. What remains: the phrase parser
+> `src/lib/quickEntry.ts` and its golden phrases, used by Dictar (`src/lib/parseDictation.ts`), and phone dictation
+> (`src/api/voice.ts`). Escanear reads receipts through `read-receipt` instead. The rest of this page is history.
+
 Goal: **logging an expense takes about 3 seconds** from intent to saved, by typing, speaking, photographing a
 receipt or tapping a home-screen shortcut. Fits the product principle *Fast to log* (today: < 10 s, three taps
 after the amount) and tightens it. Linked from [PLAN.md](PLAN.md).

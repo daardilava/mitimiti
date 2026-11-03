@@ -431,12 +431,7 @@ verify_jwt = false
 [functions.billing-sync]
 verify_jwt = false
 
-# Quick entry with AI (docs/QUICK_ENTRY.md). Like billing-sync: the app calls it with its Clerk session token, which
-# the gateway can't verify; claim_ai_call() with the caller's token checks it instead.
-[functions.parse-expense]
-verify_jwt = false
-
-# Escanear (docs/PLAN.md › Scan + Dictate). Like parse-expense: the app calls it with its Clerk session token, which
+# Escanear (docs/PLAN.md › Scan + Dictate). Like billing-sync: the app calls it with its Clerk session token, which
 # the gateway can't verify; claim_receipt_scan() with the caller's token checks it instead.
 [functions.read-receipt]
 verify_jwt = false

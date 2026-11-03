@@ -21,7 +21,7 @@ there, tick it (`- [x]`) in the same change.
 | Roadmap, phases, acceptance checks, open questions, billing | [docs/PLAN.md](docs/PLAN.md) |
 | Screens, routes, design tokens, typography, components | [docs/DESIGN.md](docs/DESIGN.md) |
 | Tech stack, Clerk ↔ Supabase wiring, data model, SQL functions | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| Quick entry (phrase → expense draft, AI fallback, voice, widget) | [docs/QUICK_ENTRY.md](docs/QUICK_ENTRY.md) |
+| Phrase parser behind Dictar (Gasto rápido itself was removed) | [docs/QUICK_ENTRY.md](docs/QUICK_ENTRY.md) |
 
 Section numbers like `§4` in code refer to the external *MitiMiti — Project Plan* (Feature breakdown tab).
 

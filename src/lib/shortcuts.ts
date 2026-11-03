@@ -6,9 +6,6 @@ import { canUseFeature, type Plan } from './plans';
 
 export type ShortcutId = 'budgets' | 'export' | 'history';
 
-/** What quick entry starts with when a link opens it with `?start=` (src/app/expense/quick.tsx). */
-export type QuickStart = 'receipt' | 'voice';
-
 export type ShortcutRoute = { pathname: '/budgets' | '/export' | '/activity' };
 
 export type ShortcutTarget = { kind: 'route'; route: ShortcutRoute } | { kind: 'paywall'; from: Benefit };
@@ -33,9 +30,4 @@ export function isLocked(id: ShortcutId, plan: Plan): boolean {
 export function shortcutTarget(id: ShortcutId, plan: Plan): ShortcutTarget {
   const { route, premium } = SHORTCUTS[id];
   return premium !== undefined && isLocked(id, plan) ? { kind: 'paywall', from: premium } : { kind: 'route', route };
-}
-
-/** The `start` route param of quick entry; anything else is ignored. */
-export function readQuickStart(raw: unknown): QuickStart | undefined {
-  return raw === 'receipt' || raw === 'voice' ? raw : undefined;
 }

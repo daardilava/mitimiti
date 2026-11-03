@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { CATEGORY_IDS as QUICK_ENTRY_CATEGORY_IDS } from '../../../supabase/functions/_shared/quickEntry';
 import { readReceiptResponseSchema, RECEIPT_CATEGORY_IDS, type ReceiptAi } from '../../../supabase/functions/_shared/receipt';
 import { CATEGORY_IDS } from '../expenseDraft';
 import { canUseTotal, draftFromReading, readingFromAi } from '../receiptDraft';
@@ -86,8 +85,7 @@ describe('draftFromReading', () => {
 });
 
 describe('read-receipt response', () => {
-  it('uses the same 9 category ids as quick entry and the app', () => {
-    expect([...RECEIPT_CATEGORY_IDS]).toEqual([...QUICK_ENTRY_CATEGORY_IDS]);
+  it('uses the same 9 category ids as the app', () => {
     expect([...RECEIPT_CATEGORY_IDS]).toEqual([...CATEGORY_IDS]);
   });
 

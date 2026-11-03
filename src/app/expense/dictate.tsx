@@ -130,7 +130,7 @@ function Listening({ couple }: { couple: Couple }) {
   }
 
   const errorText =
-    dictation.error === 'denied' ? m.quick.micDenied : dictation.error === 'none' ? m.quick.micNone : dictation.error === 'failed' ? m.quick.micFailed : null;
+    dictation.error === 'denied' ? m.entry.micDenied : dictation.error === 'none' ? m.entry.micNone : dictation.error === 'failed' ? m.entry.micFailed : null;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -144,11 +144,11 @@ function Listening({ couple }: { couple: Couple }) {
         ) : stage === 'explain' ? (
           <View style={styles.notice}>
             <Text style={[type.heading, { textAlign: 'center' }]} accessibilityRole="header">
-              {m.quick.micTitle}
+              {m.entry.micTitle}
             </Text>
-            <Text style={[type.body, { color: color.textSecondary, textAlign: 'center' }]}>{m.quick.micWhy}</Text>
+            <Text style={[type.body, { color: color.textSecondary, textAlign: 'center' }]}>{m.entry.micWhy}</Text>
             <NavButton
-              label={m.quick.micContinue}
+              label={m.entry.micContinue}
               onPress={() => {
                 setStage('live');
                 void dictation.start();
