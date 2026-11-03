@@ -319,8 +319,6 @@ export const en: Messages = {
     budgetSetUpA11y: 'Budgets: set limits per category',
     budgetSetUp: 'Set a limit per category and see how much you have left.',
     shortcuts: {
-      quick: { label: 'Quick', a11y: 'Quick expense' },
-      dictate: { label: 'Dictate', a11y: 'Dictate an expense' },
       budgets: { label: 'Budgets', a11y: 'Budgets' },
       export: { label: 'Export', a11y: 'Export activity' },
       history: { label: 'History', a11y: 'History: all your activity' },
@@ -708,7 +706,6 @@ Valid until ${until}.` : ''),
       dictate: 'Dictate',
       dictateDetail: 'Say it out loud',
       dictateA11y: 'Dictate an expense. Premium',
-      crownLegend: 'The crown marks what is part of Premium.',
     },
     locked: {
       scanTitle: 'Scan is part of Premium',

@@ -1,11 +1,9 @@
-// Inicio's shortcut row (docs/DESIGN.md › 05): Rápido · Dictar · Presupuestos · Exportar · Historial. Where
+// Inicio's shortcut row (docs/DESIGN.md › 05): Presupuestos · Exportar · Historial. Where
 // each goes is src/lib/shortcuts.ts. A Premium one shows a crown and opens the paywall on Free; its spoken label says
 // Premium, and a line under the row says what the crown means, so the icon is never the only cue.
 import { router } from 'expo-router';
-import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { usePlan } from '@/api/plan';
-import { dictationAvailable } from '@/api/voice';
 import { isLocked, shortcutIds, shortcutTarget, type ShortcutId } from '@/lib/shortcuts';
 import { Icon, type IconName } from './Icon';
 import { openPaywall } from './Premium';
@@ -14,8 +12,6 @@ import { makeStyles, useTheme } from './theme';
 import { useI18n } from '@/i18n';
 
 const ICON: Record<ShortcutId, IconName> = {
-  quick: 'bolt',
-  dictate: 'mic',
   budgets: 'gauge',
   export: 'share',
   history: 'history',
@@ -26,13 +22,10 @@ export function Shortcuts() {
   const { color, categories } = useTheme();
   const styles = useStyles();
   const { gate } = usePlan();
-  const canDictate = useMemo(() => dictationAvailable(), []);
-  const ids = shortcutIds(canDictate);
+  const ids = shortcutIds();
 
   // Icon on its tile: pairs already checked at 3:1 in tokens.test.ts (avatar and category tiles).
   const look: Record<ShortcutId, { fg: string; bg: string }> = {
-    quick: { fg: color.partnerText, bg: color.partnerTint },
-    dictate: { fg: categories.casa.color, bg: categories.casa.tint },
     budgets: { fg: categories.ocio.color, bg: categories.ocio.tint },
     export: { fg: categories.transporte.color, bg: categories.transporte.tint },
     history: { fg: categories.otros.color, bg: categories.otros.tint },

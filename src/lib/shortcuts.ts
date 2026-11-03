@@ -1,31 +1,27 @@
 // Inicio's shortcut row (docs/DESIGN.md › 05): where each shortcut goes. A Premium one opens the paywall on Free, so a
-// tap always leads somewhere; what is Premium stays decided in plans.ts. The receipt photo has no shortcut: it is the
-// camera inside quick entry, next to the mic.
+// tap always leads somewhere; what is Premium stays decided in plans.ts. Adding an expense has its own place above the
+// row (Escanear and Dictar cards, and the + button), so the row holds no entry shortcuts.
 import type { Benefit } from './paywall';
 import { canUseFeature, type Plan } from './plans';
 
-export type ShortcutId = 'quick' | 'dictate' | 'budgets' | 'export' | 'history';
+export type ShortcutId = 'budgets' | 'export' | 'history';
 
-/** What quick entry starts with when a shortcut opens it (src/app/expense/quick.tsx). */
+/** What quick entry starts with when a link opens it with `?start=` (src/app/expense/quick.tsx). */
 export type QuickStart = 'receipt' | 'voice';
 
-export type ShortcutRoute =
-  | { pathname: '/expense/quick'; params?: { start: QuickStart } }
-  | { pathname: '/budgets' | '/export' | '/activity' };
+export type ShortcutRoute = { pathname: '/budgets' | '/export' | '/activity' };
 
 export type ShortcutTarget = { kind: 'route'; route: ShortcutRoute } | { kind: 'paywall'; from: Benefit };
 
 const SHORTCUTS: Record<ShortcutId, { route: ShortcutRoute; premium?: Benefit }> = {
-  quick: { route: { pathname: '/expense/quick' } },
-  dictate: { route: { pathname: '/expense/quick', params: { start: 'voice' } } },
   budgets: { route: { pathname: '/budgets' } },
   export: { route: { pathname: '/export' }, premium: 'export' },
   history: { route: { pathname: '/activity' } },
 };
 
-/** The row, in order. Dictar only where the phone can recognise speech. */
-export function shortcutIds(canDictate: boolean): ShortcutId[] {
-  return (Object.keys(SHORTCUTS) as ShortcutId[]).filter((id) => id !== 'dictate' || canDictate);
+/** The row, in order. */
+export function shortcutIds(): ShortcutId[] {
+  return Object.keys(SHORTCUTS) as ShortcutId[];
 }
 
 /** True when the shortcut needs Premium and this plan doesn't have it: it shows the crown and opens the paywall. */

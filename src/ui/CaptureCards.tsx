@@ -1,6 +1,7 @@
 // Inicio › "Agregar un gasto" (docs/DESIGN.md › 05): Escanear and Dictar side by side, both Premium. While the gate is
 // off (src/lib/premium.ts) the crown is only a label and both open; once it's on, a Free couple gets a short Premium
-// sheet that always offers to type the expense instead. A line under the cards says what the crown means.
+// sheet that always offers to type the expense instead. The badge says "Premium" in words, so the crown is never the
+// only cue; the legend line lives under the shortcut row below (src/ui/Shortcuts.tsx).
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -56,10 +57,6 @@ export function CaptureCards() {
           </Pressable>
         ))}
       </View>
-      <View style={styles.legend}>
-        <Icon name="crown" size={14} color={color.warningText} />
-        <Text style={styles.legendText}>{t.crownLegend}</Text>
-      </View>
       <Sheet visible={locked !== null} title={m.premium.badge} onClose={() => setLocked(null)}>
         {locked && <PremiumGate feature={locked} onLeave={() => setLocked(null)} />}
       </Sheet>
@@ -85,6 +82,4 @@ const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
   icon: { width: 44, height: 44, borderRadius: radius.tile, alignItems: 'center', justifyContent: 'center' },
   cardTitle: { ...type.row, fontFamily: font.bodyBold, color: color.ink },
   cardDetail: { ...type.label, fontFamily: font.body, color: color.textSecondary, lineHeight: 18 },
-  legend: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
-  legendText: { ...type.label, fontFamily: font.body, color: color.textSecondary, flexShrink: 1 },
 }));

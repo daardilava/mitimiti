@@ -322,8 +322,6 @@ export const de: Messages = {
     budgetSetUpA11y: 'Budgets: Limits pro Kategorie festlegen',
     budgetSetUp: 'Legt ein Limit pro Kategorie fest und seht, wie viel euch bleibt.',
     shortcuts: {
-      quick: { label: 'Schnell', a11y: 'Schnelle Ausgabe' },
-      dictate: { label: 'Diktieren', a11y: 'Eine Ausgabe diktieren' },
       budgets: { label: 'Budgets', a11y: 'Budgets' },
       export: { label: 'Export', a11y: 'Umsätze exportieren' },
       history: { label: 'Verlauf', a11y: 'Verlauf: alle Umsätze' },
@@ -711,7 +709,6 @@ Gültig bis ${until}.` : ''),
       dictate: 'Diktieren',
       dictateDetail: 'Sag es einfach laut',
       dictateA11y: 'Eine Ausgabe diktieren. Premium',
-      crownLegend: 'Die Krone markiert, was zu Premium gehört.',
     },
     locked: {
       scanTitle: 'Scannen gehört zu Premium',

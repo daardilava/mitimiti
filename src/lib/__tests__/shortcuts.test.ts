@@ -2,12 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { isLocked, readQuickStart, shortcutIds, shortcutTarget } from '../shortcuts';
 
 describe('shortcutIds', () => {
-  it('lists the five shortcuts in order when the phone can dictate', () => {
-    expect(shortcutIds(true)).toEqual(['quick', 'dictate', 'budgets', 'export', 'history']);
-  });
-
-  it('leaves Dictar out when speech recognition is unavailable', () => {
-    expect(shortcutIds(false)).toEqual(['quick', 'budgets', 'export', 'history']);
+  it('lists Presupuestos, Exportar and Historial in order (adding an expense lives in the cards above the row)', () => {
+    expect(shortcutIds()).toEqual(['budgets', 'export', 'history']);
   });
 });
 
@@ -17,19 +13,14 @@ describe('isLocked', () => {
     expect(isLocked('export', 'premium')).toBe(false);
   });
 
-  it('never locks typing, dictation, Presupuestos or Movimientos', () => {
-    for (const id of ['quick', 'dictate', 'budgets', 'history'] as const) {
+  it('never locks Presupuestos or Movimientos', () => {
+    for (const id of ['budgets', 'history'] as const) {
       expect(isLocked(id, 'free')).toBe(false);
     }
   });
 });
 
 describe('shortcutTarget', () => {
-  it('opens quick entry, or starts it with the microphone', () => {
-    expect(shortcutTarget('quick', 'free')).toEqual({ kind: 'route', route: { pathname: '/expense/quick' } });
-    expect(shortcutTarget('dictate', 'free')).toEqual({ kind: 'route', route: { pathname: '/expense/quick', params: { start: 'voice' } } });
-  });
-
   it('sends Free to the paywall with the benefit it tapped', () => {
     expect(shortcutTarget('export', 'free')).toEqual({ kind: 'paywall', from: 'export' });
   });
