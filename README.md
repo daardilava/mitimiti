@@ -307,7 +307,7 @@ Escanear ([docs/PLAN.md › Scan + Dictate](docs/PLAN.md#scan--dictate-premium))
    ```bash
    npx supabase functions deploy read-receipt --no-verify-jwt
    ```
-3. When Premium is enforced (`PREMIUM_ENFORCED = true` in `src/lib/premium.ts`), also refuse Free couples on the server:
+3. Premium is enforced in the app (`PREMIUM_ENFORCED = true` in `src/lib/premium.ts`); refuse Free couples on the server too:
    ```bash
    npx supabase secrets set RECEIPT_PREMIUM_ONLY=1
    ```

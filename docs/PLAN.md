@@ -32,7 +32,7 @@ a web app (mobile only), converting between currencies.
 | Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): Export, Escanear and Dictar, later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |
-| Scan + Dictate | Escanear a receipt (read by AI) and Dictar an expense, from Inicio › Agregar un gasto; Premium (gate off until billing is tested); see [Scan + Dictate](#scan--dictate-premium) | Built 2026-11-02 (on request) |
+| Scan + Dictate | Escanear a receipt (read by AI) and Dictar an expense, from Inicio › Agregar un gasto; Premium (gate on: Free gets the paywall); see [Scan + Dictate](#scan--dictate-premium) | Built 2026-11-02 (on request) |
 | Quick entry | Gasto rápido (one-line screen) and its AI fallback `parse-expense` removed on 2026-11-03; its phrase parser lives on in Dictar. See [QUICK_ENTRY.md](QUICK_ENTRY.md) | Removed (parser kept for Dictar) |
 | Receipt photo / widget | Picture on an expense; home-screen balance + quick add | Later |
 
@@ -426,9 +426,9 @@ RPCs or migrations.
 
 **Decisions**
 
-- Both are **Premium**. Until billing is tested, `PREMIUM_ENFORCED = false` in `src/lib/premium.ts`: both open for
-  everyone and the crown is only a label. Turning it on is that constant plus `RECEIPT_PREMIUM_ONLY=1` on the server.
-  (The quick sheet's mic, built before, stays free; whether it follows Dictar is open.)
+- Both are **Premium**, and the gate is on (2026-11-04): `PREMIUM_ENFORCED = true` in `src/lib/premium.ts`, plus
+  `RECEIPT_PREMIUM_ONLY=1` on the server. A Free couple who taps Escanear, Dictar or Exportar gets the paywall with
+  that benefit first; the screens redirect there too, so nothing Premium opens on Free. Typing (+) stays free.
 - Escanear has **its own Edge Function, `read-receipt`, on `claude-sonnet-5-5`**, with its own allowance (30 scans per
   couple and day, `receipt_scans`), separate from the removed Gasto rápido's `ai_usage`.
 - The model returns amounts **as printed text**; money.ts reads them (QUICK_ENTRY ground rule 2). Another currency is
@@ -444,8 +444,8 @@ RPCs or migrations.
 
 - [x] `src/lib/expenseDraft.ts` (`ExpenseDraft`, Zod schema, `mapCategory()`), `src/lib/draftStore.ts`; `expense/new`
   reads and clears a handed-over draft. Tests: `expenseDraft.test.ts`.
-- [x] Premium gate: `src/lib/premium.ts` (`PREMIUM_ENFORCED`, `canUse()`), `scan` / `dictate` in plans.ts; a short
-  Premium sheet that always offers Escribir. Tests: `premium.test.ts`.
+- [x] Premium gate: `src/lib/premium.ts` (`PREMIUM_ENFORCED = true`, `canUse()`), `scan` / `dictate` in plans.ts; on
+  Free, the cards open the paywall and the screens redirect to it. Tests: `premium.test.ts`.
 - [x] Inicio › Agregar un gasto: Escanear and Dictar cards with a crown badge, and the legend line.
 - [x] Dictar (`expense/dictate`): live transcript with the amount highlighted, chips, stop → prefilled form; calm
   messages for a refused mic, nothing heard, or no speech recognition. `src/lib/parseDictation.ts` + es / en / de tests.
@@ -470,7 +470,9 @@ RPCs or migrations.
 - [ ] Development build on a real phone: camera, photos and dictation (permissions, refusal, flash).
 - [ ] Deployed `read-receipt`: a real receipt read in a few seconds; no session → 401; the 31st scan of the day → 429
   and the message; nothing about the image in the function's logs.
-- [ ] With `PREMIUM_ENFORCED = true`: a Free couple gets the Premium sheet from both cards and can still type.
+- [x] With `PREMIUM_ENFORCED = true`: a Free couple gets the paywall from Escanear, Dictar and Exportar (that benefit
+  first) and can still type; a Premium couple gets the camera (dev bypass, web, 2026-11-04).
+- [ ] `RECEIPT_PREMIUM_ONLY=1` set on the hosted project; a Free couple's direct call to read-receipt gets 403.
 
 ## Open questions
 

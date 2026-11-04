@@ -1,5 +1,5 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +10,6 @@ import { daysAgo } from '@/lib/dates';
 import { setReceipt } from '@/lib/draftStore';
 import { canUse } from '@/lib/premium';
 import { readingFromAi } from '@/lib/receiptDraft';
-import { PremiumGate } from '@/ui/Capture';
 import { Icon } from '@/ui/Icon';
 import { Miti } from '@/ui/Miti';
 import { Loading, NavButton } from '@/ui/Screen';
@@ -25,19 +24,10 @@ export default function Scan() {
   const { m } = useI18n();
   const couple = useCouple();
   const { gate } = usePlan();
-  const styles = useStyles();
 
   if (!couple.data) return <Loading title={m.capture.scan.title} error={couple.error} />;
-  if (!canUse('scan', gate)) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <TopBar />
-        <View style={styles.centered}>
-          <PremiumGate feature="scan" />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // Free: the paywall instead, never the camera (also when reached by a link or before the plan had loaded).
+  if (!canUse('scan', gate)) return <Redirect href={{ pathname: '/paywall', params: { from: 'scan' } }} />;
   return <Camera couple={couple.data} />;
 }
 

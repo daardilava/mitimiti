@@ -62,9 +62,10 @@ Agregar gasto ──▶ useUpsertExpense ──▶ upsert_expense(…, p_source 
   Lines that don't add up: the total counts, and the screen says so. Contract: `supabase/functions/_shared/receipt.ts`.
 - **Nothing kept:** the photo is sent once and discarded, no line items are stored, and dictation's audio never leaves
   the phone. Only the count of scans per couple and day (`receipt_scans`) is kept.
-- **Premium gate:** `src/lib/premium.ts` has `PREMIUM_ENFORCED = false` while billing is tested, so both open for
-  everyone and the crown is only a label. `canUse('scan' | 'dictate', plan)` is the one check; once it's on, it asks
-  `canUseFeature()` in plans.ts, and read-receipt refuses Free couples too when `RECEIPT_PREMIUM_ONLY=1` is set.
+- **Premium gate:** on (`PREMIUM_ENFORCED = true` in `src/lib/premium.ts`). `canUse('scan' | 'dictate', plan)` is the
+  one check and asks `canUseFeature()` in plans.ts. A Free couple's tap opens the paywall (`?from=scan|dictate`), and
+  the screens themselves redirect there too (a link, or a tap before the plan loaded), so the camera and microphone
+  never open on Free; Exportar does the same. read-receipt refuses Free couples when `RECEIPT_PREMIUM_ONLY=1` is set.
 - **Its own allowance:** `receipt_scans`, 30 a day per couple. (`ai_usage` belonged to the removed Gasto rápido and is
   no longer written.)
 

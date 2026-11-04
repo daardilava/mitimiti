@@ -1,16 +1,11 @@
-// Pieces shared by Escanear and Dictar (docs/PLAN.md › Scan + Dictate): the Premium badge with its crown, what a
-// locked feature shows (always with a way to type the expense instead), a bottom sheet of choices, and the words for a
-// split. Colours from useTheme(); the crown always comes with the word "Premium".
-import { router } from 'expo-router';
+// Pieces shared by Escanear and Dictar (docs/PLAN.md › Scan + Dictate): the Premium badge with its crown, a bottom
+// sheet of choices, and the words for a split. A Free couple never gets here: the paywall opens instead. Colours from useTheme(); the crown always comes with the word "Premium".
 import type { ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Couple } from '@/api/expenses';
-import type { PremiumFeature } from '@/lib/premium';
 import type { SplitMode } from '@/lib/splits';
 import { Icon } from './Icon';
-import { openPaywall } from './Premium';
-import { NavButton } from './Screen';
 import { font, radius, space, touch } from './tokens';
 import { makeStyles, useTheme } from './theme';
 import { useI18n, type Messages } from '@/i18n';
@@ -24,43 +19,6 @@ export function CrownBadge() {
     <View style={styles.badge} aria-hidden>
       <Icon name="crown" size={12} color={color.warningText} />
       <Text style={styles.badgeText}>{m.premium.badge}</Text>
-    </View>
-  );
-}
-
-/** A locked feature: what it does, the way to Premium, and typing the expense, which is always free. */
-export function PremiumGate({ feature, onLeave }: { feature: PremiumFeature; onLeave?: () => void }) {
-  const { m } = useI18n();
-  const { color, type } = useTheme();
-  const styles = useStyles();
-  const t = m.capture.locked;
-  const leave = onLeave ?? (() => {});
-  return (
-    <View style={styles.gate} accessibilityLiveRegion="polite">
-      <View style={styles.gateIcon}>
-        <Icon name="crown" size={24} color={color.warningText} />
-      </View>
-      <Text style={[type.heading, { textAlign: 'center' }]} accessibilityRole="header">
-        {feature === 'scan' ? t.scanTitle : t.dictateTitle}
-      </Text>
-      <Text style={[type.body, { color: color.textSecondary, textAlign: 'center' }]}>{feature === 'scan' ? t.scanDetail : t.dictateDetail}</Text>
-      <View style={{ alignSelf: 'stretch', gap: space[2] }}>
-        <NavButton
-          label={m.premium.see}
-          onPress={() => {
-            leave();
-            openPaywall(feature);
-          }}
-        />
-        <NavButton
-          label={t.write}
-          kind="secondary"
-          onPress={() => {
-            leave();
-            router.push('/expense/new');
-          }}
-        />
-      </View>
     </View>
   );
 }
@@ -147,16 +105,6 @@ const useStyles = makeStyles(({ color, type }) => StyleSheet.create({
     backgroundColor: color.neutralTint,
   },
   badgeText: { ...type.effect, color: color.textSecondary },
-  gate: {
-    alignItems: 'center',
-    gap: space[3],
-    padding: space[5],
-    borderRadius: radius.card,
-    borderWidth: 1,
-    borderColor: color.line,
-    backgroundColor: color.surface,
-  },
-  gateIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: color.neutralTint, alignItems: 'center', justifyContent: 'center' },
   sheetRoot: { flex: 1, justifyContent: 'flex-end' },
   scrim: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: color.scrim, opacity: 0.4 },
   sheet: {

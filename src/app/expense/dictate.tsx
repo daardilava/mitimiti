@@ -1,5 +1,5 @@
 import { useLocales } from 'expo-localization';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,7 +13,7 @@ import { parseDictation } from '@/lib/parseDictation';
 import { canUse } from '@/lib/premium';
 import type { QuickEntryContext } from '@/lib/quickEntry';
 import { recognitionLocale } from '@/lib/quickSheet';
-import { PremiumGate, splitLabel } from '@/ui/Capture';
+import { splitLabel } from '@/ui/Capture';
 import { Icon } from '@/ui/Icon';
 import { Miti } from '@/ui/Miti';
 import { NavButton, Loading } from '@/ui/Screen';
@@ -28,19 +28,10 @@ export default function Dictate() {
   const { m } = useI18n();
   const couple = useCouple();
   const { gate } = usePlan();
-  const styles = useStyles();
 
   if (!couple.data) return <Loading title={m.capture.dictate.title} error={couple.error} />;
-  if (!canUse('dictate', gate)) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <Header />
-        <View style={styles.centered}>
-          <PremiumGate feature="dictate" />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // Free: the paywall instead, never the microphone (also when reached by a link or before the plan had loaded).
+  if (!canUse('dictate', gate)) return <Redirect href={{ pathname: '/paywall', params: { from: 'dictate' } }} />;
   return <Listening couple={couple.data} />;
 }
 

@@ -1,14 +1,13 @@
-// Inicio › "Agregar un gasto" (docs/DESIGN.md › 05): Escanear and Dictar side by side, both Premium. While the gate is
-// off (src/lib/premium.ts) the crown is only a label and both open; once it's on, a Free couple gets a short Premium
-// sheet that always offers to type the expense instead. The badge says "Premium" in words, so the crown is never the
+// Inicio › "Agregar un gasto" (docs/DESIGN.md › 05): Escanear and Dictar side by side, both Premium. A Free couple's
+// tap opens the paywall with that benefit first (src/lib/premium.ts decides). The badge says "Premium" in words, so the crown is never the
 // only cue; the legend line lives under the shortcut row below (src/ui/Shortcuts.tsx).
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { usePlan } from '@/api/plan';
 import { canUse, type PremiumFeature } from '@/lib/premium';
-import { CrownBadge, PremiumGate, Sheet } from './Capture';
+import { CrownBadge } from './Capture';
 import { Icon, type IconName } from './Icon';
+import { openPaywall } from './Premium';
 import { font, radius, space, touch } from './tokens';
 import { makeStyles, useTheme } from './theme';
 import { useI18n } from '@/i18n';
@@ -18,11 +17,10 @@ export function CaptureCards() {
   const { color, categories } = useTheme();
   const styles = useStyles();
   const { gate } = usePlan();
-  const [locked, setLocked] = useState<PremiumFeature | null>(null);
   const t = m.capture.home;
 
   const open = (feature: PremiumFeature) => {
-    if (!canUse(feature, gate)) return setLocked(feature);
+    if (!canUse(feature, gate)) return openPaywall(feature);
     router.push(feature === 'scan' ? '/expense/scan' : '/expense/dictate');
   };
 
@@ -57,9 +55,6 @@ export function CaptureCards() {
           </Pressable>
         ))}
       </View>
-      <Sheet visible={locked !== null} title={m.premium.badge} onClose={() => setLocked(null)}>
-        {locked && <PremiumGate feature={locked} onLeave={() => setLocked(null)} />}
-      </Sheet>
     </View>
   );
 }
