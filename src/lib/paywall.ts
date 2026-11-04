@@ -6,14 +6,11 @@ import { addDays, isoDate } from './dates';
 import type { PlanPackage } from './offerings';
 import type { Feature } from './plans';
 
-/** The benefits the paywall lists, in its default order. `recurring` isn't built yet: it shows as Pronto. */
-export const BENEFITS = ['export', 'aiEntry', 'recurring'] as const satisfies readonly Feature[];
+/** The benefits the paywall lists, in its default order: what Premium opens today. */
+export const BENEFITS = ['scan', 'dictate', 'export'] as const satisfies readonly Feature[];
 export type Benefit = (typeof BENEFITS)[number];
 
-/** Built today; the others are labelled Pronto. */
-export const AVAILABLE: ReadonlySet<Benefit> = new Set(['export', 'aiEntry']);
-
-/** What opened the paywall comes first (Exportar → export, Escanear / Dictar → aiEntry). */
+/** What opened the paywall comes first (Escanear → scan, Dictar → dictate, Exportar → export). */
 export function benefitOrder(from: string | undefined): Benefit[] {
   const first = BENEFITS.find((b) => b === from);
   return first ? [first, ...BENEFITS.filter((b) => b !== first)] : [...BENEFITS];

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PlanPackage } from '../offerings';
-import { AVAILABLE, benefitOrder, BENEFITS, defaultPackage, savingsPercent, sortPlans, trialEnd } from '../paywall';
+import { benefitOrder, BENEFITS, defaultPackage, savingsPercent, sortPlans, trialEnd } from '../paywall';
 
 const monthly: PlanPackage = { id: '$rc_monthly', period: 'monthly', priceString: '2,99 €', price: 2.99, currencyCode: 'EUR', trialDays: null };
 const annual: PlanPackage = { id: '$rc_annual', period: 'annual', priceString: '19,99 €', price: 19.99, currencyCode: 'EUR', trialDays: 7 };
@@ -37,8 +37,9 @@ describe('defaultPackage and sortPlans', () => {
 
 describe('benefitOrder', () => {
   it('what opened the paywall comes first', () => {
-    expect(benefitOrder('export')).toEqual(['export', 'aiEntry', 'recurring']);
-    expect(benefitOrder('aiEntry')).toEqual(['aiEntry', 'export', 'recurring']);
+    expect(benefitOrder('export')).toEqual(['export', 'scan', 'dictate']);
+    expect(benefitOrder('dictate')).toEqual(['dictate', 'scan', 'export']);
+    expect(benefitOrder('scan')).toEqual(['scan', 'dictate', 'export']);
   });
 
   it('Presupuestos and the full history are free: an old ?from=budgets|history link shows the default order', () => {
@@ -53,9 +54,9 @@ describe('benefitOrder', () => {
     expect(benefitOrder('hack')).toEqual([...BENEFITS]);
   });
 
-  it('recurring expenses are not built yet', () => {
-    expect(AVAILABLE.has('recurring')).toBe(false);
-    expect([...AVAILABLE]).toEqual(['export', 'aiEntry']);
+  it('lists Escanear, Dictar and Exportar; an old ?from=aiEntry link shows the default order', () => {
+    expect([...BENEFITS]).toEqual(['scan', 'dictate', 'export']);
+    expect(benefitOrder('aiEntry')).toEqual([...BENEFITS]);
   });
 });
 

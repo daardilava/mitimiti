@@ -49,7 +49,7 @@ export function PremiumGate({ feature, onLeave }: { feature: PremiumFeature; onL
           label={m.premium.see}
           onPress={() => {
             leave();
-            openPaywall('aiEntry');
+            openPaywall(feature);
           }}
         />
         <NavButton
