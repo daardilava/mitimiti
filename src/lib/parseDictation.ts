@@ -1,13 +1,17 @@
 // Dictar: a spoken sentence ("almuerzo con Melanie, 25 euros, pagué yo, a medias") into an expense draft, on the
 // phone, with no network. The rules are quick entry's parser (src/lib/quickEntry.ts, its golden phrases in es / en /
-// de), so typing and speaking understand the same things; this adds what the Dictar screen draws: the chips and the
-// part of the transcript that is the amount.
+// de), so typing and speaking understand the same things. Phones often write numbers in words ("veinte euros"), so
+// they become digits first (src/lib/spokenNumbers.ts). This adds what the Dictar screen draws: the sentence as read,
+// the chips and the part of it that is the amount.
 import type { CategoryId } from '../ui/tokens';
 import { mapCategory, type ExpenseDraft } from './expenseDraft';
 import type { Currency } from './money';
 import { parseQuickEntry, type QuickEntryContext, type SplitChoice, type Who } from './quickEntry';
+import { numbersToDigits } from './spokenNumbers';
 
 export interface DictationResult {
+  /** What was said, with its numbers in digits ("cena veinte euros" → "cena 20 euros"): what the screen shows. */
+  text: string;
   /** What the form starts from. The amount only when it was heard for sure and in the couple's currency. */
   draft: ExpenseDraft;
   /** Chips: what was understood so far. `null` for what wasn't said (the default applies). */
@@ -20,7 +24,7 @@ export interface DictationResult {
   };
   /** Set when another currency was said ("20 dólares" in a EUR couple). Say so; never convert. */
   foreignCurrency?: Currency;
-  /** [start, end) of the amount in the transcript, to highlight it; null when there is none. */
+  /** [start, end) of the amount in `text`, to highlight it; null when there is none. */
   amountSpan: [number, number] | null;
 }
 
@@ -36,12 +40,14 @@ export function amountSpan(text: string): [number, number] | null {
 }
 
 export function parseDictation(transcript: string, ctx: QuickEntryContext): DictationResult {
-  const result = parseQuickEntry(transcript, ctx);
+  const text = numbersToDigits(transcript, ctx.language);
+  const result = parseQuickEntry(text, ctx);
   const { draft } = result;
   // The keywords found nothing in the sentence: try the description alone (a shop's name, a label).
   const category = draft.category !== 'otros' ? draft.category : mapCategory(draft.description, ctx.language);
   const heardCategory = category !== 'otros' ? category : null;
   return {
+    text,
     draft: {
       ...(draft.amountMinor !== undefined ? { amountMinor: draft.amountMinor } : {}),
       ...(draft.description ? { description: draft.description.slice(0, 80) } : {}),
@@ -58,6 +64,6 @@ export function parseDictation(transcript: string, ctx: QuickEntryContext): Dict
       split: result.split,
     },
     ...(result.foreignCurrency ? { foreignCurrency: result.foreignCurrency } : {}),
-    amountSpan: amountSpan(transcript),
+    amountSpan: amountSpan(text),
   };
 }

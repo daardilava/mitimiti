@@ -434,6 +434,10 @@ RPCs or migrations.
 - The model returns amounts **as printed text**; money.ts reads them (QUICK_ENTRY ground rule 2). Another currency is
   shown and flagged, never converted, and its total never becomes the amount.
 - Dictar reuses quick entry's parser (`parseDictation()` wraps `parseQuickEntry()`), so typing and speaking agree.
+- Phones often write spoken numbers as words ("veinte euros", "twenty euros", "zwanzig Euro"), so Dictar turns them
+  into digits first (`src/lib/spokenNumbers.ts`, es / en / de + English in any language): only next to a currency, as
+  cents, as a split (two adding to 100 once the amount is said), as a price pair ("doce cincuenta") or when it is the
+  only number; "un café", "los dos" and "el tres de noviembre" stay words. The screen shows the sentence with digits.
 - Drafts move between screens through a zustand store (`src/lib/draftStore.ts`), not URL params.
 
 **Tasks**

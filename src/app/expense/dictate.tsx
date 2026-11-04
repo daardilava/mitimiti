@@ -163,16 +163,16 @@ function Listening({ couple }: { couple: Couple }) {
               <Text style={[type.label, { color: color.ink }]}>{listening ? t.listening : t.ready}</Text>
             </View>
 
-            {transcript ? (
-              <Text style={styles.transcript} accessibilityLabel={t.heardA11y(transcript)} accessibilityLiveRegion="polite">
-                {result?.amountSpan ? (
+            {result ? (
+              <Text style={styles.transcript} accessibilityLabel={t.heardA11y(result.text)} accessibilityLiveRegion="polite">
+                {result.amountSpan ? (
                   <>
-                    {transcript.slice(0, result.amountSpan[0])}
-                    <Text style={styles.amount}>{transcript.slice(...result.amountSpan)}</Text>
-                    {transcript.slice(result.amountSpan[1])}
+                    {result.text.slice(0, result.amountSpan[0])}
+                    <Text style={styles.amount}>{result.text.slice(...result.amountSpan)}</Text>
+                    {result.text.slice(result.amountSpan[1])}
                   </>
                 ) : (
-                  transcript
+                  result.text
                 )}
                 {listening ? '…' : ''}
               </Text>

@@ -98,3 +98,54 @@ describe('amountSpan', () => {
     expect(t2.slice(...amountSpan(t2)!)).toBe('4,50 €');
   });
 });
+
+describe('parseDictation · amounts said in words (the phone often writes them out)', () => {
+  it.each([
+    ['es', 'EUR', 'veinte euros', 2000],
+    ['es', 'EUR', 'cena veinte euros pagó Melanie', 2000],
+    ['es', 'EUR', 'almuerzo veinticinco euros a medias', 2500],
+    ['es', 'EUR', 'mercado cuarenta y dos euros con cincuenta', 4250],
+    ['es', 'EUR', 'café doce cincuenta', 1250],
+    ['es', 'EUR', 'cena veinte', 2000],
+    ['es', 'COP', 'mercado ochenta mil pesos', 80000],
+    ['es', 'COP', 'arriendo un millón doscientos mil pesos', 1200000],
+    ['en', 'EUR', 'twenty euros', 2000],
+    ['en', 'EUR', 'dinner twenty-five euros Melanie paid', 2500],
+    ['en', 'EUR', 'coffee twelve fifty', 1250],
+    ['en', 'USD', 'groceries one hundred and five dollars', 10500],
+    ['de', 'EUR', 'zwanzig Euro', 2000],
+    ['de', 'EUR', 'Abendessen fünfundzwanzig Euro', 2500],
+    ['de', 'EUR', 'Einkauf zweiundvierzig Euro fünfzig', 4250],
+    ['es', 'EUR', 'twenty euros', 2000],
+  ] as const)('%s/%s: "%s" → %i', (language, currency, said, minor) => {
+    const r = parseDictation(said, ctx({ language, currency }));
+    expect(r.heard.amountMinor).toBe(minor);
+    expect(r.draft.amountMinor).toBe(minor);
+    expect(r.amountSpan).not.toBeNull();
+  });
+
+  it('shows the sentence with digits and highlights the amount in it', () => {
+    const r = parseDictation('cena veinte euros pagó Melanie', ctx());
+    expect(r.text).toBe('cena 20 euros pagó Melanie');
+    expect(r.text.slice(...r.amountSpan!)).toBe('20 euros');
+    expect(r.draft.description).toBe('Cena');
+    expect(r.heard.payer).toBe('partner');
+  });
+
+  it('reads a spoken split once the amount is said', () => {
+    const r = parseDictation('arriendo mil euros sesenta cuarenta', ctx());
+    expect(r.draft.amountMinor).toBe(100000);
+    expect(r.heard.split).toEqual({ myPct: 60 });
+  });
+
+  it('does not take "los dos" or "un café" for an amount', () => {
+    expect(parseDictation('cena veinte euros, pagamos los dos', ctx()).draft.amountMinor).toBe(2000);
+    expect(parseDictation('un café', ctx()).draft.amountMinor).toBeUndefined();
+  });
+
+  it('a date said in words stays a date, not a second amount', () => {
+    expect(parseDictation('cena veinte euros hace tres días', ctx())).toMatchObject({
+      draft: { amountMinor: 2000, spentOn: '2026-10-30' },
+    });
+  });
+});
