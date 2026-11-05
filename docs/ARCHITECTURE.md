@@ -14,7 +14,7 @@
 | Database | Supabase Postgres | Balances and summaries are plain SQL |
 | Security | Row Level Security, keyed on the **Clerk user id** | A member only reads/writes rows of their own couple |
 | Realtime | Supabase Realtime | Partner's screen updates within seconds |
-| Server logic | Supabase Edge Functions (`revenuecat-webhook`, `billing-sync`, `parse-expense`); pg_cron planned | Billing and quick entry's AI today; push and the Sunday reminder in v1.1 |
+| Server logic | Supabase Edge Functions (`revenuecat-webhook`, `billing-sync`, `read-receipt`); pg_cron planned | Billing and Escanear's AI today; push and the Sunday reminder in v1.1 |
 | UI | `react-native-svg` (Miti, avatars, chart), Fredoka + DM Sans (`@expo-google-fonts`) | The MitiMiti brand; see [DESIGN.md › Brand](DESIGN.md#brand) |
 | Languages | Own typed messages (`src/i18n`: es, en, de) + `expo-localization` | Spanish is the source; the type checker refuses a missing message |
 | Export | `expo-print` (PDF), `expo-sharing` (share sheet) | CSV and PDF of a period, Premium |
@@ -40,21 +40,34 @@ Phone ──supabase-js with accessToken: () => getToken()──▶ Supabase (th
 - **User ids are Clerk ids (`text`, e.g. `user_2x…`), not `uuid`.** Every `auth.uid()` becomes
   `auth.jwt()->>'sub'`, and every `uuid references auth.users` column becomes `text`.
 
-## How quick entry fits together
+## How Escanear and Dictar fit together
 
 ```
-Phone: text / dictation (phone's own speech recognition) ──▶ parseQuickEntry() on the phone ──▶ chips
-   only if the phone isn't sure, or a receipt photo, and only for Premium:
-Phone ──Clerk token──▶ Edge Function parse-expense ──claim_ai_call() as the caller──▶ Premium? today's limit? names
-                        ──phrase or photo + currency + two first names──▶ Claude (claude-haiku-5-5, structured output)
-                        ◀── draft (amount as text) ──  app reads the amount with money.ts ──▶ chips
-Tap ──▶ upsert_expense(…, p_source) like any other expense
+Dictar:    phone's speech recognition ──▶ parseDictation() (= parseQuickEntry + chips) ──▶ draftStore ──▶ Nuevo gasto
+Escanear:  camera / photos ──▶ shrink to 1600 px, JPEG 0.6 ──Clerk token──▶ Edge Function read-receipt
+              ──claim_receipt_scan() as the caller──▶ in a couple? today's 30 scans? currency, Premium?
+              ──photo + today + language + currency──▶ Claude (claude-sonnet-5-5, structured output, fallbacks "default")
+           ◀── shop, date, currency, lines and total as printed text ──
+           readingFromAi() reads the amounts with money.ts ──▶ draftStore ──▶ Revisar el recibo
+Agregar gasto ──▶ useUpsertExpense ──▶ upsert_expense(…, p_source 'receipt') like any other expense
 ```
 
-- **The AI proposes, the app decides.** The model never writes, and returns the amount as text that `money.ts`
-  reads; nothing saves without a tap. Its contract (request, answer, prompt) is `supabase/functions/_shared/quickEntry.ts`,
-  shared by the function, the app and the tests.
-- **Nothing kept:** not the phrase, not the photo, not the audio (which never leaves the phone).
+- **Drafts between screens** go through a small zustand store, `src/lib/draftStore.ts`, never the URL: Dictar and
+  Escanear › Editar hand an `ExpenseDraft` (`src/lib/expenseDraft.ts`, checked with Zod) that `expense/new` reads once
+  and clears; the review screen reads the receipt the scan screen left there. Memory only; the photo is never in it.
+- **No new write path.** Both save through `useUpsertExpense` → `upsert_expense`, so shares, audit and the balance are
+  unchanged. The review's line "Con este gasto, Ana te deberá …" is `balance_view` + `expenseEffect()` from splits.ts.
+- **Money from the model is text.** read-receipt returns amounts as printed; `src/lib/receiptDraft.ts` reads them with
+  `parseSpokenAmount()`. A receipt in another currency is shown as printed and its total is never the expense's amount.
+  Lines that don't add up: the total counts, and the screen says so. Contract: `supabase/functions/_shared/receipt.ts`.
+- **Nothing kept:** the photo is sent once and discarded, no line items are stored, and dictation's audio never leaves
+  the phone. Only the count of scans per couple and day (`receipt_scans`) is kept.
+- **Premium gate:** on (`PREMIUM_ENFORCED = true` in `src/lib/premium.ts`). `canUse('scan' | 'dictate', plan)` is the
+  one check and asks `canUseFeature()` in plans.ts. A Free couple's tap opens the paywall (`?from=scan|dictate`), and
+  the screens themselves redirect there too (a link, or a tap before the plan loaded), so the camera and microphone
+  never open on Free; Exportar does the same. read-receipt refuses Free couples when `RECEIPT_PREMIUM_ONLY=1` is set.
+- **Its own allowance:** `receipt_scans`, 30 a day per couple. (`ai_usage` belonged to the removed Gasto rápido and is
+  no longer written.)
 
 ## How billing fits together
 
@@ -82,7 +95,8 @@ Both phones ──my_plan() RPC + Realtime on subscriptions──▶ usePlan() �
 | households | id, name, invited_name, currency, default_split, default_pct, join_code, join_code_expires_at, created_at |
 | members | household_id, user_id (**text**, Clerk id), display_name, role, avatar (character id or null; set via `update_couple_settings`) |
 | expenses | id, household_id, paid_by, amount_minor, category, description, spent_on (date), split_mode, split_pct, source (manual / text / voice / receipt, set on create), created_by, updated_by, deleted_at |
-| ai_usage | household_id, day, calls — quick entry's AI calls per couple and day, written only by `claim_ai_call()`, no client access |
+| ai_usage | household_id, day, calls — unused since Gasto rápido was removed (2026-11-03); kept because its migration is applied, no client access |
+| receipt_scans | household_id, day, scans — Escanear's receipt reads per couple and day (30), written only by `claim_receipt_scan()`, RLS on, no client access |
 | expense_shares | expense_id, user_id, share_minor |
 | settlements | id, household_id, from_user, to_user, amount_minor, method, paid_on, created_by, deleted_at |
 | budgets | household_id, category, month, limit_minor |
@@ -131,6 +145,6 @@ Both phones ──my_plan() RPC + Realtime on subscriptions──▶ usePlan() �
 | `src/lib/avatars.ts`, `deleteAccount.ts`, `sample.ts` | Avatar ids; the Borrar cuenta steps; the sample couple for `EXPO_PUBLIC_DEV_BYPASS_AUTH=1` |
 | `src/i18n/` | Messages in Spanish (source of truth), English and German, and the legal texts (`legal/`) |
 | `src/ui/` | Design tokens, theme, `Icon`, `Screen` (and `NavButton`), `Miti` / `Wordmark`, `Avatar` / `AvatarArt`, form pieces, auth pieces, `ExpenseRow` / `PaymentRow`, `SearchField`, `SpendChart`, `PeriodNav`, `DatePickerSheet`, `LegalScreen`, `Premium` (locks) |
-| `supabase/` | Local config, migrations, Edge Functions (`functions/`: `revenuecat-webhook`, `billing-sync`, `parse-expense`, shared `_shared/billing.ts` and `_shared/quickEntry.ts`), and SQL tests on PGlite (`supabase/tests`: RLS and RPCs, billing, quick entry, account deletion, and app ↔ database split parity) |
+| `supabase/` | Local config, migrations, Edge Functions (`functions/`: `revenuecat-webhook`, `billing-sync`, `read-receipt`, shared `_shared/billing.ts` and `_shared/receipt.ts`), and SQL tests on PGlite (`supabase/tests`: RLS and RPCs, billing, quick entry, receipt scans, account deletion, and app ↔ database split parity) |
 | `assets/` | App icon, adaptive icon, splash and favicon (PNG, generated); brand SVGs in `assets/brand`; store icon in `assets/store` |
 | `scripts/` | `check-clerk.mjs` (`npm run clerk:check`); `brand-assets.py` renders the PNGs in `assets/` from `assets/brand` |

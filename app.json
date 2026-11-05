@@ -82,6 +82,14 @@
         }
       ],
       [
+        "expo-camera",
+        {
+          "cameraPermission": "MitiMiti usa la cámara para fotografiar un recibo y leer la tienda, la fecha y el total. La foto no se guarda.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "cameraPermission": "MitiMiti usa la cámara para fotografiar un recibo y leer el total. La foto no se guarda.",

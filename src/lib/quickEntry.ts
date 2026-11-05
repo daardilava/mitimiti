@@ -165,6 +165,11 @@ function findCategory(text: string, language: Language): CategoryId {
   return best.id;
 }
 
+/** The same keyword guess for any free text (a shop's name, an AI hint): used by mapCategory() in expenseDraft.ts. */
+export function guessCategory(text: string, language: Language): CategoryId {
+  return findCategory(fold(text), language);
+}
+
 // ─── Description ──────────────────────────────────────────────────────────
 
 const FILLER = new Set([

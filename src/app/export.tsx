@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { Redirect } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 import { balanceKeys, useSettlements } from '@/api/balance';
@@ -9,7 +10,6 @@ import { buildCsv, EXPORT_PRESETS, exportFileName, exportRows, exportSummary, pr
 import { buildPdfHtml } from '@/lib/exportPdf';
 import { canUseFeature } from '@/lib/plans';
 import { Chip, Field, RadioCard } from '@/ui/Form';
-import { Locked } from '@/ui/Premium';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { space } from '@/ui/tokens';
 import { useTheme } from '@/ui/theme';
@@ -36,14 +36,8 @@ export default function Export() {
     [couple.data, expenses.data, settlements.data, range],
   );
 
-  // Reached some other way than Ajustes' (labelled) entry point: still closed on Free.
-  if (!canUseFeature(gate, 'export')) {
-    return (
-      <Screen title={m.exportData.title} back="back">
-        <Locked title={m.premium.exportTitle} detail={m.premium.exportDetail} from="export" />
-      </Screen>
-    );
-  }
+  // Reached some other way than Inicio's (labelled) shortcut: still closed on Free, so the paywall instead.
+  if (!canUseFeature(gate, 'export')) return <Redirect href={{ pathname: '/paywall', params: { from: 'export' } }} />;
 
   if (!rows || !couple.data) {
     return (

@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email, address } = LEGAL_CONTACT;
 
 export const privacyEn: LegalDoc = {
-  effective: 'Effective from November 1, 2026',
+  effective: 'Effective from November 3, 2026',
   intro:
     'This policy explains what personal data MitiMiti keeps, why and on what legal basis, who it shares it with, how long it keeps it, and how you can see it, correct it or ask for it to be deleted.',
   sections: [
@@ -18,7 +18,7 @@ export const privacyEn: LegalDoc = {
         'From your account: your name, your email and your password. The password is stored encrypted by our sign-in provider; we never see it. If you sign in with Google or Apple, they give us your name, your email and an identifier. For security, the provider also records your sessions, the device and the IP address you sign in from.',
         'From the couple: each person’s name (including the name you invite your partner with before they join), the avatar, the currency, the default split and the invite code.',
         'What you record: each expense (amount, description, category, date, who paid, how it is split and how it was logged: in the form, typed, dictated or from a receipt photo), each payment between you (amount, method and date) and the budgets.',
-        'If you use quick entry: when you dictate, your phone does the speech recognition (Apple’s or Google’s, under their policies) and MitiMiti only receives the text, never the audio. If you use AI reading (Premium), the typed phrase or the receipt photo is sent to propose the expense and is not kept: neither the photo nor the phrase stays with MitiMiti, only the expense you confirm.',
+        'If you use Dictate: your phone does the speech recognition (Apple’s or Google’s, under their policies) and reads the text on the phone; MitiMiti never receives the audio, only the expense you confirm. If you use Scan (Premium), the receipt photo is sent to propose the expense and is not kept: the photo does not stay with MitiMiti, only the expense you confirm.',
         'A history of changes: who created, edited or deleted each expense or payment, and when. We also keep attempts to join with a code, to prevent abuse.',
         'If the couple buys Premium: the store (Apple or Google) processes the payment, and we never see your card or payment details. Through RevenueCat, we receive the subscription’s status linked to your account: the product, the store, whether it is a trial, the purchase, renewal and end dates, and the store’s notices about that purchase.',
         'Your phone keeps your session, in the system’s secure storage, and your language and appearance preferences.',
@@ -48,7 +48,7 @@ export const privacyEn: LegalDoc = {
         'With your partner: they see everything shared in your space, including your name and avatar.',
         'With the providers that help us run the service, who only use your data for that, under our instructions and under a data processing agreement (Article 28 GDPR): Clerk (sign-in, United States) and Supabase (database, hosted in Ireland, European Union). If you sign in with Google or Apple, they take part in signing in too.',
         'If you buy Premium: RevenueCat (subscription management, United States) receives your account identifier and the purchase’s status, and Apple or Google process the payment as controllers of their own store, under their policies.',
-        'If you use AI reading: Anthropic (artificial intelligence model, United States) receives the phrase or the receipt photo, today’s date, the couple’s currency and each of your first names, only to propose the expense draft. It does not receive the balance or your other expenses.',
+        'If you use Scan: Anthropic (artificial intelligence model, United States) receives the receipt photo, today’s date, the app language and the couple’s currency, only to propose the expense draft. It does not receive your names, the balance or your other expenses.',
         'With authorities, only when the law requires it.',
       ],
     },

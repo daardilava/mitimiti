@@ -70,7 +70,7 @@ Dark mode follows the phone, or Ajustes › Apariencia:
 | Export | The expenses and payments of a period as a CSV for spreadsheets, or a PDF report with totals and the balance, through the share sheet | Built |
 | Notifications | Partner activity, Sunday reminder | Planned (v1.1) |
 | Offline logging, recurring expenses | Save without signal; rent and subscriptions each month | Planned (v1.2) |
-| Premium | One subscription per couple in the App Store / Google Play: export, quick entry with AI (budgets and the full history are free) | Built; store testing open (Phase 6) |
+| Premium | One subscription per couple in the App Store / Google Play: export, Escanear and Dictar (budgets and the full history are free) | Built; store testing open (Phase 6) |
 
 **Product principles:** two people, never a group · fair, not just 50/50 · fast to log · the app records
 payments, it never moves money · neutral, no-blame language.
@@ -176,7 +176,7 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 | --- | --- |
 | `REVENUECAT_WEBHOOK_AUTH` | The billing webhook: the secret RevenueCat sends in its Authorization header (with or without `Bearer `) |
 | `REVENUECAT_SECRET_API_KEY` | `billing-sync`: RevenueCat secret API key (`sk_…`), to read a customer's current state |
-| `ANTHROPIC_API_KEY` | `parse-expense`: Claude API key, for quick entry's AI reading (Premium) |
+| `ANTHROPIC_API_KEY` | `read-receipt`: Claude API key, for Escanear (Premium) |
 
 ## Scripts
 
@@ -187,7 +187,6 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 | `npm run typecheck` | TypeScript, no emit |
 | `npx expo lint` | ESLint (Expo config) |
 | `npm test` | All Vitest suites, app logic and SQL |
-| `npm run eval:quick-entry` | Quick entry's golden phrases against the real model (needs `ANTHROPIC_API_KEY`; costs money, never in CI) |
 | `npm run clerk:check` | Check that the Clerk instance in `.env` is configured the way the app signs in |
 | `npm run db:start` | Start local Supabase (Docker) |
 | `npm run db:reset` | Recreate the local database from `supabase/migrations` |
@@ -284,29 +283,39 @@ a purchase, or Restaurar compras) to read the person's current state from Revenu
    header, 400 for a body that isn't an event, and 500 when the database fails, so RevenueCat retries.
    Logs: Supabase Dashboard › Edge Functions › revenuecat-webhook › Logs.
 
-### Deploy quick entry
+### Gasto rápido and parse-expense (removed)
 
-Quick entry ([docs/QUICK_ENTRY.md](docs/QUICK_ENTRY.md)) reads a typed or dictated phrase on the phone. Only for
-Premium couples, and only when the phone isn't sure (or for a receipt photo), the
-[`parse-expense`](supabase/functions/parse-expense/index.ts) function asks Claude (`claude-haiku-5-5`). Push
-`20261029000000_quick_entry.sql` first: it adds `expenses.source`, `upsert_expense(…, p_source)` and
-`claim_ai_call()`, the Premium check and daily limit per couple.
+Gasto rápido (the one-line quick-entry screen) and its AI function `parse-expense` were removed on 2026-11-03; adding
+an expense is the form (+), Escanear or Dictar. Dictar still uses the phrase parser on the phone
+(`src/lib/quickEntry.ts`). `20261029000000_quick_entry.sql` stays applied: `expenses.source` is still written, and
+`ai_usage` / `claim_ai_call()` are simply unused. Take the deployed function offline once:
 
-1. Store the Claude API key (Claude Console › API keys):
-   ```bash
-   npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-your-key
-   ```
+```bash
+npx supabase functions delete parse-expense
+```
+
+### Deploy Escanear (read-receipt)
+
+Escanear ([docs/PLAN.md › Scan + Dictate](docs/PLAN.md#scan--dictate-premium)) sends a shrunk receipt photo to
+[`read-receipt`](supabase/functions/read-receipt/index.ts), which asks Claude (`claude-sonnet-5-5`) to read it. Push
+`20261102000000_receipt_scans.sql` first (`receipt_scans` and `claim_receipt_scan()`: 30 scans per couple and day).
+
+1. Store the Claude API key as a secret (`npx supabase secrets set ANTHROPIC_API_KEY=…`). The
+   key lives only in Supabase, never in `.env` or the app.
 2. Deploy it. Like `billing-sync`, the app sends Clerk's token, which the gateway can't verify, so the function checks
-   the caller itself through Supabase (`claim_ai_call()` with the caller's token):
+   the caller itself (`claim_receipt_scan()` with the caller's token):
    ```bash
-   npx supabase functions deploy parse-expense --no-verify-jwt
+   npx supabase functions deploy read-receipt --no-verify-jwt
    ```
-3. Check it against the golden phrases before shipping a prompt change (costs a few cents per run):
+3. Premium is enforced in the app (`PREMIUM_ENFORCED = true` in `src/lib/premium.ts`); refuse Free couples on the server too:
    ```bash
-   ANTHROPIC_API_KEY=sk-ant-your-key npm run eval:quick-entry
+   npx supabase secrets set RECEIPT_PREMIUM_ONLY=1
    ```
-4. It answers 200 with a draft, 401 without a valid session, 403 for a Free couple, 429 past the daily limit, 422 when
-   the model can't read it and 502 when the model fails. It never logs the phrase or the image.
+4. It answers 200 with the reading, 401 without a valid session, 403 outside a couple (or Free, with step 3), 429 past
+   the daily limit, 422 when the photo can't be read and 502 when the model fails. It never logs or keeps the image.
+
+Escanear's camera (`expo-camera`) and Dictar (`expo-speech-recognition`) are native code: they need a new development
+build.
 
 Dictation uses the phone's speech recognition (`expo-speech-recognition`, native code): it needs a development build
 (`npx expo run:android` / `run:ios`, or `eas build --profile development`). In Expo Go the mic button is hidden and

@@ -7,7 +7,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email, address } = LEGAL_CONTACT;
 
 export const privacyEs: LegalDoc = {
-  effective: 'Vigente desde el 1 de noviembre de 2026',
+  effective: 'Vigente desde el 3 de noviembre de 2026',
   intro:
     'Esta política explica qué datos personales guarda MitiMiti, para qué y con qué base legal, con quién los comparte, cuánto tiempo los conserva y cómo puedes conocerlos, corregirlos o pedir que se borren.',
   sections: [
@@ -21,7 +21,7 @@ export const privacyEs: LegalDoc = {
         'De tu cuenta: tu nombre, tu correo y tu contraseña. La contraseña la guarda nuestro proveedor de inicio de sesión de forma cifrada; nosotros nunca la vemos. Si entras con Google o Apple, recibimos de ellos tu nombre, tu correo y un identificador. Por seguridad, el proveedor también registra tus sesiones, el dispositivo y la dirección IP desde la que entras.',
         'De la pareja: el nombre de cada uno (incluido el nombre con el que invitas a tu pareja antes de que se una), el avatar, la moneda, la división predeterminada y el código de invitación.',
         'Lo que ustedes registran: cada gasto (monto, descripción, categoría, fecha, quién pagó, cómo se divide y cómo se registró: en el formulario, escrito, dictado o con la foto de un recibo), cada pago entre ustedes (monto, medio y fecha) y los presupuestos.',
-        'Si usas el gasto rápido: para dictar, el reconocimiento de voz lo hace tu teléfono (el de Apple o Google, según sus políticas) y MitiMiti solo recibe el texto, nunca el audio. Si usan la lectura con IA (Premium), la frase escrita o la foto del recibo se envía para proponer el gasto y no se guarda: ni la foto ni la frase quedan en MitiMiti, solo el gasto que tú confirmes.',
+        'Si usas Dictar: el reconocimiento de voz lo hace tu teléfono (el de Apple o Google, según sus políticas) y el texto se interpreta en tu teléfono; MitiMiti nunca recibe el audio, solo el gasto que tú confirmes. Si usan Escanear (Premium), la foto del recibo se envía para proponer el gasto y no se guarda: la foto no queda en MitiMiti, solo el gasto que tú confirmes.',
         'Un historial de cambios: quién creó, editó o borró cada gasto o pago, y cuándo. También guardamos los intentos de unirse con un código, para evitar abusos.',
         'Si la pareja compra Premium: la tienda (Apple o Google) procesa el pago y nosotros no vemos tu tarjeta ni tus datos de pago. Recibimos, a través de RevenueCat, el estado de la suscripción asociado a tu cuenta: el producto, la tienda, si es una prueba, las fechas de compra, renovación y fin, y los avisos de la tienda sobre esa compra.',
         'En tu teléfono quedan tu sesión, en el almacenamiento seguro del sistema, y tus preferencias de idioma y apariencia.',
@@ -51,7 +51,7 @@ export const privacyEs: LegalDoc = {
         'Con tu pareja: ve todo lo que se comparte en su espacio, incluido tu nombre y tu avatar.',
         'Con los proveedores que nos ayudan a prestar el servicio, que solo usan tus datos para eso, bajo nuestras instrucciones y con un contrato de encargo del tratamiento (artículo 28 del RGPD): Clerk (inicio de sesión, Estados Unidos) y Supabase (base de datos, alojada en Irlanda, Unión Europea). Si entras con Google o Apple, también ellos participan en el inicio de sesión.',
         'Si compran Premium: RevenueCat (gestión de suscripciones, Estados Unidos) recibe tu identificador de cuenta y el estado de la compra, y Apple o Google procesan el pago como responsables de su propia tienda, según sus políticas.',
-        'Si usan la lectura con IA: Anthropic (modelo de inteligencia artificial, Estados Unidos) recibe la frase o la foto del recibo, la fecha de hoy, la moneda de la pareja y el nombre de pila de cada uno, solo para proponer el borrador del gasto. No recibe el saldo ni sus otros gastos.',
+        'Si usan Escanear: Anthropic (modelo de inteligencia artificial, Estados Unidos) recibe la foto del recibo, la fecha de hoy, el idioma de la app y la moneda de la pareja, solo para proponer el borrador del gasto. No recibe sus nombres, el saldo ni sus otros gastos.',
         'Con autoridades, solo cuando la ley nos obligue.',
       ],
     },

@@ -6,10 +6,12 @@ import { isoDate } from './dates';
 export type Plan = 'free' | 'premium';
 
 /**
- * Premium features. `aiEntry`: quick entry with AI (phrases the phone can't read, receipt photos); typing and dictation
- * stay free. `recurring` and `receiptPhoto` (a picture kept on an expense) don't exist yet; the paywall lists them as Pronto.
+ * Premium features. `aiEntry`: entering expenses with AI (the paywall's benefit for Escanear and Dictar); typing
+ * stays free. `scan` / `dictate`: the Escanear and Dictar screens (whether that gate is on yet is
+ * src/lib/premium.ts). `recurring` and `receiptPhoto` (a picture kept on an expense) don't exist yet; the paywall lists
+ * them as Pronto.
  */
-export type Feature = 'export' | 'aiEntry' | 'recurring' | 'receiptPhoto';
+export type Feature = 'export' | 'aiEntry' | 'scan' | 'dictate' | 'recurring' | 'receiptPhoto';
 
 /** The plan as my_plan() reports it. */
 export interface PlanInfo {
