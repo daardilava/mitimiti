@@ -4,7 +4,7 @@ import { LEGAL_CONTACT, type LegalDoc } from './types';
 const { owner, email, address } = LEGAL_CONTACT;
 
 export const termsDe: LegalDoc = {
-  effective: 'Gültig ab dem 1. November 2026',
+  effective: 'Gültig ab dem 5. November 2026',
   intro:
     'Diese Bedingungen erklären, was MitiMiti ist, was du von der App erwarten kannst und was wir von den Menschen erwarten, die sie nutzen. Mit dem Erstellen deines Kontos akzeptierst du sie. Wenn du nicht einverstanden bist, nutze die App nicht.',
   sections: [
@@ -46,7 +46,7 @@ export const termsDe: LegalDoc = {
     {
       heading: '6. Preis',
       paragraphs: [
-        'MitiMiti hat einen kostenlosen Plan ohne Enddatum mit dem Wichtigsten: Ausgaben erfassen, den Saldo sehen und ausgleichen. Premium ist ein kostenpflichtiger Plan mit zusätzlichen Funktionen, etwa dem gesamten Verlauf, Budgets und dem Export. Bevor du zustimmst, siehst du, was er enthält, den Preis und wie oft abgerechnet wird.',
+        'MitiMiti hat einen kostenlosen Plan ohne Enddatum mit dem Wichtigsten: Ausgaben erfassen, den Saldo sehen und ausgleichen. Premium ist ein kostenpflichtiger Plan mit zusätzlichen Funktionen, etwa dem Scannen von Belegen, dem Diktieren von Ausgaben und dem Export. Bevor du zustimmst, siehst du, was er enthält, den Preis und wie oft abgerechnet wird.',
         'Premium ist ein Abo pro Paar: Ein Abo gilt für beide Personen im Bereich, egal wer es kauft. Deshalb bietet die App kein zweites Abo an, solange das Paar Premium hat.',
         'Kauf, Abrechnung, Verlängerung, Kündigung und Erstattungen übernimmt der Store, in dem du kaufst (Apples App Store oder Google Play), nach seinen eigenen Bedingungen. Wir sehen weder deine Karte noch deine Zahlungsdaten.',
         'Das Abo verlängert sich am Ende jedes Zeitraums automatisch, wenn du es nicht spätestens 24 Stunden vorher in den Einstellungen deines Store-Kontos kündigst. Enthält es einen kostenlosen Test und kündigst du nicht vor dessen Ende, beginnt an diesem Tag die Abrechnung.',

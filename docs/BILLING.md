@@ -222,7 +222,7 @@ The acceptance checks to run: [PLAN.md › Phase 6](PLAN.md#phase-6--billing-cur
 | Open the paywall on phone B | *Diego ya activó Premium*, no purchase button |
 | Wait for a renewal | Ajustes keeps *Se renueva el …*, with the new date |
 | Cancel in the store's subscription settings | Premium until the date; Ajustes says *Termina el …* (cancellations can take up to ~2 hours to arrive) |
-| Let it expire | Free: older months and Presupuestos locked, every expense still there, the balance unchanged |
+| Let it expire | Free: Escanear, Dictar and export open the paywall; every month and Presupuestos stay open, every expense still there, the balance unchanged |
 | Delete the app, reinstall, sign in, **Restaurar compras** | Premium back |
 | Buy on Android, look at the partner's iPhone | Premium there too |
 | Billing issue (Google: a test card that declines; Apple: see [failing renewals](https://developer.apple.com/documentation/storekit/testing-failing-subscription-renewals-and-in-app-purchases)) | Ajustes shows the store couldn't charge, with *Revisar el pago*; Premium until the grace period ends |
