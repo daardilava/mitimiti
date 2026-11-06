@@ -3,12 +3,12 @@ import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { balanceKeys, useSettlements } from '@/api/balance';
 import { coupleKey, expenseKeys, useCouple, useExpenses } from '@/api/expenses';
-import { activityView, countLabel, dailySpend, isCurrentOrLater, periodLabel, periodRange, shiftPeriod, type ActivityFilter, type Period } from '@/lib/activity';
+import { activityView, countLabel, dailySpend, isCurrentOrLater, lastDays, periodLabel, periodRange, shiftPeriod, shiftRange, type ActivityFilter, type DateRange, type Period } from '@/lib/activity';
 import { isoDate, monthOf } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { ExpenseRow, PaymentRow } from '@/ui/ExpenseRow';
 import { DatePickerSheet } from '@/ui/DatePickerSheet';
-import { Chip, SearchField } from '@/ui/Form';
+import { Chip, SearchField, Segmented } from '@/ui/Form';
 import { Icon } from '@/ui/Icon';
 import { PeriodNav } from '@/ui/PeriodNav';
 import { Pending, Screen } from '@/ui/Screen';
@@ -17,7 +17,8 @@ import { font, radius, space } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
 
-// 08 · Movimientos: a day, week or month of expenses and payments, with a chart of who paid, search and filters.
+// 08 · Movimientos: a day, week, month or picked range (Rango) of expenses and payments, with a chart of who paid,
+// search and filters.
 export default function Activity() {
   const { m, d } = useI18n();
   const { color, type } = useTheme();
@@ -28,10 +29,12 @@ export default function Activity() {
   const settlements = useSettlements();
 
   const today = new Date();
-  const [period, setPeriod] = useState<Period>('month');
+  const [period, setPeriod] = useState<Period | 'range'>('month');
   // Any date inside the period shown; the arrows move it one day, week or month.
   const [anchor, setAnchor] = useState(isoDate(today));
-  const range = useMemo(() => periodRange(period, anchor), [period, anchor]);
+  // Rango: the picked from–to range; it starts on the last 7 days and the arrows move it by its own length.
+  const [custom, setCustom] = useState<DateRange>(() => lastDays(7, today));
+  const range = useMemo(() => (period === 'range' ? custom : periodRange(period, anchor)), [period, anchor, custom]);
   const [filter, setFilter] = useState<ActivityFilter>('all');
   const [query, setQuery] = useState('');
   const [picking, setPicking] = useState(false);
@@ -76,27 +79,30 @@ export default function Activity() {
     { id: 'payments', label: m.activityScreen.payments },
   ];
   const narrowed = filter !== 'all' || query.trim() !== '';
-  const atLatest = isCurrentOrLater(period, anchor, today);
-  const periods: { id: Period; label: string }[] = [
+  const todayIso = isoDate(today);
+  const atLatest = period === 'range' ? custom.end >= todayIso : isCurrentOrLater(period, anchor, today);
+  const periods: { id: Period | 'range'; label: string }[] = [
     { id: 'day', label: m.activityScreen.day },
     { id: 'week', label: m.activityScreen.week },
     { id: 'month', label: m.activityScreen.month },
+    { id: 'range', label: m.activityScreen.range },
   ];
-  const emptyTitle = period === 'day' ? m.activityScreen.emptyDay : period === 'week' ? m.activityScreen.emptyWeek : m.activityScreen.emptyMonth(d.monthNameOf(monthOf(anchor)));
+  const emptyTitle =
+    period === 'day' ? m.activityScreen.emptyDay
+      : period === 'week' ? m.activityScreen.emptyWeek
+        : period === 'range' ? m.activityScreen.emptyRange
+          : m.activityScreen.emptyMonth(d.monthNameOf(monthOf(anchor)));
+  const move = (delta: number) => (period === 'range' ? setCustom(shiftRange(custom, delta, todayIso)) : setAnchor(shiftPeriod(period, anchor, delta)));
 
   return (
     <Screen title={m.activityScreen.title}>
-      <View style={styles.periods} accessibilityRole="radiogroup">
-        {periods.map((p) => (
-          <Chip key={p.id} label={p.label} selected={period === p.id} onPress={() => setPeriod(p.id)} />
-        ))}
-      </View>
+      <Segmented label={m.activityScreen.periodLabel} options={periods} value={period} onChange={setPeriod} />
 
       <PeriodNav
-        title={periodLabel(period, anchor, today, d)}
+        title={period === 'range' ? d.rangeLabel(custom.start, custom.end, today) : periodLabel(period, anchor, today, d)}
         subtitle={m.activityScreen.subtitle(countLabel(view.count, m), formatMoney(view.expensesTotalMinor, couple.data.currency))}
-        onPrevious={() => setAnchor(shiftPeriod(period, anchor, -1))}
-        onNext={() => setAnchor(shiftPeriod(period, anchor, 1))}
+        onPrevious={() => move(-1)}
+        onNext={() => move(1)}
         nextDisabled={atLatest}
         onTitlePress={() => {
           setOpens((n) => n + 1);
@@ -109,10 +115,12 @@ export default function Activity() {
         key={opens}
         visible={picking}
         period={period}
-        value={anchor}
-        today={isoDate(today)}
+        value={period === 'range' ? custom.end : anchor}
+        today={todayIso}
         marked={marked}
         onSelect={setAnchor}
+        range={custom}
+        onSelectRange={setCustom}
         onClose={() => setPicking(false)}
       />
 
@@ -172,7 +180,6 @@ function Empty({ title, hint }: { title: string; hint: string }) {
 }
 
 const useStyles = makeStyles(({ color }) => StyleSheet.create({
-  periods: { flexDirection: 'row', gap: space[2] },
   // Chips scroll edge to edge, past the screen's 20 px margin.
   chipsBleed: { marginHorizontal: -space[5], flexGrow: 0 },
   chips: { gap: space[2], paddingHorizontal: space[5] },

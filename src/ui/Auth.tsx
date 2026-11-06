@@ -1,7 +1,7 @@
 // Pieces shared by Iniciar sesión, Crea tu cuenta and ¿Olvidaste tu contraseña?
 import { Link, type Href } from 'expo-router';
 import { useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type TextInput } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type TextInputInstance } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { authErrorMessage, useOAuth, type Provider } from '@/api/auth';
 import { CODE_LENGTH } from '@/lib/authFlow';
@@ -9,7 +9,7 @@ import { TextField } from './Form';
 import { NavButton, Screen } from './Screen';
 import { font, radius, space, touch } from './tokens';
 import { makeStyles, useTheme } from './theme';
-import { useI18n } from '@/i18n';
+import { useI18n, type Messages } from '@/i18n';
 
 /** Blue text button, e.g. "¿Olvidaste tu contraseña?". With href it navigates, replacing the current screen. */
 export function TextLink({ label, href, onPress, disabled }: { label: string; href?: Href; onPress?: () => void; disabled?: boolean }) {
@@ -113,6 +113,8 @@ export function CodeStep({
   extra,
   canSubmit = true,
   submitLabel,
+  submitKind = 'primary',
+  errorMessage = authErrorMessage,
 }: {
   title: string;
   lead: string;
@@ -122,6 +124,10 @@ export function CodeStep({
   extra?: ReactNode;
   canSubmit?: boolean;
   submitLabel?: string;
+  /** danger: the code confirms a deletion (Borrar cuenta). */
+  submitKind?: 'primary' | 'danger';
+  /** How a failed onVerify reads; sign-in errors by default. */
+  errorMessage?: (error: unknown, m: Messages) => string;
 }) {
   const { m } = useI18n();
   const { color, type } = useTheme();
@@ -130,16 +136,22 @@ export function CodeStep({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
-  const input = useRef<TextInput>(null);
+  const input = useRef<TextInputInstance>(null);
+  // `busy` only updates on the next render; Android can fire onChangeText twice for the same text before that, which
+  // sent the code twice ("verification_already_verified"). A ref blocks the second call synchronously.
+  const inFlight = useRef(false);
 
   const verify = async (value: string) => {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setError(null);
     try {
       await onVerify(value);
     } catch (e) {
-      setError(authErrorMessage(e, m));
+      setError(errorMessage(e, m));
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };
@@ -158,8 +170,9 @@ export function CodeStep({
 
   const onChange = (text: string) => {
     const digits = text.replace(/\D/g, '').slice(0, CODE_LENGTH);
+    // Only when the six digits change: the keyboard repeating the same text is not a new code.
+    if (!extra && digits.length === CODE_LENGTH && digits !== code) verify(digits);
     setCode(digits);
-    if (!extra && digits.length === CODE_LENGTH && !busy) verify(digits);
   };
 
   return (
@@ -167,7 +180,7 @@ export function CodeStep({
       title={title}
       lead={lead}
       back="back"
-      footer={<NavButton label={submitLabel ?? m.authUi.continue} onPress={() => verify(code)} disabled={code.length < CODE_LENGTH || !canSubmit} loading={busy} />}
+      footer={<NavButton label={submitLabel ?? m.authUi.continue} kind={submitKind} onPress={() => verify(code)} disabled={code.length < CODE_LENGTH || !canSubmit} loading={busy} />}
     >
       <TextField
         ref={input}

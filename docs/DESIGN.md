@@ -1,76 +1,122 @@
-# a medias — Screens and design system
+# MitiMiti — Screens and design system
 
-External source of truth: *a medias — UI design* (13 screens + design system "UI kit v1").
+External source of truth: *MitiMiti — UI design* (13 screens + design system "UI kit v1"), with the MitiMiti brand on top (board *Color, tipografía y voz*).
 
 ## Screens
 
-13 screens: 4 onboarding, 4 tabs, 5 reached from them. Home is the hub; every screen is at most two taps away.
+The design's 13 numbered screens, plus the auth, legal, export, account and paywall screens added since: 4 tabs, the
+rest reached from them. Home is the hub; every screen is at most two taps away.
 
 | # | Screen (UI title) | Route | Reached from | Main actions |
 | --- | --- | --- | --- | --- |
-| 1 | Welcome — "Cuentas claras entre los dos." | `(onboarding)/welcome` | Launch, sign-out | Crear nuestra cuenta · Tengo un código de invitación |
-| — | Crea tu cuenta (Clerk) | `(onboarding)/sign-up` | Welcome (either button) | Name, email, password, terms → code by email · Google · Apple |
-| — | Iniciar sesión (Clerk) | `(onboarding)/sign-in` | Welcome "¿Ya tienes cuenta?" | Email, password, ¿Olvidaste tu contraseña? · Google · Apple |
-| — | ¿Olvidaste tu contraseña? | `(onboarding)/forgot-password` | Iniciar sesión | Code by email + new password → signed in |
-| 2 | Create account — "Armemos su cuenta" (Paso 1 de 2) | `(onboarding)/setup` | Sign-in | Names, currency, usual split → Continuar |
-| 3 | Invite partner — "Invita a Ana" (Paso 2 de 2) | `invite` | Setup, Settings | Copiar · Compartir · Ir a la app |
-| 4 | Join with code — "Únete a tu pareja" | `(onboarding)/join` | Sign-in | 6-char code, validated as typed → Unirme |
-| 5 | Home (Inicio) | `(tabs)/index` | After onboarding | Saldar cuentas, Ver todos, open expense, + |
-| 6 | New / edit expense | `expense/new`, `expense/[id]/edit` (modal) | + button, Edit | Agregar gasto (footer previews new balance) |
-| 7 | Expense detail | `expense/[id]` | Any expense row | Editar, eliminar (confirmation) |
-| 8 | Activity (Movimientos) | `(tabs)/activity` | Tab, "Ver todos" | Open expense, + |
-| 9 | Settle up (Saldar cuentas) | `settle/index` | Home balance card | Todo / La mitad / custom (never more than owed), method → Registrar pago |
-| 10 | Payment recorded | `settle/done` | Settle up | Volver al inicio · Ver movimientos |
-| 11 | Summary (Resumen) | `(tabs)/summary` | Tab | See budgets |
-| 12 | Budgets (Presupuestos) | `budgets` | Home, Summary | − / + in steps of $50.000 |
-| 13 | Settings (Ajustes) | `(tabs)/settings` | Tab | Tu avatar (12 characters or the initial, `src/ui/AvatarArt.tsx`), names, couple code, default split, currency, reminders, Export CSV, Cerrar sesión |
+| 1 | Welcome — MitiMiti, "Gastos compartidos, cuentas claras y cero discusiones." | `(onboarding)/welcome` | Launch, sign-out | Crear cuenta · Tengo una invitación de mi pareja · Iniciar sesión (link) |
+| — | Crea tu cuenta (Clerk) | `(onboarding)/sign-up` | Welcome (either button), an invite link | Name, email, password, terms and privacy → code by email · Google · Apple |
+| — | Iniciar sesión — "Hola de nuevo" (Clerk) | `(onboarding)/sign-in` | Welcome "Iniciar sesión", Crea tu cuenta "¿Ya tienes cuenta?" | Email, password, ¿Olvidaste tu contraseña? · Google · Apple; code by email on a new device |
+| — | ¿Olvidaste tu contraseña? | `(onboarding)/forgot-password` | Iniciar sesión | Code by email + new password → Guardar y entrar |
+| — | Términos y condiciones | `terms` (outside the guards) | Crea tu cuenta, Ajustes › Información legal, Paywall | Read; Escribirnos (email) |
+| — | Política de privacidad | `privacy` (outside the guards) | Crea tu cuenta, Ajustes › Información legal, Paywall | Read; Escribirnos (email) |
+| 2 | Create account — "Armemos su cuenta" (Paso 1 de 2) | `(onboarding)/setup` | Crear cuenta, after sign-up | Names, currency, usual split → Continuar · Tengo una invitación de mi pareja · Borrar cuenta |
+| 3 | Invite partner — "Invita a Ana" (Paso 2 de 2) | `invite` | Setup, Ajustes › Código de pareja | Copiar · Enviar por WhatsApp · Otras apps · Ir a la app; Generar un código nuevo when expired (7 days) |
+| 4 | Join with code — "Únete a tu pareja" | `(onboarding)/join` | Tengo una invitación de mi pareja, Setup, an invite link (`mitimiti://join?code=AM482X`, code filled in) | 6-char code, validated as typed → Unirme |
+| 5 | Home (Inicio) | `(tabs)/index` | After onboarding | Saldar cuentas; **Agregar un gasto** under the balance: two cards side by side, Escanear ("Foto del recibo, lo lee la IA") and Dictar ("Dilo en voz alta"), each with a crown + "Premium" badge (the word carries it, so no legend under the cards); on a Free couple a tap opens the paywall with that benefit first; then the shortcut row (Presupuestos · Exportar · Historial; Premium ones carry a crown, say Premium to screen readers, open the paywall on Free, and a line under the row explains the crown; the row scrolls sideways when labels don't fit); Presupuesto del mes card, Ver todos, open expense, + |
+| 6b | Dictar (Premium) | `expense/dictate` (full-screen modal) | Inicio › Agregar un gasto › Dictar | × · title · Escribir (the form). Miti in soft rings (they breathe while listening, still with reduced motion), a pill "Te escucho", the live transcript in large type with the amount in coral, "Di qué fue y cuánto costó.", chips of what was understood (category, amount, Pagó …, split), a notice when another currency is said, and a round stop button "Toca para terminar". Stopping hands the draft to Nuevo gasto (prefilled). Before the first system dialog it explains the mic; denied → calm text, Abrir ajustes, Escribir. Expo Go / web: says it needs the installed app and offers Escribir |
+| 6c | Escanear (Premium) | `expense/scan` (full-screen modal, dark in both modes) | Inicio › Agregar un gasto › Escanear | Top: × · "Premium · Lectura con IA" pill · flash (a switch; "Flash encendido" shows while on). Corner guides around the frame, "Encuadra el recibo entero" above it and "La foto no se guarda: solo el gasto que confirmes." under it. Bottom: photos · shutter · Escribir. Before the camera permission, what it's for (Permitir la cámara · Elegir de mis fotos · Escribir); refused → Abrir ajustes. While reading: "Leyendo el recibo…"; any failure or the daily limit says so and offers Escribir |
+| 6d | Revisar el recibo | `expense/receipt` (modal) | Escanear, after reading | Header chip "Leído del recibo". Receipt card: shop, category chip, Fecha, the lines, Total in large type. Pagó and División rows open sheets with the form's choices. "Con este gasto, Ana te deberá …" from splits.ts on the live balance. Lines that don't add up → a neutral note, the total counts. Another currency or no total → a note and "Escribir el monto" instead. Editar (form, prefilled) · Agregar gasto (primary) → back to Inicio with the toast "Gasto agregado · Deshacer · Editar" |
+| 6 | New / edit expense — "Nuevo gasto" / "Editar gasto" | `expense/new`, `expense/[id]/edit` (modal) | + button; Dictar, Escanear › Editar / Escribir (prefilled through `src/lib/draftStore.ts`); Gasto rápido › Formulario / Revisar (prefilled); Editar gasto | Agregar gasto / Guardar cambios (footer previews the new balance) |
+| 7 | Expense detail — "Detalle del gasto" | `expense/[id]` | Any expense row | Editar gasto, Eliminar gasto (confirmation) |
+| 8 | Activity (Movimientos) | `(tabs)/activity` | Tab, "Ver todos", Inicio › Historial | Día / Semana / Mes / Rango (segmented); Rango opens the calendar in range mode: tap the first and the last day (an earlier second tap becomes the start), the days between sit on a band, a line says what is picked and how many days, Ver movimientos applies it; the arrows move a range by its own length and stop at today. Chart, search, filters, calendar, open expense, + |
+| 9 | Settle up (Saldar cuentas) | `settle/index` | Home balance card | Todo / La mitad / custom (never more than owed), ¿Cómo se pagó? → Registrar pago |
+| 10 | Payment recorded (Pago registrado) | `settle/done` | Settle up | Volver al inicio · Ver movimientos |
+| 11 | Summary (Resumen) | `(tabs)/summary` | Tab | Month switcher, Ver presupuestos |
+| 12 | Budgets (Presupuestos) | `budgets` | Inicio (shortcut and card), Resumen | − / + in steps of $50.000 (10 € / US$10) |
+| 13 | Settings (Ajustes) | `(tabs)/settings` | Tab | In order: profile card (your avatar with an edit badge, name, email, Editar → Tu perfil; below it the partner, or the Código de pareja until they join); Tu plan; División predeterminada; Moneda; Apariencia (segmented Automático · Claro · Oscuro); Idioma; Recordatorios y avisos (Pronto); Información legal; Cuenta (Cerrar sesión, Borrar cuenta). Each card has an icon tile. Exportar lives on Inicio's shortcut row |
+| 13a | Your profile (Tu perfil) | `profile` | Ajustes › avatar or Editar | Tu avatar (12 characters or the initial, `src/ui/AvatarArt.tsx`, saves on tap); Ustedes (names, save on leaving the field) |
+| — | Exportar movimientos | `export` | Ajustes › Exportar movimientos (Premium) | Periodo (5 presets) · Formato CSV / PDF → Exportar (share sheet) |
+| — | Borrar tu cuenta | `delete-account` (outside the guards) | Ajustes › Cuenta, Setup | What is deleted (partner too), the subscription note → tick → Borrar cuenta (red); code by email if the sign-in is older than 10 min |
+| — | MitiMiti Premium (paywall) | `paywall` (modal, `?from=scan\|dictate\|export`) | Ajustes › Tu plan › Ver Premium, every Premium lock | Navy hero edge to edge (× close, Miti in a ring, "MitiMiti Premium", "Menos tiempo con las cuentas, más tiempo juntos."; navy, not green: green means payments / settled). Benefits with Inicio's tiles: Escanear recibos · Dictar gastos · Exportar a CSV y PDF (what opened it first). Anual ("Ahorra 44 %" badge on its edge) / Mensual, the billed price largest, no monthly price for the yearly plan; "Una sola suscripción cubre a los dos" and the full trial / renewal terms under the plans. Pinned footer: Continuar con el plan anual / mensual (Probar 7 días gratis with a trial), one short renewal line, Restaurar compras · Términos · Privacidad |
 
-The `+` in the tab bar always opens a new expense. Screens marked **Por construir** are routed placeholders;
-each names the feature section that builds it.
+The `+` in the tab bar always opens a new expense. Every routed screen is built; `Todo` in
+[src/ui/Screen.tsx](../src/ui/Screen.tsx) remains for marking a future placeholder with the feature section that builds it.
+
+## Brand
+
+Implemented in [src/ui/tokens.ts](../src/ui/tokens.ts) and [src/lib/miti.ts](../src/lib/miti.ts); sources in
+[assets/brand](../assets/brand). Same meanings as the UI kit, brand look: Tinta for action, blue for you, Coral Miti
+for your partner, green only for what is settled.
+
+- **Name:** MitiMiti (formerly "a medias", taken on Google Play). App id `com.mitimiti.app`, link scheme
+  `mitimiti://`. The EAS slug stays `a-medias`, tied to the EAS project id.
+- **Logo:** Miti, the two-colour mascot (markup in `src/lib/miti.ts`, drawn by `Miti` in
+  [src/ui/Miti.tsx](../src/ui/Miti.tsx) and in the PDF), and the `Wordmark` "MitiMiti" in Fredoka 600: "Miti" in
+  green, "Miti" in coral. Miti is decorative (hidden from screen readers); the wordmark carries the name.
+- **Brand colours** (`MITI_COLORS` in `src/lib/miti.ts`): Verde Miti `#0E8C7A`, Coral Miti `#FF7A59`, Tinta
+  `#1A2238`. On dark surfaces the wordmark uses `wordmarkGreen` `#3DC4A6` (Verde Miti lifted to read on Tinta) and
+  `wordmarkCoral` `#FF7A59`; on white (the PDF) Verde Miti and Coral texto `#E4572E` (`WORDMARK_ON_LIGHT`).
+- **App icon:** Miti on Tinta (`assets/icon.png`); Android adaptive icon with Tinta background and a monochrome layer
+  for themed icons; Google Play icon `assets/store/play-icon-512.png`; favicon for web (development only). All
+  rendered from the SVGs by `python scripts/brand-assets.py` (needs Pillow and Google Chrome).
+- **Splash:** Miti (`assets/splash-icon.png`) on Niebla `#F3F5F4` in light mode and Tinta `#1A2238` in dark,
+  configured in `app.json` › `expo-splash-screen`. It stays up until fonts and the session are ready, then fades
+  (`src/app/_layout.tsx`). Expo Go shows the app icon instead; check it in a development or release build.
+- **Welcome** is the brand screen: Tinta (`brandInk`) in both modes with a light status bar, Miti (176) and the
+  wordmark (44) centred, the slogan in `onBrandInk`, the coral `kind="brand"` button for Crear cuenta (Tinta text),
+  an outline button for Tengo una invitación de mi pareja, and Iniciar sesión as an underlined link in
+  `wordmarkGreen`.
+- **PDF export:** Miti and the wordmark in the header and footer, the balance card in Tinta. Titles and figures use
+  the rounded system face (SF Pro Rounded on iPhone), the closest to Fredoka a print engine has.
+- **Voice:** "tú" for the person, "ustedes" for the couple; neutral, no blame (see `src/i18n/es.ts`).
 
 ## Design system (UI kit v1)
 
-Implemented in [src/ui/tokens.ts](../src/ui/tokens.ts). Near-black ink for action, blue for you, orange for
-your partner, green only for what is settled. Red and green are never the only cue: always with text.
+Red and green are never the only cue: always with text.
 
 ### Light and dark mode
 
 - The app follows the phone (`userInterfaceStyle: "automatic"` in `app.json`; `expo-system-ui` makes Android honour
   it). **Ajustes › Apariencia** can fix it to Claro or Oscuro on that phone; the choice is stored on the device and
   passed to `Appearance.setColorScheme`, so keyboards and alerts match.
-- `tokens.ts` has a light palette (the UI kit below) and a dark one with the **same token names**, plus dark
-  category colours. The UI kit only defines light; the dark palette keeps its hues: lighter blue / orange / green /
-  red for text and marks on near-black, deeper tints for tiles and notices.
+- `tokens.ts` has a light palette and a dark one with the **same token names**, plus dark category colours. The dark
+  palette keeps the brand's hues: lighter blue / coral / green / red for text and marks on deep navy (background
+  `#0E1220`, surface `#181E30`), deeper tints for tiles and notices.
 - Tokens by job, so each mode can treat them differently: `ink` (text, primary buttons; light in dark mode) with
-  `onPrimary` on it; `hero` (balance, Presupuestos' month, Welcome; stays dark in both) with `onHero` / `onInk`;
-  `positive` (fills) vs `positiveText`; `danger` (delete button) vs `negative` (text, bars); `scrim`.
-- Buttons on hero cards use `kind="inverse"` (white with dark text in both modes).
-- [src/ui/__tests__/tokens.test.ts](../src/ui/__tests__/tokens.test.ts) checks ~30 text and mark pairs per mode
-  against WCAG (4.5:1 text, 3:1 icons and bars) and every category icon on its tile. Known exception from the UI
-  kit: light orange is 2.6:1 on white, so the partner's marks always come with a legend and amounts.
+  `onPrimary` on it; `hero` (balance, Presupuestos' month; Tinta in light mode, `#1F2740` in dark so it still reads
+  as a card) with `onHero` / `onInk` / `onInkMuted`; `positive` (fills) vs `positiveText`; `danger` (delete button)
+  vs `negative` (text, bars); bars on hero cards `inkTrack` / `positiveOnInk` / `warningOnInk` / `negativeOnInk`;
+  Welcome's `brandInk` / `brandCoral` / `onBrandCoral` / `brandLine` / `onBrandInk` (same in both modes); `scrim`.
+- Button kinds (`NavButton` in [src/ui/Screen.tsx](../src/ui/Screen.tsx)): `primary` (Tinta), `secondary`,
+  `outline` (on hero surfaces), `payment` (green, recording payments only), `inverse` (white with dark text on hero
+  cards, both modes), `danger` (red, deleting only), `brand` (coral, Welcome only).
+- [src/ui/__tests__/tokens.test.ts](../src/ui/__tests__/tokens.test.ts) checks every text and mark pair per mode
+  against WCAG (4.5:1 text, 3:1 icons and bars), every category icon on its tile, and the wordmark and Welcome
+  colours. Known exception from the UI kit: Coral Miti is 2.6:1 on white, so the partner's marks always come with a
+  legend and amounts (text uses `partnerText`).
 - Screens read colours with `useTheme()` and build styles with `makeStyles()` ([src/ui/theme.tsx](../src/ui/theme.tsx)).
 
-| Token | Hex | Use |
-| --- | --- | --- |
-| Ink | `#16181D` | Text, primary button (the balance card is `hero`, same hex in light mode) |
-| Background | `#F2F4F3` | App background |
-| Surface | `#FFFFFF` | Cards, sheets, fields |
-| Line | `#E3E6E8` | Card borders, dividers |
-| Text secondary | `#5B606B` | Labels, metadata |
-| Disabled | `#9AA0A8` | Off radios / switches; inactive tab `#6B7079` |
-| You / bg | `#1F4FB8` / `#DCE5FA` | What you pay or owe; your avatar's initial (until a character is picked) |
-| Partner / bg | `#E8873A` / `#FBE1CC` (text `#8A3A0C`) | What your partner pays or owes; their avatar |
-| Positive | `#0F7B6C` | "Te deben", payments, budget OK |
-| Negative | `#B4232C` | "Debes", over budget, delete |
+| Token | Light | Dark | Use |
+| --- | --- | --- | --- |
+| Ink (Tinta) | `#1A2238` | `#ECEEF1` | Text, primary button |
+| Hero | `#1A2238` | `#1F2740` | Balance card, Presupuestos' month card |
+| Background (Niebla) | `#F3F5F4` | `#0E1220` | App background |
+| Surface | `#FFFFFF` | `#181E30` | Cards, sheets, fields |
+| Line | `#E3E6E8` | `#283049` | Card borders, dividers |
+| Text secondary | `#5A6275` | `#A3A9B3` | Labels, metadata |
+| Disabled | `#9AA0A8` | `#5F656E` | Off radios / switches; inactive tab `#6B7079` / `#8C929C` |
+| You / bg | `#1F4FB8` / `#DCE5FA` | `#86A8F5` / `#22304F` | What you pay or owe; your avatar's initial (until a character is picked) |
+| Partner (Coral Miti) / bg | `#FF7A59` / `#FFE3DA` (text `#9E3418`) | `#FF8C6E` / `#45261F` (text `#FFB8A6`) | What your partner pays or owes; their avatar's initial |
+| Positive | `#0F7B6C` (text `#0B6E60`) | `#13806F` (text `#4CC9AF`) | "Te deben", payments, settled, budget OK |
+| Warning | `#B7791F` (text `#8A5A00`) | `#C9922C` (text `#E9B95C`) | Budget from 80 % |
+| Negative / danger | `#B4232C` | `#F07A82` / `#C2303A` | "Debes", over budget, the delete button |
 
-Categories: Súper `#2E7D5B` · Comida fuera `#B4501F` · Casa `#3E4BA0` · Servicios `#8A6100` ·
-Transporte `#22668A` · Salidas `#83347F` · Viajes `#17706F` · Regalos `#A8304F` · Otros `#4D525C`.
+Categories (light): Súper `#2E7D5B` · Comida fuera `#B4501F` · Casa `#3E4BA0` · Servicios `#8A6100` ·
+Transporte `#22668A` · Salidas `#83347F` · Viajes `#17706F` · Regalos `#A8304F` · Otros `#4D525C`. Dark mode uses
+lighter hues on deep tiles (`categoryColors.dark`).
 
-- **Type:** Bricolage Grotesque 700 for figures and titles (balance 52, welcome 44, screen title 32, heading 20);
-  DM Sans for UI (top bar 17/700, row & button 16/600–700, body 15–16/400 at 1.5, label 13/600,
+- **Type:** Fredoka 700 for figures and titles (balance 52, hero 44, screen title 32, heading 20); Fredoka 600 only
+  for the wordmark; DM Sans for UI (top bar 17/700, row & button 16/600–700, body 16/400 at 1.5, label 13/600,
   balance effect 12/700, tab 11/700). Figures use tabular numbers.
 - **Space & shape:** 4 px scale, 20 px side margins, every touch target ≥ 44 × 44. Radii: 12 category icon,
   14 button/field, 16 option/notice, 20 card, 24 balance card/sheet, 28 chip/FAB.
 - **Components:** one primary button per screen. Green is reserved for recording payments; red for deleting.
-  Budgets: green up to 79 %, amber from 80 %, red when over; text always says the state.
+  Budgets: green up to 79 %, amber from 80 %, red when over; text always says the state. Premium locks say
+  **Premium** in text, never only with an icon ([src/ui/Premium.tsx](../src/ui/Premium.tsx)).
 - **Icons:** 24 × 24 canvas, 1.8 px stroke, round caps.

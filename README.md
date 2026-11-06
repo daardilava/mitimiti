@@ -1,6 +1,6 @@
-# a medias
+# MitiMiti
 
-[![CI](https://github.com/daardilava/a-medias/actions/workflows/ci.yml/badge.svg)](https://github.com/daardilava/a-medias/actions/workflows/ci.yml)
+[![CI](https://github.com/daardilava/mitimiti/actions/workflows/ci.yml/badge.svg)](https://github.com/daardilava/mitimiti/actions/workflows/ci.yml)
 ![Expo SDK 57](https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres_+_RLS-3FCF8E?logo=supabase&logoColor=white)
@@ -11,13 +11,15 @@
 Two people log what they spend together, choose how each expense is split, and see one live balance on both
 phones. When they settle up outside the app, they record the payment and the balance goes back to zero.
 
-> **Status:** private beta in preparation. Phase 3 (*Settle + summary*) is built; polish is in progress.
+> **Status:** private beta in preparation. Phases 1–3 are built (live checks open); Phase 6 (*Billing*) is built,
+> with its store QA on real phones still open.
 > Roadmap and acceptance checks: [docs/PLAN.md](docs/PLAN.md).
 
 ---
 
 ## Contents
 
+- [Screenshots](#screenshots)
 - [What it does](#what-it-does)
 - [Tech stack](#tech-stack)
 - [Architecture](#architecture)
@@ -34,6 +36,24 @@ phones. When they settle up outside the app, they record the payment and the bal
 
 ---
 
+## Screenshots
+
+Sample data (`EXPO_PUBLIC_DEV_BYPASS_AUTH=1`), 390 px wide, on the Premium plan.
+
+| Bienvenida | Inicio | Movimientos | Resumen | Presupuestos |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/welcome.png" width="180" alt="Welcome: Miti, the MitiMiti wordmark and the slogan, with Crear cuenta and Tengo una invitación de mi pareja"> | <img src="docs/screenshots/home-light.png" width="180" alt="Home: Ana te debe $337.950, spending this month by who paid, the month's budget and recent expenses"> | <img src="docs/screenshots/activity-light.png" width="180" alt="Movimientos: the month's chart of shared spending by who paid, search and filters"> | <img src="docs/screenshots/summary-light.png" width="180" alt="Resumen: the month's shared spending by category"> | <img src="docs/screenshots/budgets-light.png" width="180" alt="Presupuestos: the month's total against its limit, and a limit per category"> |
+
+| Saldar cuentas | Detalle del gasto | Nuevo gasto | Ajustes | Premium |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/settle-light.png" width="180" alt="Saldar cuentas: Ana pays Diego $337.950, with Todo / La mitad and the payment method"> | <img src="docs/screenshots/expense-light.png" width="180" alt="Expense detail: Mercado de la semana, $285.000, split half and half"> | <img src="docs/screenshots/new-expense-light.png" width="180" alt="New expense: amount, description, who paid, category and split"> | <img src="docs/screenshots/settings-light.png" width="180" alt="Ajustes: the avatar picker and the couple's names"> | <img src="docs/screenshots/paywall-light.png" width="180" alt="Paywall: Premium para los dos, its benefits and the yearly plan with a 7-day trial"> |
+
+Dark mode follows the phone, or Ajustes › Apariencia:
+
+| Inicio | Movimientos | Resumen | Presupuestos |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/home-dark.png" width="180" alt="Home in dark mode"> | <img src="docs/screenshots/activity-dark.png" width="180" alt="Movimientos in dark mode"> | <img src="docs/screenshots/summary-dark.png" width="180" alt="Resumen in dark mode"> | <img src="docs/screenshots/budgets-dark.png" width="180" alt="Presupuestos in dark mode"> |
+
 ## What it does
 
 | Feature | Description | Status |
@@ -47,8 +67,10 @@ phones. When they settle up outside the app, they record the payment and the bal
 | Monthly summary | Shared total by category, who paid, each person's share, personal spending | Built |
 | Budgets | Monthly limit per category, warning at 80 %, over-limit state | Built |
 | Settings | Names, avatar, default split, currency, appearance (light / dark), language (es / en / de) | Built |
-| Notifications, CSV export | Partner activity, Sunday reminder, export a date range | Planned (v1.1) |
+| Export | The expenses and payments of a period as a CSV for spreadsheets, or a PDF report with totals and the balance, through the share sheet | Built |
+| Notifications | Partner activity, Sunday reminder | Planned (v1.1) |
 | Offline logging, recurring expenses | Save without signal; rent and subscriptions each month | Planned (v1.2) |
+| Premium | One subscription per couple in the App Store / Google Play: export, Escanear and Dictar (budgets and the full history are free) | Built; store testing open (Phase 6) |
 
 **Product principles:** two people, never a group · fair, not just 50/50 · fast to log · the app records
 payments, it never moves money · neutral, no-blame language.
@@ -102,8 +124,8 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ### 1. Install
 
 ```bash
-git clone https://github.com/daardilava/a-medias.git
-cd a-medias
+git clone https://github.com/daardilava/mitimiti.git
+cd mitimiti
 npm install
 cp .env.example .env
 ```
@@ -114,7 +136,7 @@ Set `EXPO_PUBLIC_DEV_BYPASS_AUTH=1` in `.env`. Sign-in is skipped and every scre
 sample data.
 
 ```bash
-npx expo start            # scan the QR code with Expo Go, or press a / i / w
+npm run go                # = npx expo start --go: scan the QR code with Expo Go, or press a / i / w
 ```
 
 ### 3. Run against a real backend
@@ -145,12 +167,23 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 | `EXPO_PUBLIC_SUPABASE_KEY` | Supabase publishable / anon key. Safe in the app: RLS guards every row |
 | `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (`pk_test_…` in development) |
 | `EXPO_PUBLIC_DEV_BYPASS_AUTH` | `1` = skip sign-in and use sample data. Development only |
+| `EXPO_PUBLIC_REVENUECAT_IOS_KEY` | RevenueCat public SDK key for iOS (`appl_…`). Empty = no purchases |
+| `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | RevenueCat public SDK key for Android (`goog_…`). Empty = no purchases |
+
+**Server-side secrets** never go in `.env` or the app. They live in Supabase (`npx supabase secrets set`):
+
+| Secret | Used by |
+| --- | --- |
+| `REVENUECAT_WEBHOOK_AUTH` | The billing webhook: the secret RevenueCat sends in its Authorization header (with or without `Bearer `) |
+| `REVENUECAT_SECRET_API_KEY` | `billing-sync`: RevenueCat secret API key (`sk_…`), to read a customer's current state |
+| `ANTHROPIC_API_KEY` | `read-receipt`: Claude API key, for Escanear (Premium) |
 
 ## Scripts
 
 | Command | What it does |
 | --- | --- |
-| `npx expo start` | Start the dev server |
+| `npm run go` | Start the dev server for **Expo Go** (`expo start --go`). Plain `npx expo start` targets a development build, because `expo-dev-client` is installed, and Expo Go can't open its QR code |
+| `npx expo start` | Start the dev server for a development build |
 | `npm run typecheck` | TypeScript, no emit |
 | `npx expo lint` | ESLint (Expo config) |
 | `npm test` | All Vitest suites, app logic and SQL |
@@ -164,18 +197,23 @@ Never put a secret (service-role key, Clerk secret key) in `.env`. Template: [`.
 ```
 src/
   app/              Expo Router routes, one file per screen
-    (onboarding)/   Signed-out flow: welcome, sign-in/up, setup, join
+    (onboarding)/   Signed-out flow: welcome, sign-in/up, forgot password, setup, join
     (tabs)/         Main app: Inicio, Movimientos, Resumen, Ajustes
+                    plus expense, settle, budgets, invite, export, paywall, terms, privacy, delete-account
   api/              Clerk and Supabase calls, TanStack Query hooks, Realtime
   lib/              Pure, tested logic: money, splits, balance, dates, activity, budgets, settle…
     __tests__/
-  ui/               Design tokens (light + dark), theme, icons, shared components
-  i18n/             Messages in Spanish (source of truth), English and German
+  ui/               Design tokens (light + dark), theme, Miti and the wordmark, icons, shared components
+  i18n/             Messages in Spanish (source of truth), English and German; legal texts
+assets/             App icon, adaptive icon, splash, favicon (generated)
+  brand/            MitiMiti brand SVGs: Miti and its expressions, app icon
+  store/            Store listing icon
 supabase/
   migrations/       Schema, RLS policies and SQL functions, in order
+  functions/        Edge Functions: revenuecat-webhook, billing-sync
   tests/            SQL / RLS tests on PGlite, and app ↔ SQL split parity
-docs/               Plan, design and architecture
-scripts/            Tooling (Clerk configuration check)
+docs/               Plan, design, architecture and the billing runbook
+scripts/            Clerk configuration check; brand-assets.py renders assets/ from assets/brand
 ```
 
 ## Testing
@@ -186,10 +224,10 @@ npm test
 
 | Suite | Covers |
 | --- | --- |
-| `src/lib/__tests__` | Money formatting and parsing, splits and balance, dates, activity, budgets, settle up, summary, auth flow |
-| `src/ui/__tests__` | WCAG contrast of every colour pair, in light and dark mode |
+| `src/lib/__tests__` | Money formatting and parsing, splits and balance, dates, activity, budgets, settle up, summary, auth flow, plans and paywall, export (CSV, PDF), the Miti logo |
+| `src/ui/__tests__` | WCAG contrast of every colour pair (brand colours included), in light and dark mode |
 | `src/i18n/__tests__` | Every language has every message |
-| `supabase/tests` | Migrations applied to PGlite: RLS isolation between couples, every SQL function, and **split parity**: the SQL and the app compute the same balance for every split mode |
+| `supabase/tests` | Migrations applied to PGlite: RLS isolation between couples, every SQL function, billing and account deletion, and **split parity**: the SQL and the app compute the same balance for every split mode |
 
 The balance must never be wrong, so any change to split or balance math, in SQL or TypeScript, must keep
 `supabase/tests/splits_parity.test.ts` passing. CI runs typecheck, lint and tests on every push and pull request.
@@ -211,6 +249,78 @@ The balance must never be wrong, so any change to split or balance math, in SQL 
   Ship the migration **before** the app code that depends on it, and keep the app tolerant of the previous
   schema until every phone has updated.
 
+### Deploy the billing webhook
+
+Two functions write each couple's Premium (Phase 6, [docs/PLAN.md](docs/PLAN.md)); push the billing migrations first:
+[`revenuecat-webhook`](supabase/functions/revenuecat-webhook/index.ts) receives RevenueCat's events, and
+[`billing-sync`](supabase/functions/billing-sync/index.ts) is called by the app (after creating or joining a couple,
+a purchase, or Restaurar compras) to read the person's current state from RevenueCat's REST API.
+
+1. Make a long random secret, and store the header value RevenueCat will send:
+   ```bash
+   npx supabase secrets set REVENUECAT_WEBHOOK_AUTH="Bearer $(openssl rand -hex 32)"
+   npx supabase secrets list            # check it is there (the value is not shown)
+   ```
+   Keep a copy of the whole value (`Bearer …`) for step 3, in a password manager, never in the repo.
+   Then the secret API key for `billing-sync` (RevenueCat › Project settings › API keys › Secret API keys, `sk_…`):
+   ```bash
+   npx supabase secrets set REVENUECAT_SECRET_API_KEY=sk_your-secret-key
+   ```
+2. Deploy both. Neither gets a token the gateway knows (RevenueCat sends none; the app sends Clerk's), so JWT
+   verification is off for them (`verify_jwt = false` in `supabase/config.toml`; the flag says the same). Each checks
+   its caller itself: the webhook its shared secret, `billing-sync` the Clerk session through Supabase.
+   ```bash
+   npx supabase functions deploy revenuecat-webhook --no-verify-jwt
+   npx supabase functions deploy billing-sync --no-verify-jwt
+   ```
+3. RevenueCat › Project › Integrations › Webhooks › Add:
+   - URL: `https://<project-ref>.supabase.co/functions/v1/revenuecat-webhook`
+   - Authorization header: the same `Bearer …` value as in step 1 (the function also accepts the secret without
+     `Bearer `, and ignores surrounding spaces; a refused request's answer gives the shape of what arrived, never
+     the secret)
+   - Send a **test event**: the function answers 200 and stores it in `billing_events`.
+4. The function answers 200 for everything it handled (duplicates and `TEST` included), 401 without the right
+   header, 400 for a body that isn't an event, and 500 when the database fails, so RevenueCat retries.
+   Logs: Supabase Dashboard › Edge Functions › revenuecat-webhook › Logs.
+
+### Gasto rápido and parse-expense (removed)
+
+Gasto rápido (the one-line quick-entry screen) and its AI function `parse-expense` were removed on 2026-11-03; adding
+an expense is the form (+), Escanear or Dictar. Dictar still uses the phrase parser on the phone
+(`src/lib/quickEntry.ts`). `20261029000000_quick_entry.sql` stays applied: `expenses.source` is still written, and
+`ai_usage` / `claim_ai_call()` are simply unused. Take the deployed function offline once:
+
+```bash
+npx supabase functions delete parse-expense
+```
+
+### Deploy Escanear (read-receipt)
+
+Escanear ([docs/PLAN.md › Scan + Dictate](docs/PLAN.md#scan--dictate-premium)) sends a shrunk receipt photo to
+[`read-receipt`](supabase/functions/read-receipt/index.ts), which asks Claude (`claude-sonnet-5-5`) to read it. Push
+`20261102000000_receipt_scans.sql` first (`receipt_scans` and `claim_receipt_scan()`: 30 scans per couple and day).
+
+1. Store the Claude API key as a secret (`npx supabase secrets set ANTHROPIC_API_KEY=…`). The
+   key lives only in Supabase, never in `.env` or the app.
+2. Deploy it. Like `billing-sync`, the app sends Clerk's token, which the gateway can't verify, so the function checks
+   the caller itself (`claim_receipt_scan()` with the caller's token):
+   ```bash
+   npx supabase functions deploy read-receipt --no-verify-jwt
+   ```
+3. Premium is enforced in the app (`PREMIUM_ENFORCED = true` in `src/lib/premium.ts`); refuse Free couples on the server too:
+   ```bash
+   npx supabase secrets set RECEIPT_PREMIUM_ONLY=1
+   ```
+4. It answers 200 with the reading, 401 without a valid session, 403 outside a couple (or Free, with step 3), 429 past
+   the daily limit, 422 when the photo can't be read and 502 when the model fails. It never logs or keeps the image.
+
+Escanear's camera (`expo-camera`) and Dictar (`expo-speech-recognition`) are native code: they need a new development
+build.
+
+Dictation uses the phone's speech recognition (`expo-speech-recognition`, native code): it needs a development build
+(`npx expo run:android` / `run:ios`, or `eas build --profile development`). In Expo Go the mic button is hidden and
+typing, receipts and the AI still work.
+
 ## Engineering rules
 
 These are not style preferences. Breaking one is a bug.
@@ -220,7 +330,8 @@ These are not style preferences. Breaking one is a bug.
 - **The balance is never stored**, always computed. When a split leaves an odd unit, the payer keeps it.
 - **User ids are Clerk ids** (`text`, `user_…`), not `uuid`. In SQL use `requesting_user_id()`, never `auth.uid()`.
 - **Expense writes are atomic:** an expense and its shares change in one Postgres function.
-- **Soft deletes and an audit trail:** `deleted_at`, plus a row in `audit_log` for every change.
+- **Soft deletes and an audit trail:** `deleted_at`, plus a row in `audit_log` for every change. The one exception is
+  deleting an account (`delete_account()`), which erases the couple's rows for the right to erasure.
 - **`spent_on` is a `date`**, never a timestamp, so time zones never move an expense to another day.
 - **Exactly two members per couple.**
 - **Design:** colours only from `useTheme()`, styles from `makeStyles()`. No raw hex. Every screen works in
@@ -237,7 +348,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branch names, commit style and the re
 | Document | Contents |
 | --- | --- |
 | [docs/PLAN.md](docs/PLAN.md) | Product principles, features, roadmap, phase acceptance checks, Clerk setup, billing, open questions |
-| [docs/DESIGN.md](docs/DESIGN.md) | The 13 screens and their routes, design system (UI kit v1) |
+| [docs/BILLING.md](docs/BILLING.md) | Billing runbook: App Store, Google Play and RevenueCat setup, sandbox testing, release checklist |
+| [docs/DESIGN.md](docs/DESIGN.md) | Screens and their routes, the MitiMiti brand (logo, icon, splash, colours), design system (UI kit v1) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack, Clerk ↔ Supabase wiring, data model, code layout |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to propose and review changes |
 | [SECURITY.md](SECURITY.md) | Keys, data protection, reporting a vulnerability |

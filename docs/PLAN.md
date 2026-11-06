@@ -1,6 +1,6 @@
-# a medias — Plan
+# MitiMiti — Plan
 
-Scope, roadmap and the acceptance checks for each phase. External source of truth: *a medias — Project Plan*.
+Scope, roadmap and the acceptance checks for each phase. External source of truth: *MitiMiti — Project Plan*.
 
 ## Product principles
 
@@ -28,10 +28,12 @@ a web app (mobile only), converting between currencies.
 | Budgets | Monthly limit per category, warning at 80 %, over-limit alert | v1.1 → built early (the alert as a notification stays v1.1) |
 | Notifications | "Ana agregó un gasto"; Sunday reminder when a balance is open | v1.1 |
 | Default split and currency | Per-couple setting used for every new expense | v1.1 |
-| CSV export | All expenses and payments for a date range | v1.1 |
-| Subscription (Clerk Billing) | Paid plan, see [Billing](#billing-later-phase) | TBD |
+| Export (CSV, PDF) | All expenses and payments for a period (this month, last month, last 3 months, this year, all), through the share sheet | v1.1 → built early |
+| Premium (store subscription) | One subscription per couple through the App Store / Google Play (RevenueCat): Export, Escanear and Dictar, later recurring expenses and receipt photo; see [Phase 6](#phase-6--billing-current) | Phase 6 |
 | Offline logging | Save without signal, sync later | v1.2 |
 | Recurring expenses | Rent, internet, subscriptions added each month | v1.2 |
+| Scan + Dictate | Escanear a receipt (read by AI) and Dictar an expense, from Inicio › Agregar un gasto; Premium (gate on: Free gets the paywall); see [Scan + Dictate](#scan--dictate-premium) | Built 2026-11-02 (on request) |
+| Quick entry | Gasto rápido (one-line screen) and its AI fallback `parse-expense` removed on 2026-11-03; its phrase parser lives on in Dictar. See [QUICK_ENTRY.md](QUICK_ENTRY.md) | Removed (parser kept for Dictar) |
 | Receipt photo / widget | Picture on an expense; home-screen balance + quick add | Later |
 
 ### Balance rules (the core logic)
@@ -53,10 +55,10 @@ checks are ticked.
 | --- | --- | --- |
 | 1. Auth (Clerk) — built, checks open | Sign-in, session, sign-out, Supabase linked to Clerk, couple create/join behind auth | Both of us can sign in on real phones and land in the same couple |
 | 2. Core MVP — built, checks open | Add, edit, delete expenses; live balance on Home; Activity | — |
-| **3. Settle + summary** ← now | Settle up ✅, monthly summary ✅, split tests ✅, polish | **Balance is right:** all split tests pass ✅ |
+| 3. Settle + summary — built, polish open | Settle up ✅, monthly summary ✅, split tests ✅, polish | **Balance is right:** all split tests pass ✅ |
 | 4. Private beta | TestFlight + Play internal, both of us daily | — |
 | 5. v1.1 | Budgets, notifications, defaults, CSV | **We trust it:** 2 weeks, 0 corrections |
-| 6. Billing (Clerk Billing) | Paid plan, entitlements | Decision on mobile payment flow (below) |
+| **6. Billing (RevenueCat)** ← now, started early | Premium per couple through the stores, entitlements in Supabase | **Fair paywall:** both phones unlock within seconds; no plan changes the balance |
 
 When a phase starts, give it a section below with goal, tasks as `- [ ]` and acceptance checks.
 
@@ -68,8 +70,10 @@ with a code. Signing out returns to Welcome with nothing cached.
 **Flow**
 
 ```
-Welcome ─▶ Sign-in (Clerk) ─┬─ "Crear nuestra cuenta" ─▶ Setup (Paso 1) ─▶ Invite (Paso 2) ─▶ Home
-                            └─ "Tengo un código"      ─▶ Join            ─────────────────▶ Home
+Welcome ─┬─ "Crear cuenta"                       ─▶ Crea tu cuenta (Clerk) ─▶ Setup (Paso 1) ─▶ Invite (Paso 2) ─▶ Home
+         ├─ "Tengo una invitación de mi pareja"  ─▶ Crea tu cuenta (Clerk) ─▶ Join ─────────────────────────▶ Home
+         └─ "Iniciar sesión"                     ─▶ Iniciar sesión (Clerk) ─▶ Home, or Setup without a couple
+Invite link mitimiti://join?code=AM482X ─▶ Crea tu cuenta (if signed out) ─▶ Join, code filled in
 Signed in + already in a couple ─▶ Home directly
 Settings ▸ Cerrar sesión ─▶ Clerk signOut ─▶ Welcome (query cache cleared)
 ```
@@ -82,8 +86,11 @@ Settings ▸ Cerrar sesión ─▶ Clerk signOut ─▶ Welcome (query cache cle
 | Session store follows Clerk's `useAuth()` (`userId` = Clerk id), then looks up the couple | [src/lib/session.ts](../src/lib/session.ts) |
 | Supabase client sends Clerk's session token (`accessToken`); no Supabase Auth | [src/lib/supabase.ts](../src/lib/supabase.ts) |
 | Password sign-in (+ code on a new device), sign-up (+ code to verify the email), password reset, Google / Apple via `useSSO`, sign-out | [src/api/auth.ts](../src/api/auth.ts), [src/lib/authFlow.ts](../src/lib/authFlow.ts) |
-| Screens: Iniciar sesión, Crea tu cuenta, ¿Olvidaste tu contraseña?, Términos (placeholder) | [src/app/(onboarding)/](../src/app/(onboarding)/), [src/ui/Auth.tsx](../src/ui/Auth.tsx) |
-| Browser comes back to `amedias://sso-callback` | [src/app/sso-callback.tsx](../src/app/sso-callback.tsx) |
+| Screens: Iniciar sesión, Crea tu cuenta, ¿Olvidaste tu contraseña? | [src/app/(onboarding)/](../src/app/(onboarding)/), [src/ui/Auth.tsx](../src/ui/Auth.tsx) |
+| Términos y condiciones (es / en / de, Spanish binding; Colombian law), open signed out and from Ajustes › Información legal | [src/app/terms.tsx](../src/app/terms.tsx), [src/i18n/legal/](../src/i18n/legal/), [src/ui/LegalScreen.tsx](../src/ui/LegalScreen.tsx) |
+| Política de privacidad (Ley 1581 de 2012 / Decreto 1377 de 2013; controller in Bucaramanga; Clerk in the US, Supabase in Ireland; deleting an account deletes the couple's space), accepted with the terms at sign-up | [src/app/privacy.tsx](../src/app/privacy.tsx), [src/i18n/legal/](../src/i18n/legal/) |
+| Borrar cuenta (Ajustes › Cuenta, and Setup for an account without a couple): confirm a recent sign-in with a code by email, erase the couple's space for both (`delete_account()`), then the Clerk user; the partner lands on Welcome with a notice | [src/app/delete-account.tsx](../src/app/delete-account.tsx), [src/lib/deleteAccount.ts](../src/lib/deleteAccount.ts), [src/api/account.ts](../src/api/account.ts), [supabase/migrations/20261020000000_delete_account.sql](../supabase/migrations/20261020000000_delete_account.sql) |
+| Browser comes back to `mitimiti://sso-callback` | [src/app/sso-callback.tsx](../src/app/sso-callback.tsx) |
 | User ids are `text` Clerk ids; RLS and RPCs use `requesting_user_id()` = `auth.jwt()->>'sub'` | [supabase/migrations/](../supabase/migrations/) |
 | Supabase trusts Clerk (`[auth.third_party.clerk]`, domain from `CLERK_DOMAIN`) | [supabase/config.toml](../supabase/config.toml) |
 
@@ -98,11 +105,14 @@ fails on anything the app cannot handle.
 3. **SSO connections:** add **Google** (and **Apple**), "Enable for sign-up and sign-in". On a development
    instance Clerk's shared credentials work, so no Google Cloud project is needed until production.
 4. **Native applications:** enable the **Native API**. If Clerk rejects the redirect after Google, add
-   `amedias://sso-callback` (development build) to the mobile SSO redirect allowlist; in Expo Go the redirect
+   `mitimiti://sso-callback` (development build) to the mobile SSO redirect allowlist; in Expo Go the redirect
    is `exp://<your-ip>:8081/--/sso-callback`.
 5. **Integrations › Supabase:** activate it (adds `role: authenticated` to session tokens) and copy the Clerk
    domain. Put it in `[auth.third_party.clerk] domain` in `supabase/config.toml` (local), and in Supabase ›
    Authentication › Sign In / Providers › Third-party auth › Clerk (hosted).
+6. **User & authentication › Restrictions / Account deletion:** "Allow users to delete their accounts" **on**
+   (Borrar cuenta calls `user.delete()`). Clerk asks for a sign-in from the last 10 minutes first; the app handles
+   that with a code by email (Sessions › Reverification window).
 
 **Proofs that run without Clerk** (`npm test`)
 
@@ -122,6 +132,10 @@ fails on anything the app cannot handle.
 - [ ] New user → Setup → Invite shows a 6-character code; partner joins with it and sees the same couple.
 - [ ] A signed-in user already in a couple opens straight to Home.
 - [ ] Sign-out returns to Welcome and no data from the previous couple is visible.
+- [ ] Borrar cuenta (hosted, after `npx supabase db push`): with an old session it asks for the email code; then
+  both the Clerk user and the couple's rows are gone, and the deleting phone shows "Tu cuenta se borró" on Welcome.
+- [ ] The partner's phone, on its next refresh, returns to Welcome with "Tu pareja borró su cuenta…" and can start
+  a new couple.
 
 ### Phase 2 — Core MVP (built; acceptance checks open)
 
@@ -133,7 +147,7 @@ fails on anything the app cannot handle.
 - [x] **Live balance on Home (§5)** — [src/app/(tabs)/index.tsx](../src/app/(tabs)/index.tsx)
   - Balance card from `balance_view` ([src/api/balance.ts](../src/api/balance.ts)): "Ana te debe $337.950", what it
     considers ("9 gastos compartidos y 1 pago registrado"), Saldar cuentas when not zero.
-  - "Gastado juntos en octubre": shared expenses of the month by who paid, blue / orange bar.
+  - "Gastado juntos en octubre": shared expenses of the month by who paid, blue / coral bar.
   - Recientes: last 4 expenses ([src/ui/ExpenseRow.tsx](../src/ui/ExpenseRow.tsx)), "Ver todos", empty state.
   - Live: Realtime on `expenses` and `settlements` + refetch on app focus ([src/api/live.ts](../src/api/live.ts)).
   - Before the partner joins: their name is the one typed in Setup, and they cannot be picked as payer.
@@ -151,9 +165,9 @@ fails on anything the app cannot handle.
   - Logic in [src/lib/activity.ts](../src/lib/activity.ts); its tests reproduce the design's October (screen 08).
   - **Día · Semana · Mes** switch: the arrows step one day, week (Mon–Sun) or month; never into the future.
   - **Chart** ([src/ui/SpendChart.tsx](../src/ui/SpendChart.tsx)): shared spending per day stacked by who paid
-    (blue / orange), totals in the legend, tap or drag to read one day. Día shows the who-paid bar instead of a
+    (blue / coral), totals in the legend, tap or drag to read one day. Día shows the who-paid bar instead of a
     one-column chart. Built with the dataviz rules (≤ 24 px columns, 2 px gaps, round ticks, legend with values
-    because orange is under 3:1 on white; the list below is the table view). Checked in screenshots at 390 px.
+    because coral is under 3:1 on white; the list below is the table view). Checked in screenshots at 390 px.
 
 **Acceptance checks**
 
@@ -164,7 +178,7 @@ fails on anything the app cannot handle.
 - [ ] Activity lists every expense and payment of the day / week / month by day, with search and filters, and
   its chart adds up to the legend totals.
 
-### Phase 3 — Settle + summary (current)
+### Phase 3 — Settle + summary (built; polish and acceptance checks open)
 
 **Goal:** settling up is a habit (≥ 1 per month) and the month can be reviewed at a glance; the balance is right.
 
@@ -206,8 +220,8 @@ fails on anything the app cannot handle.
   - División predeterminada (Mitad y mitad / Proporcional with my share 30–70 %). New expenses now start from it
     (it was a hard-coded 60 % in the form). This pulls the v1.1 "Default split and currency" setting forward.
   - Moneda: can change only while there are no expenses or payments, since amounts are never converted.
-  - Recordatorios y avisos, Exportar CSV: shown as **Pronto** (v1.1: they need push tokens, a scheduled Edge
-    Function and file export), not as switches that do nothing.
+  - Recordatorios y avisos: shown as **Pronto** (v1.1: they need push tokens and a scheduled Edge Function), not
+    as switches that do nothing. Exportar movimientos started the same way and is now built (Premium).
   - Cerrar sesión asks once more and shows which account is signed in.
   - **Security fix:** the RLS policies "update own member row" and "members update household" let a member move
     their row into another couple without a code (and past the two-member limit) or change the currency after
@@ -238,6 +252,10 @@ fails on anything the app cannot handle.
   ([20261018020000_default_pct_range.sql](../supabase/migrations/20261018020000_default_pct_range.sql) only widens
   that check in `update_couple_settings`). New expenses start from it, and the form adds a chip for any value that
   isn't one of its five. Setup (*Armemos su cuenta*) still offers 30–70 % in steps of 5. **Needs `npx supabase db push`.**
+- [x] **MitiMiti brand** (2026-10-23) — the app is renamed MitiMiti everywhere people see it (app name, Welcome,
+  invite message, legal texts, PDF and export file names); app id `com.mitimiti.app`, scheme `mitimiti://`. Miti is
+  the logo, app icon, splash and favicon; Welcome is the Tinta brand screen; the palette moves to Tinta / Niebla /
+  Coral Miti and titles to Fredoka. Details: [DESIGN.md › Brand](DESIGN.md#brand).
 - [ ] Polish.
 
 **Acceptance checks**
@@ -249,19 +267,212 @@ fails on anything the app cannot handle.
 - [ ] Ajustes: renaming myself shows on the partner's phone; the proportional default is each one's own share.
 - [ ] Presupuestos: a limit changed on one phone shows on the other; next month starts with the same limits.
 
-### Billing (later phase)
+### Phase 6 — Billing (current)
 
-Clerk Billing is the planned billing layer, but it has constraints that must be resolved before we build it:
+Started 2026-10-23, ahead of Phases 4–5, on request.
 
-- **Checkout is web-only** (including Expo web). Native iOS/Android can *read* plans and subscriptions
-  but there is no native checkout.
-- **Stripe only, USD only.** Fine for a subscription price, independent from the couple's COP/EUR/USD currency.
-- **No Apple In-App Purchase or Google Play Billing.** Stores generally require their own billing for digital
-  subscriptions sold inside the app; check the current App Review Guidelines and Play Payments policy.
+**Goal:** a couple buys Premium once, in the App Store or Google Play, and both phones unlock within seconds.
+Free keeps the whole core, and no plan ever changes the balance.
 
-Options to decide on: (a) subscribe on a web page and unlock in the app by checking the plan with Clerk's
-`has({ plan })`; (b) use store billing (e.g. RevenueCat / `expo-iap`) on mobile and keep Clerk for identity.
-Which plan is per **couple** (B2B-style, one subscription for both) vs. per **person** is also open.
+**Decisions**
+
+- **Store billing through RevenueCat**; Clerk stays for identity only. Clerk Billing is ruled out: its checkout is
+  web-only, it is Stripe-only, and it has no Apple In-App Purchase or Google Play Billing, while the app is mobile-only.
+- **One subscription per couple** (household), not per person. Either member can buy it; both get Premium. If the
+  payer deletes their account, the couple is deleted anyway (`delete_account()` cascades).
+- **RevenueCat `app_user_id` = the Clerk user id** (`text`, `user_…`). RevenueCat anonymous ids never decide an
+  entitlement.
+- **Supabase is the source of truth** for entitlements: a RevenueCat webhook (Edge Function, service role) writes
+  the couple's `subscriptions` row; the app reads it through the `my_plan()` RPC and never writes it.
+- **Plans: Free and Premium.** Prices live in the stores, not in code: 2,99 €/month, 19,99 €/year, a 7-day free
+  trial on the yearly plan, regional prices for COP and USD.
+- **Free, forever:** unlimited expenses, every split mode, the live balance, settle up, Movimientos and Resumen of
+  every month, and Presupuestos (made free on 2026-10-30; until then the full history and Presupuestos were
+  Premium). **Premium:** Export CSV/PDF, Escanear and Dictar, and
+  later Recurring expenses and Receipt photo.
+- **Data is never deleted, and never hidden from the balance**, on Free: only screens are limited. Limits live in
+  the app's queries and screens (`src/lib/plans.ts`), never in RLS: `balance_view` and `monthly_summary` are
+  `security_invoker`, so hiding rows would change the balance.
+- **Store rules** (checked 2026-10-23, [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
+  3.1, [Play Payments policy](https://support.google.com/googleplay/android-developer/answer/9858738)):
+  - In-app purchase for the subscription, and a way to restore purchases (Apple 3.1.1).
+  - No second subscription to the same thing (Apple 3.1.2(b)): **once the couple is Premium, the partner's paywall
+    says so and offers no purchase.**
+  - Say clearly what Premium gives before asking to subscribe (Apple 3.1.2(c)).
+  - A purchase on one platform may unlock the other, because the same subscription is sold in both stores
+    (Apple 3.1.3(b)).
+  - Play billing for digital subscriptions; no links to other payment methods (Play Payments policy, sections 2 and 4).
+  - Neither store describes one subscription for two people, so the review notes explain the couple model.
+- **Prerequisites to buy for real:** Apple Developer Program (paid) for iOS, and a Google Play Console account with
+  the app on a testing track for Android. Until then, everything runs against a fake purchases module.
+- **Don't charge anyone before Phase 4:** we use the app daily for a few weeks first. Charging for an app with a
+  balance error ruins the reviews.
+
+**Tasks**
+
+- [x] **DB:** [20261023143931_household_subscription.sql](../supabase/migrations/20261023143931_household_subscription.sql)
+  - `subscriptions`: one row per couple. Members read their own; only the service role writes (no write policies,
+    and the client grants are revoked).
+  - `billing_events`: closed to every client. It makes the webhook idempotent and keeps events that arrive before a
+    couple exists.
+  - `household_is_premium()`: service side only. `my_plan()`: the signed-in person's plan.
+  - `subscriptions` is in Realtime. `delete_account()` also erases the caller's billing events.
+  - [supabase/tests/billing.test.ts](../supabase/tests/billing.test.ts). **Needs `npx supabase db push`.**
+- [x] **Webhook:** [supabase/functions/revenuecat-webhook](../supabase/functions/revenuecat-webhook/index.ts)
+  - Checks the Authorization header (constant time), validates the body with Zod, and answers RevenueCat's way:
+    only an exact 200 counts as delivered, and 500 asks for a retry.
+  - The pure part, [_shared/billing.ts](../supabase/functions/_shared/billing.ts), maps every event type (including
+    REFUND_REVERSED, TEMPORARY_ENTITLEMENT_GRANT and SUBSCRIPTION_PAUSED). It also covers the billing grace period,
+    PROMOTIONAL/PREPAID → NORMAL, the Clerk id (anonymous ids never decide), and TRANSFER.
+  - [20261023144510_apply_billing_event.sql](../supabase/migrations/20261023144510_apply_billing_event.sql) applies
+    one event in one transaction, locked per couple: idempotent, stale events skipped, buyers without a couple kept
+    for later, and TRANSFER moving the row (it carries no dates of its own).
+  - [supabase/tests/billing_webhook.test.ts](../supabase/tests/billing_webhook.test.ts). Deploy: README ›
+    *Deploy the billing webhook*. **Needs `npx supabase db push`.**
+  - The two cases an event can't settle alone are closed by billing-sync (SDK task, below).
+- [x] **SDK + entitlement hook**
+  - `react-native-purchases`, in [src/api/purchases.ts](../src/api/purchases.ts). It is native code, so it **needs a
+    new development build**; Expo Go only runs it in RevenueCat's Preview API Mode. The keys are
+    `EXPO_PUBLIC_REVENUECAT_IOS_KEY` and `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`.
+  - RevenueCat follows the session (logIn with the Clerk id, logOut when it ends, whatever ends it). With dev bypass
+    and on web a fake answers instead: buying turns the sample couple Premium (`setSamplePlan()`).
+  - [src/api/plan.ts](../src/api/plan.ts): `usePlan()` over `my_plan()`, refreshed by Realtime on `subscriptions`,
+    the SDK's listener and app focus. Purchase → server sync → [src/lib/activation.ts](../src/lib/activation.ts)
+    checks for about 20 s (*Activando Premium…*).
+  - [src/lib/plans.ts](../src/lib/plans.ts) is the single place that says what Free allows (`canUseFeature`); [src/lib/offerings.ts](../src/lib/offerings.ts) holds the store's offer in
+    the app's shape.
+  - **billing-sync** closes the two gaps left by the webhook:
+    [supabase/functions/billing-sync](../supabase/functions/billing-sync/index.ts) reads the caller's state from
+    RevenueCat's REST API, and
+    [20261023145729_sync_subscription.sql](../supabase/migrations/20261023145729_sync_subscription.sql) writes it.
+    The app calls it after creating or joining a couple, a purchase and Restaurar compras, so a purchase made before
+    having a couple and a restore on a new account both reach the couple. It never expires the partner's Premium.
+    Tests: [supabase/tests/billing_sync.test.ts](../supabase/tests/billing_sync.test.ts). **Needs
+    `npx supabase db push`** and the README deploy steps.
+- [x] **Paywall:** [src/app/paywall.tsx](../src/app/paywall.tsx), a modal (`?from=export|aiEntry` puts that benefit
+  first, highlighted; an old `history` or `budgets` link shows the default order).
+  - Prices come from the store offering. Yearly is selected by default, with *Ahorra 44 %* and *7 días gratis*.
+  - The billed amount is the largest price (Apple), and the yearly plan is never shown as a monthly price (Google).
+  - The trial terms give the date of the first charge. Then the renewal and how to cancel in the store, *Lo esencial
+    de MitiMiti es gratis para siempre* (Google: whether a subscription is needed), Términos, Privacidad, Restaurar
+    compras, and a visible close button.
+  - States: loading, failed, unavailable (no store key), purchasing, *Activando Premium…*, done (what opened), still
+    pending, cancelled (no message), and Premium already: *Ana ya activó Premium*, with no purchase offered.
+  - Helpers in [src/lib/paywall.ts](../src/lib/paywall.ts), with tests. Checked at 390 px, light and dark, on web
+    with the fake purchases.
+- [x] **Gating:** only through `canUseFeature` ([src/lib/plans.ts](../src/lib/plans.ts)); `usePlan().gate` is
+  Premium while the plan loads, so a paying couple never sees a lock flash.
+  - Movimientos, Resumen and Presupuestos have no lock: every month and the limits are free (since 2026-10-30).
+  - Exportar in Ajustes and Inicio's Exportar shortcut both say **Premium** (in text, or a crown with its
+    spoken label and a legend line) and open the paywall. Exportar is locked too if reached another way
+    ([src/ui/Premium.tsx](../src/ui/Premium.tsx)).
+  - The balance, settle up and *Gastado juntos* ignore the plan: checked identical on Free and Premium.
+  - With dev bypass, *Plan de prueba* in Ajustes switches Free / Premium. Checked at 390 px, light and dark.
+- [x] **Ajustes plan card:** *Tu plan* in [Ajustes](../src/app/(tabs)/settings.tsx).
+  - Free: *Gratis* and *Ver Premium*. Premium: *Premium para los dos*, who pays, *Se renueva / Termina / Prueba
+    gratis hasta el …* (with the year), and a neutral billing-issue warning with *Revisar el pago*.
+  - *Administrar suscripción* is for the payer only. It opens RevenueCat's managementURL, the store it was bought
+    in, or the store's own page. The partner sees *Lo administra Ana desde su tienda*. Restaurar compras is for both.
+  - Borrar cuenta: the payer reads that deleting does not cancel the subscription (billing continues through the
+    store; cancel it there first, as Apple asks), with *Administrar suscripción* right there. The partner reads that
+    the payer keeps Premium.
+  - `planLine()` and `deletionNotice()` in [src/lib/plans.ts](../src/lib/plans.ts), tested.
+- [x] **Privacy Policy and Terms** (es binding, en/de; effective 23 Oct 2026)
+  - Términos §6 *Precio*: Free and Premium; one subscription per couple, so no second purchase. The store handles
+    purchase, billing, renewal, cancellation and refunds. Auto-renewal and cancelling 24 h before. A trial turns
+    paid at its end. Deleting the account doesn't cancel the subscription. Free deletes nothing and never changes
+    the balance. Price changes are announced.
+  - Privacidad §2, §3, §5 and §8: what we receive through RevenueCat (never card data) and what for; RevenueCat as
+    a provider (United States); Apple and Google as controllers of their stores; billing events deleted with the
+    account. **To review by the owner before launch.**
+- [x] **Store setup runbook:** [docs/BILLING.md](BILLING.md), checked against the official docs on 2026-10-23. It
+  covers accounts and agreements, the products, RevenueCat (entitlement `premium`, offering `default`, webhook, store
+  notifications), testing, and the release checklist. It starts with RevenueCat's **Test Store**, so the whole flow
+  can be tested before any store account. Three steps are marked to re-check: Google's closed-test rule for personal
+  accounts, Play service credentials, and App Store server notifications.
+- [ ] **QA**
+  - [x] Review of the whole flow for bugs and security holes (2026-10-23). Fixed in
+    [20261023190000_billing_two_payers.sql](../supabase/migrations/20261023190000_billing_two_payers.sql): when both
+    partners pay, one person's events (their expiry above all) no longer overwrite the other's live subscription; the
+    longer one is kept (`billing_replaces()`). TRANSFER now moves only the row the old account pays for (it could take
+    the partner's), and brings its status and dates to a couple that already had a row. In the app, buying, restoring
+    and reading the customer wait for RevenueCat's logIn / logOut, and `usePlanSync()` asks billing-sync once per session
+    when the store says Premium and Supabase says Free. Checked and kept: sandbox events count (App Review buys in
+    sandbox on the production app), and billing-sync is not rate-limited (only the caller's own state is written).
+  - [x] `npx expo-doctor` passes (expo, expo-router, expo-sharing moved to the SDK's patch versions).
+  - [x] The partner who isn't paying deletes their account: the couple and its `subscriptions` row are erased, and
+    billing-sync links the payer's running subscription again in their next couple (`billing_sync.test.ts`).
+  - [ ] The manual test script in [BILLING.md › What to try](BILLING.md#what-to-try-and-what-to-expect), on two real
+    phones in sandbox (needs a development build and the store accounts).
+
+**Acceptance checks**
+
+- [ ] Buying yearly with the trial on phone A turns both phones Premium within seconds.
+- [ ] While the couple is Premium, the partner's phone offers no second purchase.
+- [ ] Cancelling keeps Premium until it expires; at expiry the couple is Free, with every expense still there
+  and the balance unchanged.
+- [ ] Restaurar compras on a reinstalled app brings Premium back.
+- [ ] Bought on Android, Premium also shows on the partner's iPhone.
+- [ ] A billing issue shows the warning in Ajustes, and Premium stays until the store's grace period ends.
+- [ ] Deleting the payer's account erases the couple's data and says the store subscription is cancelled in the store.
+- [ ] For the same data, Home's balance, settle up and *Gastado juntos* are identical on Free and Premium.
+
+### Scan + Dictate (Premium)
+
+Started 2026-11-02, on request, alongside Phase 6. Additive: no change to balance math, splits, SQL views, existing
+RPCs or migrations.
+
+**Goal:** from Inicio, log an expense by photographing the receipt or by saying it, and confirm it in one tap.
+
+**Decisions**
+
+- Both are **Premium**, and the gate is on (2026-11-04): `PREMIUM_ENFORCED = true` in `src/lib/premium.ts`, plus
+  `RECEIPT_PREMIUM_ONLY=1` on the server. A Free couple who taps Escanear, Dictar or Exportar gets the paywall with
+  that benefit first; the screens redirect there too, so nothing Premium opens on Free. Typing (+) stays free.
+- Escanear has **its own Edge Function, `read-receipt`, on `claude-sonnet-5-5`**, with its own allowance (30 scans per
+  couple and day, `receipt_scans`), separate from the removed Gasto rápido's `ai_usage`.
+- The model returns amounts **as printed text**; money.ts reads them (QUICK_ENTRY ground rule 2). Another currency is
+  shown and flagged, never converted, and its total never becomes the amount.
+- Dictar reuses quick entry's parser (`parseDictation()` wraps `parseQuickEntry()`), so typing and speaking agree.
+- Phones often write spoken numbers as words ("veinte euros", "twenty euros", "zwanzig Euro"), so Dictar turns them
+  into digits first (`src/lib/spokenNumbers.ts`, es / en / de + English in any language): only next to a currency, as
+  cents, as a split (two adding to 100 once the amount is said), as a price pair ("doce cincuenta") or when it is the
+  only number; "un café", "los dos" and "el tres de noviembre" stay words. The screen shows the sentence with digits.
+- Drafts move between screens through a zustand store (`src/lib/draftStore.ts`), not URL params.
+
+**Tasks**
+
+- [x] `src/lib/expenseDraft.ts` (`ExpenseDraft`, Zod schema, `mapCategory()`), `src/lib/draftStore.ts`; `expense/new`
+  reads and clears a handed-over draft. Tests: `expenseDraft.test.ts`.
+- [x] Premium gate: `src/lib/premium.ts` (`PREMIUM_ENFORCED = true`, `canUse()`), `scan` / `dictate` in plans.ts; on
+  Free, the cards open the paywall and the screens redirect to it. Tests: `premium.test.ts`.
+- [x] Inicio › Agregar un gasto: Escanear and Dictar cards with a crown badge, and the legend line.
+- [x] Dictar (`expense/dictate`): live transcript with the amount highlighted, chips, stop → prefilled form; calm
+  messages for a refused mic, nothing heard, or no speech recognition. `src/lib/parseDictation.ts` + es / en / de tests.
+- [x] Escanear (`expense/scan`): `expo-camera` with frame, flash, photos, Escribir; explains the permission first;
+  shrinks to 1600 px / JPEG 0.6 (`src/api/receipts.ts`); dev bypass answers with the sample receipt.
+- [x] `read-receipt` Edge Function + `_shared/receipt.ts` contract; `20261102000000_receipt_scans.sql`
+  (`receipt_scans`, `claim_receipt_scan()`); SQL tests in `supabase/tests/receipt_scans.test.ts`.
+- [x] Revisar el recibo (`expense/receipt`): receipt card, Pagó / División pickers, balance preview from splits.ts,
+  mismatch / currency / unread-total notes, Editar and Agregar gasto (through `useUpsertExpense`).
+- [x] Copy in es / en / de; new colour pairs in `tokens.test.ts`; docs (DESIGN, ARCHITECTURE, README, .env.example).
+
+**Acceptance checks**
+
+- [x] `npm run typecheck`, `npx expo lint`, `npm test` pass; `splits_parity.test.ts` untouched and green.
+- [x] Tests for the parser (es / en / de), `mapCategory`, draft validation, `canUse` and the scan allowance in SQL.
+- [x] Screenshots at 390 px, light and dark: Inicio, Dictar, the camera and the receipt review
+  (`docs/screenshots/capture-*.png`, Expo web with dev bypass; the camera shows Chrome's fake video feed).
+- [x] Dev bypass: Dictar → prefilled form → saved; Escanear → sample receipt → Agregar gasto → in Recientes, balance
+  updated. Run on Expo web (2026-11-02) with a scripted speech result: "Almuerzo con Ana, 25.000 pesos, pagó Ana, a
+  medias" → form $25.000 / Almuerzo con Ana → saved, $337.950 → $325.450; the sample receipt ($24.800, half) → preview
+  and Home both $337.850. On web, dictation only ran with voice.ts temporarily loading the web speech module (reverted).
+- [ ] Development build on a real phone: camera, photos and dictation (permissions, refusal, flash).
+- [ ] Deployed `read-receipt`: a real receipt read in a few seconds; no session → 401; the 31st scan of the day → 429
+  and the message; nothing about the image in the function's logs.
+- [x] With `PREMIUM_ENFORCED = true`: a Free couple gets the paywall from Escanear, Dictar and Exportar (that benefit
+  first) and can still type; a Premium couple gets the camera (dev bypass, web, 2026-11-04).
+- [ ] `RECEIPT_PREMIUM_ONLY=1` set on the hosted project; a Free couple's direct call to read-receipt gets 403.
 
 ## Open questions
 
@@ -269,5 +480,7 @@ Which plan is per **couple** (B2B-style, one subscription for both) vs. per **pe
 - One currency per couple enough, or do trips need a second one?
 - Import past expenses from the current spreadsheet / notes?
 - Should a settle-up need confirmation from the person receiving the money?
-- What is paid vs. free, and is the subscription per couple or per person?
-- App name and icon: keep "a medias"?
+- ~~What is paid vs. free, and is the subscription per couple or per person?~~ Decided 2026-10-23: one
+  subscription per couple, Free keeps the core; see [Phase 6](#phase-6--billing-current).
+- ~~App name and icon?~~ Decided 2026-10-23: **MitiMiti** (formerly "a medias", which is taken on Google Play), with
+  Miti as logo and app icon; see [DESIGN.md › Brand](DESIGN.md#brand).

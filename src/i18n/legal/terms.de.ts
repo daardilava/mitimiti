@@ -1,0 +1,106 @@
+// AGB von MitiMiti auf Deutsch: eine Übersetzung von terms.es.ts, das die verbindliche Fassung ist.
+import { LEGAL_CONTACT, type LegalDoc } from './types';
+
+const { owner, email, address } = LEGAL_CONTACT;
+
+export const termsDe: LegalDoc = {
+  effective: 'Gültig ab dem 5. November 2026',
+  intro:
+    'Diese Bedingungen erklären, was MitiMiti ist, was du von der App erwarten kannst und was wir von den Menschen erwarten, die sie nutzen. Mit dem Erstellen deines Kontos akzeptierst du sie. Wenn du nicht einverstanden bist, nutze die App nicht.',
+  sections: [
+    {
+      heading: '1. Wer die App anbietet',
+      paragraphs: [`MitiMiti wird von ${owner} angeboten, Privatperson, ${address}, Deutschland („wir“). Du erreichst uns unter ${email}.`],
+    },
+    {
+      heading: '2. Was MitiMiti ist',
+      paragraphs: [
+        'MitiMiti hilft zwei Menschen, ihre gemeinsamen Ausgaben zu erfassen, festzulegen, wie jede aufgeteilt wird, und zu sehen, wer wem etwas schuldet.',
+        'Die App erfasst nur. Sie bewegt kein Geld, verbindet sich nicht mit Banken und speichert keine Karten- oder Kontodaten. Wenn ihr abrechnet, geschieht die Zahlung außerhalb der App und wird dort nur vermerkt.',
+        'Der Saldo wird aus dem berechnet, was ihr erfasst. MitiMiti ist keine Finanz-, Buchhaltungs-, Steuer- oder Rechtsberatung.',
+      ],
+    },
+    {
+      heading: '3. Dein Konto',
+      paragraphs: [
+        'Um MitiMiti zu nutzen, musst du über 18 Jahre alt sein.',
+        'Du kannst dich mit E-Mail und Passwort, mit Google oder mit Apple anmelden. Gib uns wahre Angaben, schütze den Zugang zu deinem Konto und sag uns Bescheid, wenn du glaubst, dass jemand anderes es nutzt.',
+        'Jedes Konto ist persönlich. Du bist für das verantwortlich, was damit geschieht.',
+      ],
+    },
+    {
+      heading: '4. Das gemeinsame Konto',
+      paragraphs: [
+        'Jeder Bereich in MitiMiti ist für genau zwei Personen. Dein Partner oder deine Partnerin tritt mit einem Einladungscode bei; teile ihn nur mit dieser Person.',
+        'Beide sehen die gemeinsamen Ausgaben, Zahlungen, Budgets und Einstellungen und können sie bearbeiten. Jede Änderung wird festgehalten, mit wem und wann.',
+        'Der Saldo ist nur so richtig wie das Erfasste. Prüft Unterschiede gemeinsam: MitiMiti entscheidet nicht, wer recht hat.',
+      ],
+    },
+    {
+      heading: '5. Zulässige Nutzung',
+      paragraphs: [
+        'Nutze MitiMiti nicht für illegale Zwecke, um eine andere Person zu belästigen oder zu täuschen, oder um Daten einer Person ohne ihre Erlaubnis zu erfassen.',
+        'Versuche nicht, auf Daten anderer Paare zuzugreifen, den Dienst zu stören oder die App zu kopieren, zu dekompilieren oder weiterzuverkaufen.',
+      ],
+    },
+    {
+      heading: '6. Preis',
+      paragraphs: [
+        'MitiMiti hat einen kostenlosen Plan ohne Enddatum mit dem Wichtigsten: Ausgaben erfassen, den Saldo sehen und ausgleichen. Premium ist ein kostenpflichtiger Plan mit zusätzlichen Funktionen, etwa dem Scannen von Belegen, dem Diktieren von Ausgaben und dem Export. Bevor du zustimmst, siehst du, was er enthält, den Preis und wie oft abgerechnet wird.',
+        'Premium ist ein Abo pro Paar: Ein Abo gilt für beide Personen im Bereich, egal wer es kauft. Deshalb bietet die App kein zweites Abo an, solange das Paar Premium hat.',
+        'Kauf, Abrechnung, Verlängerung, Kündigung und Erstattungen übernimmt der Store, in dem du kaufst (Apples App Store oder Google Play), nach seinen eigenen Bedingungen. Wir sehen weder deine Karte noch deine Zahlungsdaten.',
+        'Das Abo verlängert sich am Ende jedes Zeitraums automatisch, wenn du es nicht spätestens 24 Stunden vorher in den Einstellungen deines Store-Kontos kündigst. Enthält es einen kostenlosen Test und kündigst du nicht vor dessen Ende, beginnt an diesem Tag die Abrechnung.',
+        'Das Löschen deines Kontos oder das Nicht-mehr-Nutzen der App kündigt das Abo nicht: Kündige es im Store. Endet Premium, wird nichts gelöscht und der Saldo ändert sich nicht: Der kostenlose Plan schränkt nur einige Ansichten ein.',
+        'Wenn wir den Preis ändern, sagen wir es dir vorher, und der Store bittet dich um Zustimmung, wo er das verlangt.',
+      ],
+    },
+    {
+      heading: '7. Deine Daten',
+      paragraphs: [
+        'Wir verarbeiten deine personenbezogenen Daten nach der Datenschutz-Grundverordnung der EU (DSGVO) und der Datenschutzerklärung von MitiMiti. Dort erklären wir, welche Daten wir speichern, wofür, mit wem wir sie teilen und wie du deine Rechte ausübst.',
+        'Du kannst dein Konto jederzeit unter Einstellungen › Konto löschen oder uns dafür schreiben.',
+      ],
+    },
+    {
+      heading: '8. Der Dienst',
+      paragraphs: [
+        'Wir arbeiten daran, dass MitiMiti gut funktioniert und genau rechnet, aber wir können nicht garantieren, dass sie immer ohne Fehler oder Ausfälle läuft. Wir können Funktionen aus triftigem Grund ändern, verbessern oder entfernen, etwa für Verbesserungen, Sicherheit oder rechtliche Änderungen, ohne Kosten für dich. Beeinträchtigt eine Änderung wesentlich, wofür du mit Premium bezahlt hast, sagen wir es dir vorher.',
+        'Wenn wir die App nicht mehr anbieten, sagen wir es dir mindestens 30 Tage vorher, damit du deine Informationen sichern kannst.',
+      ],
+    },
+    {
+      heading: '9. Haftung',
+      paragraphs: [
+        'Wir haften unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei Verletzung von Leben, Körper oder Gesundheit und nach dem Produkthaftungsgesetz. Bei leichter Fahrlässigkeit haften wir nur, wenn wir eine wesentliche Vertragspflicht verletzen, also eine Pflicht, ohne die der Dienst nicht erbracht werden könnte und auf die du vertraust, und nur für den typischen, vorhersehbaren Schaden.',
+        'Wir haften nicht für Entscheidungen oder Vereinbarungen zwischen euch, die auf den Informationen der App beruhen, und nicht für Verluste durch falsch erfasste Daten oder den Missbrauch deines Kontos, es sei denn, wir haben sie verschuldet. Nichts in diesen Bedingungen schränkt die gesetzliche Gewährleistung oder deine unverzichtbaren Rechte als Verbraucher oder Verbraucherin ein.',
+      ],
+    },
+    {
+      heading: '10. Geistiges Eigentum',
+      paragraphs: [
+        'Die App, ihr Design, ihr Code und ihre Marke gehören ihrem Inhaber. Was du erfasst, gehört dir; du erlaubst uns, es zu speichern und dir und deinem Partner oder deiner Partnerin anzuzeigen, nur um den Dienst zu erbringen.',
+      ],
+    },
+    {
+      heading: '11. Beendigung',
+      paragraphs: [
+        'Du kannst MitiMiti jederzeit nicht mehr nutzen und dein Konto löschen.',
+        'Wir können ein Konto sperren oder schließen, das gegen diese Bedingungen verstößt. Außer bei einer Gefahr für andere oder einer gesetzlichen Pflicht sagen wir es dir vorher und nennen den Grund.',
+      ],
+    },
+    {
+      heading: '12. Änderungen dieser Bedingungen',
+      paragraphs: [
+        'Wenn wir diese Bedingungen ändern, aktualisieren wir das Datum oben und informieren dich vorher in der App. Wichtige Änderungen gelten nur, wenn du ihnen zustimmst; stimmst du nicht zu, kannst du MitiMiti nicht mehr nutzen und dein Konto löschen.',
+      ],
+    },
+    {
+      heading: '13. Anwendbares Recht',
+      paragraphs: [
+        'Diese Bedingungen unterliegen dem Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts. Bist du Verbraucher oder Verbraucherin, behältst du den Schutz der zwingenden Vorschriften des Landes, in dem du lebst. Wenn du eine Beschwerde hast, schreib uns zuerst. Wir nehmen nicht an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teil.',
+        'Diese Bedingungen gibt es auf Spanisch, Englisch und Deutsch. Bei Abweichungen gilt die spanische Fassung.',
+      ],
+    },
+  ],
+  contact: 'Schreib uns',
+};

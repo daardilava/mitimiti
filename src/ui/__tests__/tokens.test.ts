@@ -24,10 +24,16 @@ const pairs: Pair[] = [
   ['textSecondary', 'surface', TEXT, 'labels and metadata on cards'],
   ['textSecondary', 'background', TEXT, 'day headings, hints on the background'],
   ['textSecondary', 'neutralTint', TEXT, 'neutral notices'],
+  ['ink', 'neutralTint', TEXT, 'days inside a picked range (Movimientos › Rango)'],
   ['tabInactive', 'surface', TEXT, 'inactive tab labels'],
   ['me', 'surface', TEXT, 'links ("Ver todos"), my avatar letter'],
   ['me', 'meTint', TEXT, 'my avatar'],
   ['partnerText', 'partnerTint', TEXT, "partner's avatar"],
+  ['partnerText', 'background', TEXT, 'the amount highlighted in the Dictar transcript, the listening dot'],
+  ['warningText', 'neutralTint', GRAPHIC, 'crown on the Premium badge of Escanear / Dictar'],
+  ['me', 'background', TEXT, 'Escribir on Dictar'],
+  ['heroLine', 'onHero', TEXT, 'labels on the paper receipt (Fecha, Total)'],
+  ['partnerText', 'partnerTint', TEXT, 'category chip on the paper receipt'],
   ['positiveText', 'surface', TEXT, '"Te deben", "Pago"'],
   ['positiveText', 'positiveTint', TEXT, 'balance effect notice'],
   ['warningText', 'surface', TEXT, '"Ojo: quedan"'],
@@ -42,6 +48,14 @@ const pairs: Pair[] = [
   ['hero', 'onHero', TEXT, 'white buttons on hero cards (Saldar cuentas, Crear nuestra cuenta)'],
   ['onInk', 'hero', TEXT, 'text on hero cards'],
   ['onInkMuted', 'hero', TEXT, '"Considera 9 gastos…" on the balance card'],
+  ['wordmarkGreen', 'hero', TEXT, '"Miti" of the wordmark on Welcome'],
+  ['wordmarkCoral', 'hero', TEXT, 'second "Miti" of the wordmark'],
+  ['wordmarkGreen', 'brandInk', TEXT, 'Welcome: wordmark, "Iniciar sesión" link'],
+  ['wordmarkCoral', 'brandInk', TEXT, 'Welcome: wordmark'],
+  ['onBrandCoral', 'brandCoral', TEXT, 'Welcome: "Crear cuenta"'],
+  ['onHero', 'brandInk', TEXT, 'Welcome: outline button label'],
+  ['onBrandInk', 'brandInk', TEXT, 'Welcome: slogan'],
+  ['brandLine', 'brandInk', 1.5, 'Welcome: outline button border (the label carries it)'],
   ['positive', 'surface', GRAPHIC, 'bars, check circle'],
   ['warning', 'surface', GRAPHIC, 'budget bars from 80 %'],
   ['negative', 'surface', GRAPHIC, 'over-budget bars'],
@@ -80,7 +94,7 @@ for (const scheme of ['light', 'dark'] as Scheme[]) {
 }
 
 describe('known exception, kept from the UI kit', () => {
-  it("light partner orange is under 3:1 on white, so it never draws alone: legends and amounts carry it", () => {
+  it("light partner coral is under 3:1 on white, so it never draws alone: legends and amounts carry it", () => {
     expect(contrast(palettes.light.partner, palettes.light.surface)).toBeLessThan(3);
     expect(contrast(palettes.dark.partner, palettes.dark.surface)).toBeGreaterThanOrEqual(GRAPHIC);
   });

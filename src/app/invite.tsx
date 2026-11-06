@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { useHousehold, useRegenerateJoinCode } from '@/api/household';
 import { isoDate } from '@/lib/dates';
 import { Callout } from '@/ui/Form';
@@ -46,8 +46,11 @@ export default function Invite() {
   }
 
   const code = h.joinCode ?? '';
-  const share = () =>
-    Share.share({ message: m.invite.shareMessage(code) });
+  const until = h.joinCodeExpiresAt ? d.shortDate(isoDate(new Date(h.joinCodeExpiresAt))) : null;
+  const message = m.invite.shareMessage(code, until);
+  const share = () => Share.share({ message });
+  // Straight into WhatsApp's chat picker; without WhatsApp (openURL rejects), the system share sheet instead.
+  const whatsapp = () => Linking.openURL(`whatsapp://send?text=${encodeURIComponent(message)}`).catch(share);
 
   return (
     <Screen
@@ -74,13 +77,16 @@ export default function Invite() {
               </View>
             ))}
           </View>
+          <View style={{ flexDirection: 'row' }}>
+            <IconButton icon="chat" label={m.invite.whatsapp} onPress={whatsapp} />
+          </View>
           <View style={{ flexDirection: 'row', gap: space[3] }}>
             <IconButton icon={copied ? 'check' : 'copy'} label={copied ? m.invite.copied : m.invite.copy} onPress={async () => { await Clipboard.setStringAsync(code); setCopied(true); }} />
             <IconButton icon="share" label={m.invite.share} onPress={share} />
           </View>
-          {h.joinCodeExpiresAt && (
+          {until && (
             <Text style={[type.label, { color: color.textSecondary, fontFamily: font.body }]}>
-              {m.invite.validUntil(d.shortDate(isoDate(new Date(h.joinCodeExpiresAt))))}
+              {m.invite.validUntil(until)}
             </Text>
           )}
         </>

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "a medias",
+    "name": "MitiMiti",
     "slug": "a-medias",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,18 +8,29 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.amedias.app",
-      "usesAppleSignIn": true
+      "bundleIdentifier": "com.mitimiti.app",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "CFBundleLocalizations": [
+          "es",
+          "en",
+          "de",
+          "es",
+          "en",
+          "de"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#1A2238",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.amedias.app"
+      "package": "com.mitimiti.app"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -48,11 +59,60 @@
             ]
           }
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#F3F5F4",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#1A2238"
+          }
+        }
+      ],
+      "expo-sharing",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "MitiMiti usa el micrófono solo mientras mantienes pulsado el botón de dictar, para escribir el gasto por ti.",
+          "speechRecognitionPermission": "MitiMiti convierte lo que dictas en texto para registrar el gasto. El reconocimiento lo hace tu teléfono."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MitiMiti usa la cámara para fotografiar un recibo y leer la tienda, la fecha y el total. La foto no se guarda.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "MitiMiti usa la cámara para fotografiar un recibo y leer el total. La foto no se guarda.",
+          "photosPermission": "MitiMiti abre tus fotos para que elijas un recibo y leer el total. La foto no se guarda.",
+          "microphonePermission": "MitiMiti usa el micrófono solo mientras mantienes pulsado el botón de dictar, para escribir el gasto por ti."
+        }
       ]
     ],
-    "scheme": "amedias",
+    "scheme": "mitimiti",
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8648d437-b63c-485a-a1fd-49751e4eae06"
+      }
+    },
+    "locales": {
+      "es": "./locales/es.json",
+      "en": "./locales/en.json",
+      "de": "./locales/de.json"
+    },
+    "owner": "diegovargas"
   }
 }

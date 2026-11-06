@@ -2,6 +2,9 @@
 // type checker refuses to build while any message is missing there or takes different parameters.
 // Voice: "tú" for the person, "ustedes" for the couple; neutral, no blame.
 
+import { privacyEs } from './legal/privacy.es';
+import { termsEs } from './legal/terms.es';
+
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export const es = {
@@ -136,12 +139,13 @@ export const es = {
   },
 
   welcome: {
-    title: 'Cuentas claras entre los dos.',
-    lead: 'Registren lo que gastan juntos, vean al momento quién le debe a quién y salden con un toque.',
-    create: 'Crear nuestra cuenta',
-    haveCode: 'Tengo un código de invitación',
-    haveAccount: '¿Ya tienes cuenta?',
-    signIn: 'Inicia sesión',
+    accountDeleted: 'Tu cuenta se borró. Gracias por usar MitiMiti.',
+    coupleDeleted: 'Tu pareja borró su cuenta y, con ella, el espacio que compartían. Pueden empezar uno nuevo cuando quieran.',
+    tagline: 'Gastos compartidos, cuentas claras y cero discusiones.',
+    create: 'Crear cuenta',
+    haveCode: 'Tengo una invitación de mi pareja',
+    signIn: 'Iniciar sesión',
+    otherAccount: 'Iniciar sesión con otra cuenta',
   },
 
   signIn: {
@@ -168,9 +172,11 @@ export const es = {
     fullNamePlaceholder: 'Ej. Diego Ardila',
     passwordPlaceholder: (min: number) => `Mínimo ${min} caracteres`,
     passwordMissing: (n: number) => (n === 1 ? 'Te falta 1 carácter.' : `Te faltan ${n} caracteres.`),
-    terms: 'Acepto los términos y condiciones',
+    terms: 'Acepto los términos y condiciones y la política de privacidad',
     termsBefore: 'Acepto los',
     termsLink: 'términos y condiciones',
+    privacyBetween: 'y la',
+    privacyLink: 'política de privacidad',
     submit: 'Registrarme',
     haveAccount: '¿Ya tienes cuenta?',
     signIn: 'Inicia sesión',
@@ -188,7 +194,106 @@ export const es = {
 
   terms: {
     title: 'Términos y condiciones',
-    todo: 'El texto legal de a medias: qué datos guardamos, que la app solo registra pagos y nunca mueve dinero, y cómo borrar la cuenta.',
+    ...termsEs,
+  },
+
+  privacy: {
+    title: 'Política de privacidad',
+    ...privacyEs,
+  },
+
+  deleteAccount: {
+    subscriptionPayer: 'Borrar tu cuenta no cancela tu suscripción a Premium: el cobro sigue a través de la tienda (App Store o Google Play). Cancélala antes desde la tienda.',
+    subscriptionPartner: (name: string) => `El Premium que paga ${name} no se cancela: si ${name} empieza un espacio nuevo, lo conserva.`,
+    manageFirst: 'Administrar suscripción',
+    title: 'Borrar tu cuenta',
+    lead: 'Esto no se puede deshacer. Se borra para siempre:',
+    yourAccount: (email: string) => `Tu cuenta de MitiMiti (${email}) y tu inicio de sesión.`,
+    yourAccountNoEmail: 'Tu cuenta de MitiMiti y tu inicio de sesión.',
+    sharedSpace: (partner: string) => `El espacio que compartes con ${partner}: todos los gastos, pagos, presupuestos y su historial.`,
+    soloSpace: 'El espacio de la pareja y todo lo que registraste.',
+    partnerToo: (partner: string) => `También se borra para ${partner}. Su cuenta sigue, pero empezará de cero.`,
+    keepNote: 'Si quieren conservar algo, anótenlo antes de continuar.',
+    confirm: (partner: string) => `Entiendo que se borra todo, también para ${partner}.`,
+    confirmSolo: 'Entiendo que se borra todo.',
+    delete: 'Borrar cuenta',
+    codeTitle: 'Confirma que eres tú',
+    codeLead: (email: string) => `Te enviamos un código a ${email}. Escríbelo para borrar tu cuenta.`,
+    errors: {
+      data: 'No se pudo borrar. Revisa tu conexión e inténtalo de nuevo; no se borró nada.',
+      login: 'Tus datos ya se borraron, pero no pudimos cerrar tu cuenta de inicio de sesión. Inténtalo de nuevo.',
+      noEmail: 'No pudimos enviarte un código para confirmar. Escríbenos y borramos tu cuenta.',
+    },
+  },
+
+  exportData: {
+    title: 'Exportar movimientos',
+    lead: 'Elige el periodo y el formato. El archivo incluye los gastos y los pagos.',
+    period: 'Periodo',
+    presets: { thisMonth: 'Este mes', lastMonth: 'Mes pasado', last3Months: 'Últimos 3 meses', thisYear: 'Este año', all: 'Todo' },
+    /** "12 gastos y 2 pagos" */
+    summary: (expenses: number, payments: number) =>
+      `${expenses} ${expenses === 1 ? 'gasto' : 'gastos'} y ${payments} ${payments === 1 ? 'pago' : 'pagos'}`,
+    empty: 'No hay movimientos en este periodo. Elige otro.',
+    format: 'Formato',
+    csvTitle: 'CSV',
+    csvDetail: 'Para Excel, Google Sheets o Numbers.',
+    pdfTitle: 'PDF',
+    pdfDetail: 'Un resumen para leer, imprimir o enviar.',
+    exportPdf: 'Exportar PDF',
+    /** The PDF report. */
+    pdf: {
+      title: 'Resumen de movimientos',
+      couple: (a: string, b: string) => `${a} y ${b}`,
+      /** "13 oct 2026" */
+      dateWithYear: (short: string, year: number) => `${short} ${year}`,
+      /** "1 oct 2026 – 31 oct 2026" */
+      span: (from: string, to: string) => `${from} – ${to}`,
+      generated: (date: string) => `Generado el ${date}`,
+      balanceAt: (date: string) => `Saldo al ${date}`,
+      owes: (from: string, amount: string, to: string) => `${from} le debe ${amount} a ${to}`,
+      even: 'Están a mano',
+      howTitle: 'Cómo se llegó al saldo',
+      fromExpenses: 'Gastos compartidos del periodo',
+      inFavorOf: (amount: string, name: string) => `${amount} a favor de ${name}`,
+      noChange: 'Sin cambios',
+      shared: 'Gastos compartidos',
+      payments: 'Pagos entre ustedes',
+      personal: 'Gastos personales',
+      personalNote: 'No cuentan en el saldo',
+      expensesCount: (n: number) => `${n} ${n === 1 ? 'gasto' : 'gastos'}`,
+      paymentsCount: (n: number) => `${n} ${n === 1 ? 'pago' : 'pagos'}`,
+      whoPaid: 'Quién pagó',
+      person: 'Persona',
+      paid: 'Pagó',
+      share: 'Le corresponde',
+      difference: 'Diferencia',
+      byCategory: 'Por categoría',
+      movements: 'Movimientos',
+      payment: 'Pago',
+      personalBadge: 'Personal',
+      currencyNote: (currency: string) => `Montos en ${currency}. MitiMiti registra los gastos y pagos; no convierte monedas ni mueve dinero.`,
+    },
+    exportCsv: 'Exportar CSV',
+    failed: 'No se pudo crear el archivo. Inténtalo de nuevo.',
+    /** File name, without date or extension. */
+    fileName: 'mitimiti-movimientos',
+    /** Column headers and values of the CSV file. */
+    csv: {
+      date: 'Fecha',
+      type: 'Tipo',
+      description: 'Descripción',
+      category: 'Categoría',
+      paidBy: 'Pagó',
+      amount: 'Monto',
+      currency: 'Moneda',
+      split: 'División',
+      shareOf: (name: string) => `Parte de ${name}`,
+      expense: 'Gasto',
+      payment: 'Pago',
+      /** "Diego 60 % · Ana 40 %" */
+      splitPct: (payer: string, payerPct: number, other: string, otherPct: number) => `${payer} ${payerPct} % · ${other} ${otherPct} %`,
+    },
   },
 
   setup: {
@@ -217,6 +322,8 @@ export const es = {
     ambiguous: 'Los códigos no llevan 0, O, 1 ni I. Revisa esa letra.',
     title: 'Únete a tu pareja',
     lead: 'Pídele el código de 6 caracteres que aparece en su app, en Ajustes › Código de pareja.',
+    leadInvited: 'Tu invitación ya trae el código. Revísalo y toca Unirme.',
+    noCode: 'No tengo código: crear nuestra cuenta',
     submit: 'Unirme',
     label: 'Código de invitación',
     placeholder: 'Ej. AM482X',
@@ -237,6 +344,12 @@ export const es = {
     budgetA11y: (pct: number, ofAmount: string, status: string) => `Presupuesto del mes: ${pct} por ciento. ${ofAmount}. ${status}`,
     budgetSetUpA11y: 'Presupuestos: poner límites por categoría',
     budgetSetUp: 'Pongan un límite por categoría y vean cuánto les queda.',
+    shortcuts: {
+      budgets: { label: 'Presupuestos', a11y: 'Presupuestos' },
+      export: { label: 'Exportar', a11y: 'Exportar movimientos' },
+      history: { label: 'Historial', a11y: 'Historial: todos los movimientos' },
+      crownLegend: 'La corona marca lo que es de Premium.',
+    },
   },
 
   activityScreen: {
@@ -266,6 +379,18 @@ export const es = {
     goToday: 'Ir a hoy',
     /** Calendar cell: "Lunes 12 de octubre, con movimientos" */
     withActivity: (label: string) => `${label}, con movimientos`,
+    range: 'Rango',
+    periodLabel: 'Ver por',
+    pickRange: 'Elegir fechas',
+    rangeTapFirst: 'Toca el primer día',
+    rangeTapFirstHint: 'Luego toca el último. Para un solo día, tócalo dos veces.',
+    rangeTapLast: (start: string) => `Desde ${start}`,
+    rangeTapLastHint: 'Ahora toca el último día, o muestra solo este.',
+    rangeDays: (days: number) => (days === 1 ? '1 día' : `${days} días`),
+    showRange: 'Ver movimientos',
+    emptyRange: 'Sin movimientos en estas fechas',
+    /** Calendar cell inside the picked range: "Lunes 12 de octubre, en el rango" */
+    inRange: (label: string) => `${label}, en el rango`,
   },
 
   summaryScreen: {
@@ -326,7 +451,20 @@ export const es = {
     goToApp: 'Ir a la app',
     joinedTitle: (name: string) => `${name} ya se unió`,
     joinedLead: 'Los dos ven los mismos gastos y el mismo saldo. Ya no hace falta un código.',
-    shareMessage: (code: string) => `Únete a nuestra cuenta en a medias. Abre la app, toca "Tengo un código de invitación" y escribe: ${code}`,
+    // The code alone on its line: a long press in WhatsApp copies just it.
+    shareMessage: (code: string, until: string | null) =>
+      `¡Hola! Te invito a MitiMiti, para llevar juntos nuestros gastos y ver al momento quién le debe a quién.
+
+` +
+      `1. Descarga la app MitiMiti.
+2. Toca "Tengo una invitación de mi pareja".
+3. Escribe este código:
+
+${code}` +
+      (until ? `
+
+Vale hasta el ${until}.` : ''),
+    whatsapp: 'Enviar por WhatsApp',
     inviteTitle: (name: string) => `Invita a ${name}`,
     step: 'Paso 2 de 2',
     lead: (name: string) => `Comparte este código. Cuando ${name} lo escriba en su app, los dos verán los mismos gastos y el mismo saldo.`,
@@ -336,7 +474,7 @@ export const es = {
     codeA11y: (spaced: string) => `Código: ${spaced}`,
     copy: 'Copiar',
     copied: 'Copiado',
-    share: 'Compartir',
+    share: 'Otras apps',
     validUntil: (date: string) => `Vale hasta el ${date}.`,
     meanwhile: (name: string) => `Mientras tanto ya puedes registrar gastos. ${name} los verá en cuanto se una.`,
   },
@@ -397,7 +535,27 @@ export const es = {
   },
 
   settings: {
+    planTitle: 'Tu plan',
+    planFree: 'Gratis',
+    planFreeDetail: 'Lo esencial de MitiMiti, para siempre.',
+    planPremium: 'Premium para los dos',
+    payerYou: 'Lo pagas tú.',
+    payerPartner: (name: string) => `Lo paga ${name}.`,
+    renews: (date: string) => `Se renueva el ${date}.`,
+    ends: (date: string) => `Termina el ${date}.`,
+    trialEnds: (date: string) => `Prueba gratis hasta el ${date}; después empieza el cobro.`,
+    lifetime: 'Sin fecha de fin.',
+    billingIssue: (date: string) => `La tienda no pudo cobrar la renovación. Premium sigue hasta el ${date} mientras se resuelve.`,
+    fixPayment: 'Revisar el pago',
+    manage: 'Administrar suscripción',
+    managedBy: (name: string) => `Lo administra ${name} desde su tienda.`,
+    noStorePage: 'Ábrelo desde la app en tu teléfono.',
     title: 'Ajustes',
+    profileTitle: 'Tu perfil',
+    edit: 'Editar',
+    editProfileA11y: 'Editar tu perfil: avatar y nombre',
+    changeAvatarA11y: 'Cambiar tu avatar',
+    sharingWith: (name: string) => `Compartes con ${name}`,
     you: 'Ustedes',
     partnerRenames: (name: string) => `${name} cambia su nombre desde su app.`,
     defaultSplit: 'División predeterminada',
@@ -430,8 +588,6 @@ export const es = {
     settleReminderDetail: 'Cada domingo, si hay saldo pendiente',
     newExpenseAlert: 'Avisarme de gastos nuevos',
     newExpenseAlertDetail: (name: string) => `Cuando ${name} registre uno`,
-    exportCsv: 'Exportar movimientos (CSV)',
-    exportCsvDetail: 'Todos los gastos y pagos de un rango de fechas, para abrir en una hoja de cálculo.',
     avatar: 'Tu avatar',
     avatarDetail: (partner: string) => `${partner} lo ve junto a tu nombre.`,
     avatarInitial: 'Inicial',
@@ -447,6 +603,8 @@ export const es = {
     copied: 'Copiado',
     copyCode: 'Copiar código',
     account: 'Cuenta',
+    legal: 'Información legal',
+    deleteAccount: 'Borrar cuenta',
     signedInAs: (email: string) => `Sesión iniciada como ${email}`,
     signOutConfirm: '¿Cerrar sesión en este teléfono? Tus gastos quedan guardados; vuelves a verlos al entrar.',
     cancel: 'Cancelar',
@@ -455,6 +613,182 @@ export const es = {
   },
 
   avatars: { fox: 'Zorro', cat: 'Gato', bear: 'Oso', panda: 'Panda', owl: 'Búho', frog: 'Rana', bunny: 'Conejo', penguin: 'Pingüino', pig: 'Cerdito', tiger: 'Tigre', dog: 'Perro', mouse: 'Ratón' },
+
+  paywall: {
+    title: 'Premium para los dos',
+    lead: 'Una sola suscripción cubre a los dos: lo que activa uno, lo tienen ambos.',
+    heroTitle: 'MitiMiti Premium',
+    heroLead: 'Menos tiempo con las cuentas, más tiempo juntos.',
+    continueAnnual: 'Continuar con el plan anual',
+    continueMonthly: 'Continuar con el plan mensual',
+    benefits: {
+      scan: { title: 'Escanear recibos', detail: 'Una foto y el gasto se llena solo.' },
+      dictate: { title: 'Dictar gastos', detail: 'Dilo en voz alta y queda registrado.' },
+      export: { title: 'Exportar a CSV y PDF', detail: 'Sus gastos, listos para Excel o para imprimir.' },
+    },
+    plans: 'Elige tu plan',
+    annual: 'Anual',
+    monthly: 'Mensual',
+    perYear: 'al año',
+    perMonth: 'al mes',
+    save: (pct: number) => `Ahorra ${pct} %`,
+    trialDays: (days: number) => `${days} días gratis`,
+    tryFree: (days: number) => `Probar ${days} días gratis`,
+    subscribe: 'Suscribirme',
+    restore: 'Restaurar compras',
+    restoreNone: 'No encontramos una suscripción en esta cuenta de la tienda.',
+    restoreFailed: 'No se pudo restaurar. Revisa tu conexión e inténtalo de nuevo.',
+    renewalShort: (price: string, per: string, store: string) => `${price} ${per}. Se renueva automáticamente; cancela cuando quieras en ${store}.`,
+    trialShort: (days: number, price: string, per: string) => `${days} días gratis, luego ${price} ${per}. Se renueva automáticamente.`,
+    renewal: (price: string, period: string, store: string) =>
+      `Se renueva automáticamente por ${price} cada ${period} hasta que la canceles. Puedes cancelar cuando quieras, al menos 24 horas antes de que termine el periodo, desde los ajustes de tu cuenta de ${store}.`,
+    trialTerms: (days: number, date: string, price: string, period: string) =>
+      `La prueba dura ${days} días. Si no la cancelas antes del ${date}, se cobran ${price} ese día y luego cada ${period}.`,
+    year: 'año',
+    month: 'mes',
+    stores: { ios: 'App Store', android: 'Google Play', other: 'la tienda' },
+    terms: 'Términos',
+    privacy: 'Privacidad',
+    loadFailed: 'Los planes no están disponibles ahora mismo. Inténtalo más tarde.',
+    unavailable: 'Las compras no están disponibles en esta versión de la app.',
+    purchaseFailed: 'No se pudo completar la compra. Si la tienda ya te cobró, toca Restaurar compras.',
+    activating: 'Activando Premium…',
+    activatingDetail: 'La tienda ya confirmó la compra. Esto toma unos segundos.',
+    pending: 'La compra está hecha. Premium se activará en unos minutos para los dos; puedes seguir usando la app.',
+    doneTitle: 'Ya tienen Premium',
+    doneLead: 'Se abrió para los dos:',
+    continue: 'Seguir',
+    partnerHasTitle: (name: string) => `${name} ya activó Premium`,
+    partnerHasLead: 'Premium es para los dos, así que no hace falta otra suscripción.',
+    youHaveTitle: 'Ya tienen Premium',
+    youHaveLead: 'Lo administras tú desde la tienda. Tu pareja también lo tiene.',
+    included: 'Incluido',
+  },
+
+  // What Dictar and Escanear share: the microphone permission and the toast after adding.
+  entry: {
+    micTitle: 'Dictar el gasto',
+    micWhy: 'Para dictar, MitiMiti usa el micrófono y el reconocimiento de voz de tu teléfono. El audio no se envía a MitiMiti.',
+    micContinue: 'Continuar',
+    micDenied: 'Sin permiso para el micrófono. Puedes escribir el gasto o activarlo en los ajustes del teléfono.',
+    micNone: 'No se escuchó nada. Toca el micrófono y habla.',
+    micFailed: 'El dictado no funcionó. Escribe el gasto.',
+    toast: {
+      added: (what: string, amount: string) => `Gasto agregado: ${what} · ${amount}`,
+      undo: 'Deshacer',
+      edit: 'Editar',
+      undone: 'Gasto eliminado',
+      undoFailed: 'No se pudo deshacer. Puedes eliminarlo desde el detalle.',
+    },
+  },
+
+  /** Escanear and Dictar (docs/PLAN.md › Scan + Dictate): the Home section, the two screens and the receipt review. */
+  capture: {
+    home: {
+      title: 'Agregar un gasto',
+      scan: 'Escanear',
+      scanDetail: 'Foto del recibo, lo lee la IA',
+      scanA11y: 'Escanear un recibo. Premium',
+      dictate: 'Dictar',
+      dictateDetail: 'Dilo en voz alta',
+      dictateA11y: 'Dictar un gasto. Premium',
+    },
+    locked: {
+      write: 'Escribir el gasto',
+    },
+    write: 'Escribir',
+    writeA11y: 'Escribir el gasto en el formulario',
+    openSettings: 'Abrir ajustes',
+    dictate: {
+      title: 'Dictar',
+      listening: 'Te escucho',
+      ready: 'Listo para escuchar',
+      prompt: 'Di qué fue y cuánto costó.',
+      /** "Por ejemplo: «almuerzo 25.000, pagó Ana»" */
+      example: (amount: string, name: string) => `Por ejemplo: «almuerzo ${amount}, pagó ${name}»`,
+      stop: 'Toca para terminar',
+      stopA11y: 'Terminar de dictar',
+      start: 'Toca para hablar',
+      startA11y: 'Empezar a dictar',
+      heardA11y: (text: string) => `Escuché: ${text}`,
+      chipsA11y: 'Lo que se entendió',
+      paidBy: (name: string) => `Pagó ${name}`,
+      /** "Diego 60 % · Ana 40 %" */
+      pct: (me: string, myPct: string, partner: string, partnerPct: string) => `${me} ${myPct} % · ${partner} ${partnerPct} %`,
+      allFor: (name: string) => `Todo para ${name}`,
+      personal: (name: string) => `Personal de ${name}`,
+      foreign: (named: string, own: string) => `Dijiste un monto en ${named} y ustedes usan ${own}. MitiMiti no convierte monedas: en el formulario escribe el monto en ${own}.`,
+      unavailable: 'En este teléfono no se puede dictar todavía (hace falta la app instalada, no Expo Go). Puedes escribir el gasto.',
+      tryAgain: 'Volver a intentar',
+    },
+    scan: {
+      title: 'Escanear un recibo',
+      pill: 'Premium · Lectura con IA',
+      frameHint: 'Encuadra el recibo entero',
+      notSaved: 'La foto no se guarda: solo el gasto que confirmes.',
+      shutterA11y: 'Tomar la foto del recibo',
+      galleryA11y: 'Elegir un recibo de tus fotos',
+      flashA11y: 'Flash',
+      flashOn: 'Flash encendido',
+      flashOff: 'Flash apagado',
+      permissionTitle: 'Para leer el recibo, MitiMiti usa la cámara',
+      permissionWhy: 'Tomas una foto, se envía una sola vez para leer la tienda, la fecha y el total, y luego se descarta. No se guarda.',
+      permissionAllow: 'Permitir la cámara',
+      permissionDenied: 'Sin permiso para la cámara. Puedes elegir una foto, escribir el gasto o activar la cámara en los ajustes del teléfono.',
+      choosePhoto: 'Elegir de mis fotos',
+      cameraUnavailable: 'La cámara no está disponible aquí. Puedes elegir una foto o escribir el gasto.',
+      reading: 'Leyendo el recibo…',
+      readingDetail: 'Suele tardar unos segundos.',
+      retry: 'Tomar otra foto',
+      errors: {
+        photo: 'No se pudo preparar la foto. Inténtalo de nuevo.',
+        limit: 'Llegaron a los 30 recibos de hoy. Pueden escribir el gasto; mañana se puede escanear de nuevo.',
+        offline: 'Sin conexión no se puede leer el recibo. Inténtalo de nuevo o escribe el gasto.',
+        unreadable: 'No se pudo leer este recibo. Prueba con otra foto, con más luz, o escribe el gasto.',
+        failed: 'La lectura no funcionó. Inténtalo de nuevo o escribe el gasto.',
+        premium: 'Escanear es parte de Premium. Puedes escribir el gasto.',
+      },
+    },
+    receipt: {
+      title: 'Revisar el recibo',
+      chip: 'Leído del recibo',
+      date: 'Fecha',
+      noDate: 'Sin fecha: se usa hoy',
+      total: 'Total',
+      totalUnread: 'Sin leer',
+      /** "2 Café con leche" */
+      line: (qty: string, name: string) => `${qty} ${name}`,
+      paid: 'Pagó',
+      split: 'División',
+      rowA11y: (label: string, value: string) => `${label}: ${value}. Toca para cambiarlo`,
+      pickPayer: '¿Quién pagó?',
+      pickSplit: '¿Cómo se divide?',
+      /** "Con este gasto, | Ana te deberá $337.850": the second part is highlighted. */
+      lead: 'Con este gasto,',
+      owesYou: (name: string, amount: string) => `${name} te deberá ${amount}`,
+      youOwe: (name: string, amount: string) => `le deberás ${amount} a ${name}`,
+      even: 'quedan a mano',
+      noChange: 'Este gasto no cambia el saldo entre ustedes',
+      mismatch: 'Las líneas no suman el total. Se usa el total del recibo.',
+      foreign: (named: string, own: string) => `El recibo está en ${named} y ustedes usan ${own}. MitiMiti no convierte monedas: escribe el monto en ${own}.`,
+      noTotal: 'No se pudo leer el total. Escríbelo en el formulario.',
+      edit: 'Editar',
+      editA11y: 'Editar el gasto en el formulario',
+      add: 'Agregar gasto',
+      writeAmount: 'Escribir el monto',
+      saving: 'Guardando…',
+      saveFailed: 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.',
+      gone: 'No hay un recibo para revisar. Puedes escanear otro o escribir el gasto.',
+    },
+  },
+
+  premium: {
+    badge: 'Premium',
+    see: 'Ver Premium',
+    devPlan: 'Plan de prueba (solo en desarrollo)',
+    devFree: 'Gratis',
+    devPremium: 'Premium',
+  },
 
   ui: {
     back: 'Volver',

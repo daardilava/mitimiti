@@ -10,16 +10,18 @@ import { budgetStatus, daysLeftInMonth, daysLeftLabel, monthBudget, type BudgetT
 import { formatMoney, type Currency } from '@/lib/money';
 import { TextLink } from '@/ui/Auth';
 import { Avatar } from '@/ui/Avatar';
+import { CaptureCards } from '@/ui/CaptureCards';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { NavButton, Pending, Screen } from '@/ui/Screen';
 import { Icon } from '@/ui/Icon';
+import { Shortcuts } from '@/ui/Shortcuts';
 import { font, radius, space, type Palette } from '@/ui/tokens';
 import { makeStyles, useTheme } from '@/ui/theme';
 import { useI18n } from '@/i18n';
 
 const RECENT = 4;
 
-// 05 · Inicio: the live balance, this month's shared spending by who paid, and the latest expenses.
+// 05 · Inicio: the live balance, Agregar un gasto (Escanear · Dictar), the shortcut row, this month's shared spending by who paid, and the latest expenses.
 export default function Home() {
   const { m, d } = useI18n();
   const { color, type } = useTheme();
@@ -84,6 +86,10 @@ export default function Home() {
           </View>
         )}
       </View>
+
+      <CaptureCards />
+
+      <Shortcuts />
 
       <View style={styles.card}>
         <View style={styles.cardTitle}>

@@ -1,8 +1,8 @@
-// Movimientos (§6): a day, week or month of expenses and payments, filtered, searched and grouped by day,
+// Movimientos (§6): a day, week, month or picked range of expenses and payments, filtered, searched and grouped by day,
 // plus the per-day spending its chart draws. Pure, so Vitest covers it.
 import type { CategoryId } from '../ui/tokens';
 import { es, type Messages } from '../i18n/es';
-import { addDays, dateLabels, isoDate, monthOf, shiftMonth, weekStart, type DateLabels } from './dates';
+import { addDays, dateLabels, daysBetween, isoDate, monthOf, shiftMonth, weekStart, type DateLabels } from './dates';
 import type { ExpenseLike, SettlementLike } from './splits';
 
 export interface ActivityExpense extends ExpenseLike {
@@ -55,6 +55,54 @@ export function periodLabel(period: Period, anchor: string, today = new Date(), 
   if (period === 'day') return d.longDate(anchor, today);
   if (period === 'week') return d.weekLabel(weekStart(anchor));
   return d.monthLabel(monthOf(anchor));
+}
+
+/** A from–to range picked in the calendar (Rango): YYYY-MM-DD, both days included. */
+export interface DateRange {
+  start: string;
+  end: string;
+}
+
+/** A range being picked: the first tap sets `start`, the second `end`. */
+export interface RangeDraft {
+  start: string | null;
+  end: string | null;
+}
+
+/**
+ * One tap in the Rango calendar. The first picks the start; the second the end (an earlier day becomes the start, so
+ * the order of the taps doesn't matter); a tap after both are set starts a new range.
+ */
+export function pickRangeDay(draft: RangeDraft, day: string): RangeDraft {
+  if (!draft.start || draft.end) return { start: day, end: null };
+  return day < draft.start ? { start: day, end: draft.start } : { start: draft.start, end: day };
+}
+
+/** The draft as a range to show; a lone start is that one day. Null until a day is picked. */
+export function draftRange(draft: RangeDraft): DateRange | null {
+  return draft.start ? { start: draft.start, end: draft.end ?? draft.start } : null;
+}
+
+/** How many days the range covers, both ends included. */
+export function rangeLength(range: DateRange): number {
+  return daysBetween(range.start, range.end) + 1;
+}
+
+/**
+ * The range of the same length right before (-1) or after (+1): the arrows of Rango. Moving forward never passes
+ * `today` (YYYY-MM-DD): the last step ends on it instead.
+ */
+export function shiftRange(range: DateRange, delta: number, today?: string): DateRange {
+  const length = rangeLength(range);
+  const end = addDays(range.end, length * delta);
+  if (today && delta > 0 && end > today) return { start: addDays(today, -(length - 1)), end: today };
+  return { start: addDays(range.start, length * delta), end };
+}
+
+/** Rango starts on the last 7 days, today included. */
+export function lastDays(n: number, today = new Date()): DateRange {
+  const end = isoDate(today);
+  return { start: addDays(end, -(n - 1)), end };
 }
 
 /** Whether the period holding `anchor` already includes today, so there is nothing after it to show. */

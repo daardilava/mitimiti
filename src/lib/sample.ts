@@ -2,6 +2,7 @@
 // until each screen reads from the API.
 import type { AvatarId } from './avatars';
 import type { Currency } from './money';
+import { FREE_PLAN, type PlanInfo } from './plans';
 import type { ExpenseLike, SettlementLike } from './splits';
 import type { CategoryId } from '@/ui/tokens';
 
@@ -60,3 +61,18 @@ export const sampleBudgets: { category: CategoryId; month: string; limitMinor: n
   { category: 'transporte', month: '2026-10-01', limitMinor: 200_000 },
   { category: 'otros', month: '2026-10-01', limitMinor: 100_000 },
 ];
+
+/**
+ * The couple's plan while DEV_BYPASS_AUTH is on, so every screen can be checked on Free and on Premium. Mutable:
+ * the fake purchases (src/api/purchases.ts) turn it Premium; setSamplePlan() switches it by hand.
+ */
+export const samplePlan: PlanInfo = { ...FREE_PLAN };
+
+export function setSamplePlan(plan: PlanInfo['plan']): void {
+  Object.assign(
+    samplePlan,
+    plan === 'premium'
+      ? { plan, status: 'active', expiresAt: new Date(Date.now() + 365 * 86_400_000).toISOString(), periodType: 'NORMAL', isPayer: true }
+      : FREE_PLAN,
+  );
+}

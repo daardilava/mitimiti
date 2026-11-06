@@ -1,21 +1,31 @@
 import { ClerkProvider } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
-import { BricolageGrotesque_700Bold } from '@expo-google-fonts/bricolage-grotesque';
 import { DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold, useFonts } from '@expo-google-fonts/dm-sans';
+import { Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { isRunningInExpoGo } from 'expo';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider as NavigationThemeProvider, type Theme as NavigationTheme } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useMemo } from 'react';
+import { usePlanSync } from '@/api/plan';
 import { DEV_BYPASS_AUTH, useSessionStore, useSessionSync } from '@/lib/session';
 import { I18nProvider } from '@/i18n';
 import { ThemeProvider, useTheme } from '@/ui/theme';
+import { ToastHost } from '@/ui/Toast';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 2 } },
 });
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
+
+// The splash (app.json › expo-splash-screen) stays up until the fonts and the session are ready, so no blank frame
+// shows between it and the first screen; then it fades out. Module scope, as the Expo docs recommend.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+// Expo Go can't customise the splash and warns on every launch; development and store builds fade it.
+if (!isRunningInExpoGo()) SplashScreen.setOptions({ duration: 300, fade: true });
 
 export default function RootLayout() {
   // Sample-data mode never talks to Clerk, so it runs without a key.
@@ -48,6 +58,12 @@ function SessionSync() {
   return null;
 }
 
+/** RevenueCat follows the session; its news refreshes the plan. Inside QueryClientProvider. */
+function PlanSync() {
+  usePlanSync();
+  return null;
+}
+
 function App() {
   const { color, scheme } = useTheme();
   // React Navigation draws stack and tab backgrounds itself; give it our palette so nothing flashes white in dark.
@@ -61,7 +77,7 @@ function App() {
     SystemUI.setBackgroundColorAsync(color.background).catch(() => {});
   }, [color.background]);
 
-  const [fontsLoaded] = useFonts({ BricolageGrotesque_700Bold, DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold });
+  const [fontsLoaded] = useFonts({ DMSans_400Regular, DMSans_600SemiBold, DMSans_700Bold, Fredoka_600SemiBold, Fredoka_700Bold });
   const loading = useSessionStore((s) => s.loading);
   const hasHousehold = useSessionStore((s) => s.householdId !== null);
   const pendingRoute = useSessionStore((s) => s.pendingRoute);
@@ -78,10 +94,16 @@ function App() {
     if (!hasHousehold) queryClient.clear();
   }, [hasHousehold]);
 
-  if (!fontsLoaded || loading) return null;
+  const ready = fontsLoaded && !loading;
+  useEffect(() => {
+    if (ready) SplashScreen.hide();
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
+      <PlanSync />
       <NavigationThemeProvider value={navigationTheme}>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.background } }}>
@@ -89,17 +111,30 @@ function App() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="invite" />
             <Stack.Screen name="expense/new" options={{ presentation: 'modal' }} />
+            {/* Escanear and Dictar (docs/PLAN.md › Scan + Dictate): full screen like a camera; the review is a modal. */}
+            <Stack.Screen name="expense/scan" options={{ presentation: 'fullScreenModal' }} />
+            <Stack.Screen name="expense/dictate" options={{ presentation: 'fullScreenModal' }} />
+            <Stack.Screen name="expense/receipt" options={{ presentation: 'modal' }} />
             <Stack.Screen name="expense/[id]/index" />
             <Stack.Screen name="expense/[id]/edit" options={{ presentation: 'modal' }} />
             <Stack.Screen name="settle/index" />
             <Stack.Screen name="settle/done" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="profile" />
             <Stack.Screen name="budgets" />
+            <Stack.Screen name="export" />
+            <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
           </Stack.Protected>
           <Stack.Protected guard={!hasHousehold}>
             <Stack.Screen name="(onboarding)" />
           </Stack.Protected>
           <Stack.Screen name="sso-callback" />
+          {/* Legal texts: opened from Crea tu cuenta (signed out) and from Ajustes (signed in). */}
+          <Stack.Screen name="terms" />
+          <Stack.Screen name="privacy" />
+          {/* Borrar cuenta: from Ajustes, and from Setup for an account without a couple. */}
+          <Stack.Screen name="delete-account" />
         </Stack>
+        <ToastHost />
       </NavigationThemeProvider>
     </QueryClientProvider>
   );

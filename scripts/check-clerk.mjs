@@ -63,6 +63,6 @@ async function main() {
     console.log(`Fix in the Clerk Dashboard:\n${problems.map((p) => `  - ${p}`).join('\n')}`);
     return 1;
   }
-  console.log('Clerk is set up for a medias.');
+  console.log('Clerk is set up for MitiMiti.');
   return 0;
 }

@@ -1,18 +1,20 @@
-// Calendar sheet for Movimientos: tap the period title to jump straight to a day, a week or a month.
-// Día and Semana show a month of days (Monday first); Mes shows the twelve months of a year. Days with movements
-// carry a dot (and say so to screen readers); dates after today can't be picked.
+// Calendar sheet for Movimientos: tap the period title to jump straight to a day, a week or a month, or (Rango) to
+// pick a from–to range: the first tap is the start, the second the end, and Ver movimientos shows it.
+// Día, Semana and Rango show a month of days (Monday first); Mes shows the twelve months of a year. Days with
+// movements carry a dot (and say so to screen readers); dates after today can't be picked.
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { Period } from '@/lib/activity';
+import { draftRange, pickRangeDay, rangeLength, type DateRange, type Period, type RangeDraft } from '@/lib/activity';
 import { monthGrid, monthOf, shiftMonth, weekStart } from '@/lib/dates';
 import { useI18n } from '@/i18n';
 import { Icon } from './Icon';
+import { NavButton } from './Screen';
 import { font, radius, space, touch } from './tokens';
 import { makeStyles, useTheme } from './theme';
 
 interface Props {
   visible: boolean;
-  period: Period;
+  period: Period | 'range';
   /** Any date in the period shown now (YYYY-MM-DD). */
   value: string;
   /** Today, YYYY-MM-DD: nothing after it can be picked. */
@@ -20,23 +22,34 @@ interface Props {
   /** Dates (YYYY-MM-DD) that have an expense or a payment. */
   marked: ReadonlySet<string>;
   onSelect: (date: string) => void;
+  /** Rango: the range shown now, and what to do with the one picked. */
+  range?: DateRange;
+  onSelectRange?: (range: DateRange) => void;
   onClose: () => void;
 }
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-export function DatePickerSheet({ visible, period, value, today, marked, onSelect, onClose }: Props) {
+export function DatePickerSheet({ visible, period, value, today, marked, onSelect, range, onSelectRange, onClose }: Props) {
   const { m, d } = useI18n();
   const { color, type } = useTheme();
   const styles = useStyles();
   // The month (Día, Semana) or year (Mes) on screen; it starts on the period being shown. The screen gives the sheet a
   // new key each time it opens, so this starts over then.
   const [month, setMonth] = useState(monthOf(value));
+  // Rango: the days tapped so far, starting from the range shown.
+  const [draft, setDraft] = useState<RangeDraft>({ start: range?.start ?? null, end: range?.end ?? null });
+  const isRange = period === 'range';
+  const picked = draftRange(draft);
 
   const thisMonth = monthOf(today);
   const year = Number(month.slice(0, 4));
   const byYear = period === 'month';
-  const title = period === 'day' ? m.activityScreen.pickDay : period === 'week' ? m.activityScreen.pickWeek : m.activityScreen.pickMonth;
+  const title =
+    period === 'day' ? m.activityScreen.pickDay
+      : period === 'week' ? m.activityScreen.pickWeek
+        : period === 'range' ? m.activityScreen.pickRange
+          : m.activityScreen.pickMonth;
   const pick = (date: string) => {
     onSelect(date);
     onClose();
@@ -71,19 +84,50 @@ export function DatePickerSheet({ visible, period, value, today, marked, onSelec
         {byYear ? (
           <MonthGrid year={year} value={value} today={today} marked={marked} onPick={pick} />
         ) : (
-          <DayGrid month={month} period={period} value={value} today={today} marked={marked} onPick={pick} />
+          <DayGrid
+            month={month}
+            period={period}
+            value={value}
+            today={today}
+            marked={marked}
+            draft={isRange ? draft : undefined}
+            onPick={isRange ? (day) => setDraft(pickRangeDay(draft, day)) : pick}
+          />
         )}
 
-        <Pressable accessibilityRole="button" onPress={() => pick(today)} style={styles.secondary}>
-          <Icon name="calendar" size={20} color={color.ink} />
-          <Text style={[type.row, { fontFamily: font.bodyBold }]}>{m.activityScreen.goToday}</Text>
-        </Pressable>
+        {isRange ? (
+          <>
+            <View style={styles.summary} accessibilityLiveRegion="polite">
+              <Text style={[type.row, { fontFamily: font.bodyBold }]}>
+                {!draft.start ? m.activityScreen.rangeTapFirst : !draft.end ? m.activityScreen.rangeTapLast(d.longDate(draft.start)) : picked && d.rangeLabel(picked.start, picked.end)}
+              </Text>
+              <Text style={[type.label, { color: color.textSecondary, fontFamily: font.body }]}>
+                {!draft.start ? m.activityScreen.rangeTapFirstHint : !draft.end ? m.activityScreen.rangeTapLastHint : picked && m.activityScreen.rangeDays(rangeLength(picked))}
+              </Text>
+            </View>
+            <NavButton
+              label={m.activityScreen.showRange}
+              disabled={!picked}
+              onPress={() => {
+                if (!picked) return;
+                onSelectRange?.(picked);
+                onClose();
+              }}
+            />
+          </>
+        ) : (
+          <Pressable accessibilityRole="button" onPress={() => pick(today)} style={styles.secondary}>
+            <Icon name="calendar" size={20} color={color.ink} />
+            <Text style={[type.row, { fontFamily: font.bodyBold }]}>{m.activityScreen.goToday}</Text>
+          </Pressable>
+        )}
       </View>
     </Modal>
   );
 }
 
-function DayGrid({ month, period, value, today, marked, onPick }: { month: string; period: Period; value: string; today: string; marked: ReadonlySet<string>; onPick: (date: string) => void }) {
+function DayGrid(props: { month: string; period: Period | 'range'; value: string; today: string; marked: ReadonlySet<string>; draft?: RangeDraft; onPick: (date: string) => void }) {
+  const { month, period, value, today, marked, draft, onPick } = props;
   const { m, d } = useI18n();
   const { color, type } = useTheme();
   const styles = useStyles();
@@ -105,20 +149,22 @@ function DayGrid({ month, period, value, today, marked, onPick }: { month: strin
             {days.map((day, i) => {
               if (!day) return <View key={i} style={styles.cell} />;
               const future = day > today;
-              const on = weekOn || (period === 'day' && day === value);
+              const end = !!draft && (day === draft.start || day === draft.end);
+              const between = !!draft?.start && !!draft.end && day > draft.start && day < draft.end;
+              const on = weekOn || (period === 'day' && day === value) || end;
               const has = marked.has(day);
-              const label = d.longDate(day);
+              const base = has ? m.activityScreen.withActivity(d.longDate(day)) : d.longDate(day);
               return (
                 <Pressable
                   key={day}
                   accessibilityRole="button"
-                  accessibilityLabel={has ? m.activityScreen.withActivity(label) : label}
-                  accessibilityState={{ selected: on, disabled: future }}
+                  accessibilityLabel={end || between ? m.activityScreen.inRange(base) : base}
+                  accessibilityState={{ selected: on || between, disabled: future }}
                   disabled={future}
                   onPress={() => onPick(day)}
-                  style={styles.cell}
+                  style={[styles.cell, between && styles.band]}
                 >
-                  <View style={[styles.day, period === 'day' && on && styles.dayOn, day === today && !on && styles.today]}>
+                  <View style={[styles.day, (period === 'day' || period === 'range') && on && styles.dayOn, day === today && !on && styles.today]}>
                     <Text style={[type.row, { fontFamily: day === today || on ? font.bodyBold : font.body, color: on ? color.onPrimary : future ? color.disabled : color.ink }]}>
                       {Number(day.slice(8))}
                     </Text>
@@ -199,6 +245,9 @@ const useStyles = makeStyles(({ color }) => StyleSheet.create({
   cell: { flex: 1, height: 52, alignItems: 'center', justifyContent: 'center' },
   day: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   dayOn: { backgroundColor: color.ink },
+  // Days inside a picked range (Rango); ink on neutralTint is checked in tokens.test.ts.
+  band: { backgroundColor: color.neutralTint },
+  summary: { gap: 2, padding: space[3], borderRadius: radius.control, backgroundColor: color.background },
   today: { borderWidth: 1.5, borderColor: color.ink },
   dot: { width: 5, height: 5, borderRadius: 3, marginTop: -2 },
   months: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space[2] },

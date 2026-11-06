@@ -10,6 +10,8 @@ export const DEV_BYPASS_AUTH = process.env.EXPO_PUBLIC_DEV_BYPASS_AUTH === '1';
 /** Which onboarding step comes after signing in: create a couple, or join one with a code. */
 export type NextStep = 'setup' | 'join';
 
+export type SessionNotice = 'accountDeleted' | 'coupleDeleted';
+
 interface SessionState {
   loading: boolean;
   /** Clerk user id (`user_…`) of whoever is signed in; the same value RLS reads from the token's `sub`. */
@@ -21,6 +23,12 @@ interface SessionState {
   householdId: string | null;
   /** Where to go once the app's screens unlock; the root layout follows it after the guard switches. */
   pendingRoute: Href | null;
+  /** From an invite link: kept through sign-up (email, Google, Apple) so Join opens with it filled in. */
+  inviteCode: string | null;
+  /** Shown on Welcome: this account was deleted, or the partner deleted theirs and the couple's space with it. */
+  notice: SessionNotice | null;
+  /** True while Borrar cuenta runs, so the couple vanishing mid-way isn't taken for the partner's deletion. */
+  deleting: boolean;
   setHousehold: (id: string | null, then?: Href) => void;
 }
 
@@ -31,7 +39,12 @@ export const useSessionStore = create<SessionState>((set) => ({
   email: null,
   householdId: null,
   pendingRoute: null,
-  setHousehold: (householdId, then) => set({ householdId, pendingRoute: then ?? null }),
+  inviteCode: null,
+  notice: null,
+  deleting: false,
+  // A new couple (created or joined) makes the Welcome notice about the old one, and any pending invite, stale.
+  setHousehold: (householdId, then) =>
+    set({ householdId, pendingRoute: then ?? null, ...(householdId ? { notice: null, inviteCode: null } : {}) }),
 }));
 
 /** Keeps the store in sync with Clerk and the user's couple. Mount once, inside ClerkProvider. */
@@ -58,7 +71,8 @@ export function useSessionSync() {
         if (error) console.warn('[session] household lookup failed', error.message);
         householdId = data?.household_id ?? null;
       }
-      if (!stale) useSessionStore.setState({ loading: false, userId: signedInAs, householdId });
+      // Someone signing in starts fresh: the "account deleted" notice was for whoever was here before.
+      if (!stale) useSessionStore.setState({ loading: false, userId: signedInAs, householdId, ...(signedInAs ? { notice: null } : {}) });
     })();
 
     return () => {
@@ -70,11 +84,13 @@ export function useSessionSync() {
 /**
  * On the sign-in screens: once someone is signed in but has no couple yet, continue to the chosen step.
  * Someone who already has a couple never needs this; the root layout's guards take them to Home.
+ * An invite link always continues to Join, whichever way the person signed in.
  */
 export function useContinueAfterSignIn(next: NextStep | undefined) {
   const signedIn = useSessionStore((s) => s.userId !== null);
   const hasHousehold = useSessionStore((s) => s.householdId !== null);
+  const invited = useSessionStore((s) => s.inviteCode !== null);
   useEffect(() => {
-    if (signedIn && !hasHousehold) router.replace(next === 'join' ? '/join' : '/setup');
-  }, [signedIn, hasHousehold, next]);
+    if (signedIn && !hasHousehold) router.replace(next === 'join' || invited ? '/join' : '/setup');
+  }, [signedIn, hasHousehold, next, invited]);
 }

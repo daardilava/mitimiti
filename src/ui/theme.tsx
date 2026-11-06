@@ -9,7 +9,7 @@ import { categoryColors, categoryInfo, palettes, textStyles, type Categories, ty
 
 export type AppearancePreference = 'system' | Scheme;
 
-const STORAGE_KEY = 'amedias.appearance';
+const STORAGE_KEY = 'mitimiti.appearance';
 
 export interface Theme {
   scheme: Scheme;
