@@ -71,6 +71,9 @@ export default function Paywall() {
   const selected = plans.find((p) => p.id === picked) ?? defaultPackage(plans);
   const savings = savingsPercent(plans);
   const busy = buy.isPending || restore.isPending;
+  // No monthly or annual plan in the store's offering (e.g. Play subscriptions not created yet) reads like a failure.
+  const noPlans = offerings.isError || (offerings.isSuccess && plans.length === 0);
+  if (offerings.isError) console.warn('[paywall] offerings failed', offerings.error);
 
   const subscribe = () => {
     if (!selected) return;
@@ -120,10 +123,15 @@ export default function Paywall() {
             <Callout icon="bell" tone="neutral">
               {m.paywall.unavailable}
             </Callout>
-          ) : offerings.isLoading || offerings.isError ? (
-            <View>
-              {offerings.isError && <ErrorLine tone="neutral">{m.paywall.loadFailed}</ErrorLine>}
-              <Pending failed={offerings.isError} onRetry={() => offerings.refetch()} />
+          ) : offerings.isLoading ? (
+            <Pending failed={false} onRetry={() => {}} />
+          ) : noPlans ? (
+            // The store answered with nothing to sell (or failed): one calm line, not a connection error.
+            <View style={{ gap: space[4], paddingTop: space[2] }}>
+              <Callout icon="bell" tone="neutral">
+                {m.paywall.loadFailed}
+              </Callout>
+              <NavButton label={m.ui.retry} kind="secondary" onPress={() => offerings.refetch()} loading={offerings.isFetching} />
             </View>
           ) : (
             phase !== 'pending' &&
