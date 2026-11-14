@@ -56,7 +56,7 @@ checks are ticked.
 | 1. Auth (Clerk) — built, checks open | Sign-in, session, sign-out, Supabase linked to Clerk, couple create/join behind auth | Both of us can sign in on real phones and land in the same couple |
 | 2. Core MVP — built, checks open | Add, edit, delete expenses; live balance on Home; Activity | — |
 | 3. Settle + summary — built, polish open | Settle up ✅, monthly summary ✅, split tests ✅, polish | **Balance is right:** all split tests pass ✅ |
-| 4. Private beta | TestFlight + Play internal, both of us daily | — |
+| 4. Private beta | TestFlight + Play internal, both of us daily ([iOS release](#ios-release)) | — |
 | 5. v1.1 | Budgets, notifications, defaults, CSV | **We trust it:** 2 weeks, 0 corrections |
 | **6. Billing (RevenueCat)** ← now, started early | Premium per couple through the stores, entitlements in Supabase | **Fair paywall:** both phones unlock within seconds; no plan changes the balance |
 
@@ -473,6 +473,61 @@ RPCs or migrations.
 - [x] With `PREMIUM_ENFORCED = true`: a Free couple gets the paywall from Escanear, Dictar and Exportar (that benefit
   first) and can still type; a Premium couple gets the camera (dev bypass, web, 2026-11-04).
 - [ ] `RECEIPT_PREMIUM_ONLY=1` set on the hosted project; a Free couple's direct call to read-receipt gets 403.
+
+### iOS release
+
+Started 2026-11-14, on request. The Android app is in Play closed testing; this brings the same app to the iPhone,
+ending in TestFlight (Phase 4) and the App Store. All builds run on EAS (no Mac needed). The paid **Apple Developer
+Program** membership is left for later: everything before step 3 works without it.
+
+**1. Without an Apple membership**
+
+- [x] app.json: remove the duplicated `CFBundleLocalizations` (expo-localization writes it from `supportedLocales`).
+- [x] app.json: `ios.privacyManifests` with the required-reason APIs of the native packages (UserDefaults,
+  FileTimestamp, DiskSpace, SystemBootTime), because Apple doesn't parse every static pod's manifest.
+- [x] app.json: Dictar's `NSMicrophoneUsageDescription` was dropped from the iOS build (expo-camera's
+  `microphonePermission: false` deleted it after expo-speech-recognition set it); expo-camera now gets the same text.
+- [x] Expo Go on an iPhone (checked 2026-11-14) (`npx expo start --tunnel`): layout, safe areas, keyboard over forms, light and dark mode,
+  email + Google sign-in, expenses, payments, Resumen. Dictar hides the mic and the paywall says the store is
+  unavailable there; that is expected.
+- [ ] Escanear: name the AI provider (Anthropic) and ask for explicit consent before the first photo leaves the phone, from the
+  camera and from the gallery (App Review 5.1.2(i), personal data shared with third-party AI). Privacidad already
+  lists the provider; the screen doesn't.
+- [ ] Decide individual or organization (Ceiba Studio) enrolment. An organization needs a D-U-N-S number first
+  (free, can take weeks): request it early if the seller should be Ceiba Studio.
+
+**2. Apple membership and App Store Connect**
+
+- [ ] Apple Developer Program; Paid Apps agreement, bank and tax in App Store Connect; Small Business Program.
+- [ ] App record for `com.mitimiti.app`; add `submit.production.ios` (`ascAppId`, `appleTeamId`) to eas.json.
+- [ ] Clerk production instance: Sign in with Apple credentials (Team ID, Services ID, Key ID, `.p8` key), the iOS
+  app under Native applications, `mitimiti://` allowed as redirect.
+
+**3. Development build on an iPhone**
+
+- [ ] `eas device:create`, Developer Mode on the phone, `eas build -p ios --profile development`.
+- [ ] Phase 1 checks on iOS (Apple and Google return signed in) and the Scan + Dictate permission check above.
+
+**4. Billing on iOS** ([BILLING.md › Apple](BILLING.md))
+
+- [ ] Subscription group with `premium_monthly` and `premium_yearly`, 1-week free intro offer on yearly.
+- [ ] RevenueCat iOS app (In-App Purchase key + App Store Connect API key), products in the `default` offering,
+  App Store Server Notifications v2 (Sandbox and Production), sandbox testers.
+- [ ] `EXPO_PUBLIC_REVENUECAT_IOS_KEY` (`appl_…`) in the EAS production and preview environments.
+
+**5. TestFlight and App Store**
+
+- [ ] `eas build -p ios --profile production` + `eas submit -p ios`; both of us on TestFlight (internal testers).
+- [ ] Listing: 6.9″ screenshots, privacy labels (with Purchase history), age rating, privacy and support URLs.
+- [ ] Review notes with a demo account that doesn't hit Clerk's new-device code; the first subscriptions submitted
+  with the first version.
+
+**Acceptance checks**
+
+- [ ] A TestFlight build signs in with email, Google and Apple, and lands in the same couple as the Android phone.
+- [ ] Dictar on iOS asks for the microphone and speech recognition, and works after allowing both.
+- [ ] Bought on Android, Premium also shows on the partner's iPhone (Phase 6), and the other way round.
+- [ ] Approved by App Review.
 
 ## Open questions
 
