@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCouple, type Couple } from '@/api/expenses';
 import { usePlan } from '@/api/plan';
 import { pickFromLibrary, readReceipt, shrinkPhoto, type ReceiptAnswer } from '@/api/receipts';
+import { useScanConsent } from '@/api/scanConsent';
 import { daysAgo } from '@/lib/dates';
 import { setReceipt } from '@/lib/draftStore';
 import { canUse } from '@/lib/premium';
@@ -28,7 +29,51 @@ export default function Scan() {
   if (!couple.data) return <Loading title={m.capture.scan.title} error={couple.error} />;
   // Free: the paywall instead, never the camera (also when reached by a link or before the plan had loaded).
   if (!canUse('scan', gate)) return <Redirect href={{ pathname: '/paywall', params: { from: 'scan' } }} />;
-  return <Camera couple={couple.data} />;
+  return <AfterConsent couple={couple.data} />;
+}
+
+// No photo leaves the phone, from the camera or the gallery, before this person agreed to send it to Anthropic
+// (src/lib/scanConsent.ts). The camera permission is asked only after that, so the two questions don't stack.
+function AfterConsent({ couple }: { couple: Couple }) {
+  const { color } = useTheme();
+  const styles = useStyles();
+  const { state, grant } = useScanConsent(couple.me.id);
+  if (state === 'loading') {
+    return (
+      <SafeAreaView style={[styles.safe, styles.centered]}>
+        <ActivityIndicator color={color.onHero} />
+      </SafeAreaView>
+    );
+  }
+  if (state === 'ask') return <Consent onAccept={grant} />;
+  return <Camera couple={couple} />;
+}
+
+function Consent({ onAccept }: { onAccept: () => void }) {
+  const { m } = useI18n();
+  const { color, type } = useTheme();
+  const styles = useStyles();
+  const t = m.capture.scan.consent;
+  return (
+    <SafeAreaView style={styles.safe}>
+      <TopBar />
+      <ScrollView contentContainerStyle={styles.explain}>
+        <View style={styles.explainIcon}>
+          <Icon name="sparkle" size={28} color={color.onHero} />
+        </View>
+        <Text style={[type.heading, { color: color.onHero, textAlign: 'center' }]} accessibilityRole="header">
+          {t.title}
+        </Text>
+        <Text style={[styles.lead, { textAlign: 'center' }]}>{t.body}</Text>
+        <Text style={[styles.lead, { textAlign: 'center' }]}>{t.notSent}</Text>
+        <View style={{ alignSelf: 'stretch', gap: space[2] }}>
+          <NavButton label={t.accept} kind="inverse" onPress={onAccept} />
+          <NavButton label={t.privacy} kind="outline" onPress={() => router.push('/privacy')} />
+          <NavButton label={m.capture.locked.write} kind="outline" onPress={() => router.replace('/expense/new')} />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 type ErrorKind = Exclude<ReceiptAnswer['kind'], 'receipt'> | 'photo';

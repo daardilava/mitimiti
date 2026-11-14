@@ -708,6 +708,13 @@ Gültig bis ${until}.` : ''),
       reading: 'Beleg wird gelesen…',
       readingDetail: 'Das dauert meist ein paar Sekunden.',
       retry: 'Neues Foto machen',
+      consent: {
+        title: 'Bevor du scannst',
+        body: 'Um den Beleg zu lesen, wird das Foto an Anthropic gesendet, einen Dienst für künstliche Intelligenz in den USA, zusammen mit dem heutigen Datum, der Sprache der App und der Währung des Paares.',
+        notSent: 'Anthropic erhält weder eure Namen noch den Saldo oder eure anderen Ausgaben. Das Foto wird nicht gespeichert, nur die Ausgabe, die du bestätigst.',
+        accept: 'Zustimmen und scannen',
+        privacy: 'Datenschutzerklärung lesen',
+      },
       errors: {
         photo: 'Das Foto konnte nicht vorbereitet werden. Versuch es nochmal.',
         limit: 'Ihr habt die 30 Belege für heute erreicht. Ihr könnt die Ausgabe eintippen; morgen geht Scannen wieder.',

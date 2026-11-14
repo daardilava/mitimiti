@@ -490,9 +490,15 @@ Program** membership is left for later: everything before step 3 works without i
 - [x] Expo Go on an iPhone (checked 2026-11-14) (`npx expo start --tunnel`): layout, safe areas, keyboard over forms, light and dark mode,
   email + Google sign-in, expenses, payments, Resumen. Dictar hides the mic and the paywall says the store is
   unavailable there; that is expected.
-- [ ] Escanear: name the AI provider (Anthropic) and ask for explicit consent before the first photo leaves the phone, from the
-  camera and from the gallery (App Review 5.1.2(i), personal data shared with third-party AI). Privacidad already
-  lists the provider; the screen doesn't.
+- [x] Escanear: name the AI provider (Anthropic) and ask for explicit consent before the first photo leaves the phone, from the
+  camera and from the gallery (App Review 5.1.2(i), personal data shared with third-party AI): a first step on the
+  screen, once per account and phone ([src/lib/scanConsent.ts](../src/lib/scanConsent.ts)), before the camera
+  permission. Seen in Expo Go (2026-11-14).
+- [x] app.json: no Face ID purpose string (expo-secure-store's English default; the app uses no biometrics).
+- [ ] Dictar's speech-recognition purpose string says "El reconocimiento lo hace tu teléfono", but `speech.start`
+  doesn't require on-device recognition, so iOS may send the audio to Apple. Either require on-device recognition
+  where the phone supports the language (test on a device), or say "con el reconocimiento de voz de tu teléfono
+  (Apple o Google)" as Privacidad §2 does.
 - [ ] Decide individual or organization (Ceiba Studio) enrolment. An organization needs a D-U-N-S number first
   (free, can take weeks): request it early if the seller should be Ceiba Studio.
 
@@ -518,7 +524,9 @@ Program** membership is left for later: everything before step 3 works without i
 **5. TestFlight and App Store**
 
 - [ ] `eas build -p ios --profile production` + `eas submit -p ios`; both of us on TestFlight (internal testers).
-- [ ] Listing: 6.9″ screenshots, privacy labels (with Purchase history), age rating, privacy and support URLs.
+- [ ] Listing: 6.9″ screenshots, privacy labels (with Purchase history, and photos sent to Anthropic for Escanear),
+  age rating, privacy and support URLs, and the Terms of Use link in the description (or as a custom EULA), which
+  Apple asks for with subscriptions.
 - [ ] Review notes with a demo account that doesn't hit Clerk's new-device code; the first subscriptions submitted
   with the first version.
 

@@ -740,6 +740,14 @@ Vale hasta el ${until}.` : ''),
       reading: 'Leyendo el recibo…',
       readingDetail: 'Suele tardar unos segundos.',
       retry: 'Tomar otra foto',
+      /** Asked once per account and phone before the first photo is sent (src/lib/scanConsent.ts). */
+      consent: {
+        title: 'Antes de escanear',
+        body: 'Para leer el recibo, la foto se envía a Anthropic, un servicio de inteligencia artificial en Estados Unidos, junto con la fecha de hoy, el idioma de la app y la moneda de la pareja.',
+        notSent: 'Anthropic no recibe sus nombres, el saldo ni sus otros gastos. La foto no se guarda: solo el gasto que confirmes.',
+        accept: 'Aceptar y escanear',
+        privacy: 'Ver la política de privacidad',
+      },
       errors: {
         photo: 'No se pudo preparar la foto. Inténtalo de nuevo.',
         limit: 'Llegaron a los 30 recibos de hoy. Pueden escribir el gasto; mañana se puede escanear de nuevo.',

@@ -705,6 +705,13 @@ Valid until ${until}.` : ''),
       reading: 'Reading the receipt…',
       readingDetail: 'It usually takes a few seconds.',
       retry: 'Take another photo',
+      consent: {
+        title: 'Before you scan',
+        body: "To read the receipt, the photo is sent to Anthropic, an artificial intelligence service in the United States, together with today's date, the app's language and the couple's currency.",
+        notSent: "Anthropic doesn't receive your names, the balance or your other expenses. The photo isn't kept: only the expense you confirm.",
+        accept: 'Agree and scan',
+        privacy: 'Read the privacy policy',
+      },
       errors: {
         photo: "The photo couldn't be prepared. Try again.",
         limit: "You've reached today's 30 receipts. You can type the expense; scanning works again tomorrow.",
