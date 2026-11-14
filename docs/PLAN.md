@@ -495,10 +495,10 @@ Program** membership is left for later: everything before step 3 works without i
   screen, once per account and phone ([src/lib/scanConsent.ts](../src/lib/scanConsent.ts)), before the camera
   permission. Seen in Expo Go (2026-11-14).
 - [x] app.json: no Face ID purpose string (expo-secure-store's English default; the app uses no biometrics).
-- [ ] Dictar's speech-recognition purpose string says "El reconocimiento lo hace tu teléfono", but `speech.start`
-  doesn't require on-device recognition, so iOS may send the audio to Apple. Either require on-device recognition
-  where the phone supports the language (test on a device), or say "con el reconocimiento de voz de tu teléfono
-  (Apple o Google)" as Privacidad §2 does.
+- [x] Dictar's iOS purpose strings: speech recognition said "El reconocimiento lo hace tu teléfono", but `speech.start`
+  doesn't require on-device recognition, so iOS may send the audio to Apple; it now says "con el reconocimiento de voz
+  de Apple. El audio no se envía a MitiMiti", as Privacidad §2 does. The microphone one said "mientras mantienes
+  pulsado", but Dictar is tap to start, tap to stop: now "mientras dictas un gasto". es, en, de.
 - [ ] Decide individual or organization (Ceiba Studio) enrolment. An organization needs a D-U-N-S number first
   (free, can take weeks): request it early if the seller should be Ceiba Studio.
 

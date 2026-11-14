@@ -94,15 +94,15 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "MitiMiti usa el micrófono solo mientras mantienes pulsado el botón de dictar, para escribir el gasto por ti.",
-          "speechRecognitionPermission": "MitiMiti convierte lo que dictas en texto para registrar el gasto. El reconocimiento lo hace tu teléfono."
+          "microphonePermission": "MitiMiti usa el micrófono solo mientras dictas un gasto, para escribirlo por ti.",
+          "speechRecognitionPermission": "MitiMiti convierte lo que dictas en texto para registrar el gasto, con el reconocimiento de voz de Apple. El audio no se envía a MitiMiti."
         }
       ],
       [
         "expo-camera",
         {
           "cameraPermission": "MitiMiti usa la cámara para fotografiar un recibo y leer la tienda, la fecha y el total. La foto no se guarda.",
-          "microphonePermission": "MitiMiti usa el micrófono solo mientras mantienes pulsado el botón de dictar, para escribir el gasto por ti.",
+          "microphonePermission": "MitiMiti usa el micrófono solo mientras dictas un gasto, para escribirlo por ti.",
           "recordAudioAndroid": false
         }
       ],
@@ -111,7 +111,7 @@
         {
           "cameraPermission": "MitiMiti usa la cámara para fotografiar un recibo y leer el total. La foto no se guarda.",
           "photosPermission": "MitiMiti abre tus fotos para que elijas un recibo y leer el total. La foto no se guarda.",
-          "microphonePermission": "MitiMiti usa el micrófono solo mientras mantienes pulsado el botón de dictar, para escribir el gasto por ti."
+          "microphonePermission": "MitiMiti usa el micrófono solo mientras dictas un gasto, para escribirlo por ti."
         }
       ]
     ],

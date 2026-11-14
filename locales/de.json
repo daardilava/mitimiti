@@ -1,7 +1,7 @@
 {
   "ios": {
-    "NSMicrophoneUsageDescription": "MitiMiti nutzt das Mikrofon nur, solange du die Diktiertaste gedrückt hältst, um die Ausgabe für dich zu schreiben.",
-    "NSSpeechRecognitionUsageDescription": "MitiMiti macht aus deinem Diktat Text, um die Ausgabe zu erfassen. Die Erkennung übernimmt dein Telefon.",
+    "NSMicrophoneUsageDescription": "MitiMiti nutzt das Mikrofon nur, während du eine Ausgabe diktierst, um sie für dich zu schreiben.",
+    "NSSpeechRecognitionUsageDescription": "MitiMiti macht aus deinem Diktat Text, um die Ausgabe zu erfassen, mit der Spracherkennung von Apple. Das Audio wird nicht an MitiMiti gesendet.",
     "NSCameraUsageDescription": "MitiMiti nutzt die Kamera, um einen Beleg zu fotografieren und die Summe zu lesen. Das Foto wird nicht gespeichert.",
     "NSPhotoLibraryUsageDescription": "MitiMiti öffnet deine Fotos, damit du einen Beleg wählst und die Summe gelesen wird. Das Foto wird nicht gespeichert."
   }
