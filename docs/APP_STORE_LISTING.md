@@ -19,7 +19,7 @@ If the privacy policy or what Premium unlocks changes, update this file and the 
 | Copyright | `2026 Diego Armando Ardila Vargas` |
 | Age rating | Answer the questionnaire honestly (no objectionable content → lowest rating). The 18+ rule lives in the Terms. |
 
-**App name:** `MitiMiti`. If App Store Connect says the name is taken, use `MitiMiti: gastos en pareja`.
+**App name:** `MitiMiti: gastos en pareja` (in use since 2026-11-15: App Store Connect said `MitiMiti` was taken). Apple ID 6835165914, bundle id `com.ceibastudio.mitimiti`.
 
 ---
 
