@@ -161,8 +161,10 @@ Eval: `npm run eval:quick-entry`. Deploy: README › Deploy quick entry.
 ### Slice 4 — Voice — built
 
 Built as `src/api/voice.ts`. **Tap to start, tap (or silence) to stop** instead of press-and-hold, so it also works
-with a screen reader. The language is the app's, in the phone's region when it matches (es-CO stays es-CO). The mic
+with a screen reader. The language is the app's, in the phone's region when it matches (es-CO stays es-CO); on iOS only if Apple recognises that pair (no es-DE: Spanish on a phone set to Germany uses es-ES). The mic
 is hidden where the native module isn't there (Expo Go, web). Before the first system dialog the sheet says why.
+Numbers said in words become digits first (`src/lib/spokenNumbers.ts`); iOS writes pesos as "25 mil pesos" or with a
+space ("25 000 pesos"), and both read as 25000.
 
 - Mic button in the quick sheet: press, speak, release → transcript goes through **the same** `parseQuickEntry`
   (+ AI fallback). One pipeline for text and voice.

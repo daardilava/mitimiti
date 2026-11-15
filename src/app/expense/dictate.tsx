@@ -12,7 +12,6 @@ import { formatMoney } from '@/lib/money';
 import { parseDictation } from '@/lib/parseDictation';
 import { canUse } from '@/lib/premium';
 import type { QuickEntryContext } from '@/lib/quickEntry';
-import { recognitionLocale } from '@/lib/quickSheet';
 import { splitLabel } from '@/ui/Capture';
 import { Icon } from '@/ui/Icon';
 import { Miti } from '@/ui/Miti';
@@ -68,8 +67,7 @@ function Listening({ couple }: { couple: Couple }) {
   const [transcript, setTranscript] = useState('');
   const available = useMemo(() => dictationAvailable(), []);
   const [stage, setStage] = useState<Stage | null>(available ? null : 'unavailable');
-  const locale = recognitionLocale(language, phoneLocales.map((l) => l.languageTag));
-  const dictation = useDictation(locale, (text) => setTranscript(text));
+  const dictation = useDictation(language, phoneLocales.map((l) => l.languageTag), (text) => setTranscript(text));
   const listening = dictation.state === 'listening';
   const result = useMemo(() => (transcript ? parseDictation(transcript, ctx) : null), [transcript, ctx]);
 

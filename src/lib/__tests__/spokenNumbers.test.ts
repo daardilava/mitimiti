@@ -131,3 +131,36 @@ describe('numbersToDigits › leaves words that are not an amount', () => {
     expect(numbersToDigits('cena veinte con treinta invitados', 'es')).toBe('cena veinte con treinta invitados');
   });
 });
+
+describe('numbersToDigits › how iOS writes thousands', () => {
+  const nbsp = String.fromCharCode(0xa0);
+  const narrow = String.fromCharCode(0x202f);
+
+  it.each([
+    ['almuerzo 25 mil pesos', 'almuerzo 25000 pesos'],
+    ['arriendo 2 mil quinientos pesos', 'arriendo 2500 pesos'],
+    ['mercado 120 mil pesos, pagué yo', 'mercado 120000 pesos, pagué yo'],
+    ['rent 3 thousand dollars', 'rent 3000 dollars'],
+    ['Miete 2 tausend Euro', 'Miete 2000 Euro'],
+  ])('joins a multiplier with the digits before it: %s', (said, digits) => {
+    expect(numbersToDigits(said, said.startsWith('rent') ? 'en' : said.startsWith('Miete') ? 'de' : 'es')).toBe(digits);
+  });
+
+  it('leaves "25 mil" without a currency for the parser, which reads it', () => {
+    expect(numbersToDigits('almuerzo 25 mil', 'es')).toBe('almuerzo 25 mil');
+  });
+
+  it.each([
+    ['mercado 25 000 pesos', 'mercado 25000 pesos'],
+    ['arriendo $1 200 000', 'arriendo $1200000'],
+    [`mercado 25${nbsp}000`, 'mercado 25000'],
+    [`arriendo 1${narrow}200${narrow}000 pesos`, 'arriendo 1200000 pesos'],
+    ['cena 1 250 €', 'cena 1250 €'],
+  ])('joins thousands grouped with a space: %s', (said, digits) => {
+    expect(numbersToDigits(said, 'es')).toBe(digits);
+  });
+
+  it('keeps two numbers apart when a plain space has no currency next to it', () => {
+    expect(numbersToDigits('compramos 2 300 gramos', 'es')).toBe('compramos 2 300 gramos');
+  });
+});

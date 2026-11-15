@@ -7,6 +7,8 @@
 //     ("treinta euros, sesenta cuarenta" → "30 euros, 60/40");
 //   - before "días" / "days" / "Tage" ("hace tres días" → "hace 3 días");
 //   - otherwise, when the sentence has no amount yet and exactly one number was said ("cena veinte" → "cena 20").
+// A multiplier after digits joins them ("25 mil pesos" → "25000 pesos", as iOS writes it), and thousands grouped with
+// a space become one number ("25 000 pesos" → "25000 pesos").
 // The app's language and English are read (the phone may hear an English amount in any language).
 import type { Language } from '../i18n/languages';
 
@@ -192,10 +194,22 @@ function findRuns(text: string, language: Language): Run[] {
     return tokens[k]?.morphs && tokens[k].morphs!.every((m) => next.push(m)) ? next : null;
   };
 
+  /** "25 mil": digits then a multiplier word are one number, read from the digits (else "mil pesos" is 1000 pesos). */
+  const afterDigits = (k: number): { reader: Reader; from: number } | null => {
+    const kind = tokens[k].morphs?.[0]?.kind;
+    if (kind !== 'thousand' && kind !== 'million') return null;
+    const lead = /(^|[^\d.,])(\d{1,3})(\s+)$/.exec(text.slice(0, tokens[k].start));
+    if (!lead) return null;
+    const seed = Object.assign(new Reader(), { current: Number(lead[2]), last: 'unit' as const });
+    const reader = tryPush(seed, k);
+    return reader ? { reader, from: tokens[k].start - lead[3].length - lead[2].length } : null;
+  };
+
   const runs: Run[] = [];
   let k = 0;
   while (k < tokens.length) {
-    const start = isAnd(k) ? null : tryPush(new Reader(), k);
+    const seeded = afterDigits(k);
+    const start = seeded?.reader ?? (isAnd(k) ? null : tryPush(new Reader(), k));
     if (!start) {
       k++;
       continue;
@@ -222,7 +236,12 @@ function findRuns(text: string, language: Language): Run[] {
       k++;
     }
     const words = tokens.slice(first, last + 1);
-    runs.push({ start: tokens[first].start, end: tokens[last].end, value: reader.value, weak: words.length === 1 && WEAK.has(fold(words[0].word)) });
+    runs.push({
+      start: seeded?.from ?? tokens[first].start,
+      end: tokens[last].end,
+      value: reader.value,
+      weak: !seeded && words.length === 1 && WEAK.has(fold(words[0].word)),
+    });
   }
   return runs;
 }
@@ -233,7 +252,8 @@ const DECIMAL_WORD = /^\s+(?:coma|punto|point|komma)\s+$/i;
 const AND_WORD = String.raw`(?:con|y|and|und)`;
 
 /** Turns spoken numbers into digits where they are an amount, a split or a date offset; everything else untouched. */
-export function numbersToDigits(text: string, language: Language): string {
+export function numbersToDigits(spoken: string, language: Language): string {
+  const text = joinGroups(spoken);
   const runs = findRuns(text, language);
   if (!runs.length) return joinCents(text);
   const out = new Map<Run, string>();
@@ -293,6 +313,19 @@ export function numbersToDigits(text: string, language: Language): string {
   result += text.slice(at);
 
   return joinCents(result);
+}
+
+/**
+ * Thousands grouped with a space: "25 000 pesos", "$1 200 000" → digits only. A no-break or narrow space (what phones
+ * format numbers with) always joins; a plain one only next to a currency, so "2 300" alone stays two numbers.
+ */
+function joinGroups(text: string): string {
+  const join = (n: string) => n.replace(/[\s\xa0\u202f]/g, '');
+  const keep = (_: string, before: string, n: string) => before + join(n);
+  return text
+    .replace(/(^|[^\d.,])(\d{1,3}(?:[\xa0\u202f]\d{3})+)(?![\d.,])/g, keep)
+    .replace(new RegExp(String.raw`(^|[^\d.,])(\d{1,3}(?: \d{3})+)(?=\s*${CURRENCY}(?![\p{L}]))`, 'giu'), keep)
+    .replace(/((?:us\$|\$|€)\s?)(\d{1,3}(?: \d{3})+)(?![\d.,])/gi, keep);
 }
 
 /** "10 euros con 50" / "12 Euro 50" / "20 dollars and 50 cents" → "10,50 euros". */

@@ -63,6 +63,14 @@ describe('parseDictation · es', () => {
     expect(r.heard.category).toBeNull();
     expect(r.amountSpan).toBeNull();
   });
+
+  it('reads pesos the way iOS writes them: "25 mil", "25 000", "$25.000"', () => {
+    const cop = ctx({ currency: 'COP' });
+    for (const said of ['almuerzo 25 mil pesos', 'almuerzo 25 000 pesos', 'almuerzo $25.000', 'almuerzo veinticinco mil pesos']) {
+      expect(parseDictation(said, cop).heard.amountMinor, said).toBe(25000);
+    }
+    expect(parseDictation('arriendo 1 200 000 pesos', cop).heard.amountMinor).toBe(1200000);
+  });
 });
 
 describe('parseDictation · en', () => {
