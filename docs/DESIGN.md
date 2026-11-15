@@ -44,7 +44,7 @@ Implemented in [src/ui/tokens.ts](../src/ui/tokens.ts) and [src/lib/miti.ts](../
 [assets/brand](../assets/brand). Same meanings as the UI kit, brand look: Tinta for action, blue for you, Coral Miti
 for your partner, green only for what is settled.
 
-- **Name:** MitiMiti (formerly "a medias", taken on Google Play). App id `com.mitimiti.app`, link scheme
+- **Name:** MitiMiti (formerly "a medias", taken on Google Play). App id `com.mitimiti.app` on Android, `com.ceibastudio.mitimiti` on iOS (`com.mitimiti.app` was taken on Apple), link scheme
   `mitimiti://`. The EAS slug stays `a-medias`, tied to the EAS project id.
 - **Logo:** Miti, the two-colour mascot (markup in `src/lib/miti.ts`, drawn by `Miti` in
   [src/ui/Miti.tsx](../src/ui/Miti.tsx) and in the PDF), and the `Wordmark` "MitiMiti" in Fredoka 600: "Miti" in

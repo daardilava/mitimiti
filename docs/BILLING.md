@@ -14,7 +14,7 @@ re-read that day: open the linked page first, because store consoles change ofte
 | Offering (RevenueCat) | `default`, with the packages **Monthly** (`$rc_monthly`) and **Annual** (`$rc_annual`) |
 | Products | `premium_monthly`, `premium_yearly` (App Store; Google Play: the same subscription ids, base plans `monthly` / `yearly`) |
 | Trial | 7 days free on `premium_yearly` only |
-| Bundle id / package | `com.mitimiti.app` |
+| Bundle id / package | iOS `com.ceibastudio.mitimiti` (`com.mitimiti.app` was taken on Apple); Android `com.mitimiti.app` |
 
 ---
 
@@ -129,7 +129,7 @@ In RevenueCat, the Play products show as `premium_yearly:yearly` and `premium_mo
 [Connect a store](https://www.revenuecat.com/docs/projects/connect-a-store):
 
 1. [RevenueCat](https://app.revenuecat.com/) › **Create project** *MitiMiti*.
-2. **Apps › + App Store**: bundle id `com.mitimiti.app`, the **In-App Purchase Key** (App Store Connect › Users and
+2. **Apps › + App Store**: bundle id `com.ceibastudio.mitimiti`, the **In-App Purchase Key** (App Store Connect › Users and
    Access › Integrations), and preferably an **App Store Connect API key**, so products are imported.
 3. **Apps › + Play Store**: package `com.mitimiti.app` and the **service credentials JSON**.
    **⚠️ check before following** ([service credentials](https://www.revenuecat.com/docs/service-credentials/creating-play-service-credentials)):
