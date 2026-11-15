@@ -5,7 +5,10 @@
 // dictationAvailable() is false and the sheet hides the mic; typing still works.
 import { requireOptionalNativeModule } from 'expo';
 import { useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import type { ExpoSpeechRecognitionErrorCode } from 'expo-speech-recognition';
+import type { QuickEntryContext } from '@/lib/quickEntry';
+import { recognitionLocale } from '@/lib/quickSheet';
 
 type SpeechModule = typeof import('expo-speech-recognition').ExpoSpeechRecognitionModule;
 
@@ -30,6 +33,17 @@ export async function dictationNeedsExplanation(): Promise<boolean> {
   }
 }
 
+// iOS only recognises some locales (no es-DE): ask once which. Android takes any tag, as before.
+let supportedOnce: Promise<string[]> | null = null;
+function supportedLocales(): Promise<string[]> {
+  if (!speech || Platform.OS !== 'ios') return Promise.resolve([]);
+  supportedOnce ??= speech
+    .getSupportedLocales({})
+    .then((r) => r.locales)
+    .catch(() => []);
+  return supportedOnce;
+}
+
 export type DictationState = 'idle' | 'listening';
 /** denied: no microphone or speech permission. none: nothing was heard. failed: anything else. */
 export type DictationError = 'denied' | 'none' | 'failed';
@@ -39,9 +53,10 @@ const errorOf = (code: ExpoSpeechRecognitionErrorCode): DictationError | null =>
 
 /**
  * Tap to talk: start() on the first tap, stop() on the second (or silence ends it). `onText` gets the transcript as it
- * grows (final = true once the phone is done). `locale` is a BCP-47 tag such as "es-CO" (src/lib/quickSheet.ts › recognitionLocale).
+ * grows (final = true once the phone is done). It listens in the app's `language`, in the region of `phoneTags` (the
+ * phone's BCP-47 locales) when the recogniser has it (src/lib/quickSheet.ts › recognitionLocale).
  */
-export function useDictation(locale: string, onText: (text: string, final: boolean) => void) {
+export function useDictation(language: QuickEntryContext['language'], phoneTags: string[], onText: (text: string, final: boolean) => void) {
   const [state, setState] = useState<DictationState>('idle');
   const [error, setError] = useState<DictationError | null>(null);
   const handler = useRef(onText);
@@ -78,7 +93,8 @@ export function useDictation(locale: string, onText: (text: string, final: boole
       setError('denied');
       return;
     }
-    speech.start({ lang: locale, interimResults: true, continuous: false, addsPunctuation: false });
+    const lang = recognitionLocale(language, phoneTags, await supportedLocales());
+    speech.start({ lang, interimResults: true, continuous: false, addsPunctuation: false });
   };
 
   const stop = () => speech?.stop();

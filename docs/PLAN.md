@@ -512,7 +512,7 @@ Program** membership is left for later: everything before step 3 works without i
 
 **3. Development build on an iPhone**
 
-- [ ] `eas device:create`, Developer Mode on the phone, `eas build -p ios --profile development`.
+- [x] (2026-11-15, Apple sign-in and Test Store purchase seen on the iPhone) `eas device:create`, Developer Mode on the phone, `eas build -p ios --profile development`.
 - [ ] Phase 1 checks on iOS (Apple and Google return signed in) and the Scan + Dictate permission check above.
 
 **4. Billing on iOS** ([BILLING.md › Apple](BILLING.md))
