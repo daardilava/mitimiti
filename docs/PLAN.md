@@ -505,8 +505,9 @@ Program** membership is left for later: everything before step 3 works without i
 **2. Apple membership and App Store Connect**
 
 - [ ] Apple Developer Program; Paid Apps agreement, bank and tax in App Store Connect; Small Business Program.
-- [ ] App record for `com.mitimiti.app`; add `submit.production.ios` (`ascAppId`, `appleTeamId`) to eas.json.
-- [ ] Clerk production instance: Sign in with Apple credentials (Team ID, Services ID, Key ID, `.p8` key), the iOS
+- [x] App record (2026-11-15, "MitiMiti: gastos en pareja", Apple ID 6835165914) for `com.ceibastudio.mitimiti` (iOS bundle id; `com.mitimiti.app` was taken on Apple, Android keeps it);
+  add `submit.production.ios` (`ascAppId`, `appleTeamId`) to eas.json.
+- [x] Clerk production instance (2026-11-15): Sign in with Apple credentials (Services ID `com.ceibastudio.mitimiti.signin`) (Team ID, Services ID, Key ID, `.p8` key), the iOS
   app under Native applications, `mitimiti://` allowed as redirect.
 
 **3. Development build on an iPhone**
