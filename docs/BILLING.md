@@ -101,7 +101,8 @@ entitlement and shows in the dashboard as sandbox data.
 6. **Localization** (group and each subscription): display name and description in es, en, de. For example
    *Premium para los dos · anual*: "Historial completo, presupuestos y exportar, para los dos."
 7. **Review Information**: a **screenshot of the paywall** (`src/app/paywall.tsx`) and the review note from
-   section 5.
+   section 5. Don't leave it for later: while a subscription is *Missing Metadata*, StoreKit doesn't return it, so
+   the paywall says the plans aren't available even in TestFlight. `docs/screenshots/app-store/07-paywall.png` fits.
 8. **Your first subscription and its group are submitted together with a new app version.** Later subscriptions
    can go on their own.
 

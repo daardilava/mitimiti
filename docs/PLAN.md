@@ -524,7 +524,7 @@ Program** membership is left for later: everything before step 3 works without i
 
 **5. TestFlight and App Store**
 
-- [ ] `eas build -p ios --profile production` + `eas submit -p ios`; both of us on TestFlight (internal testers).
+- [ ] `eas build -p ios --profile production` + `eas submit -p ios` (done 2026-11-15: 1.0.1 (2) on TestFlight; the partner still to join); both of us on TestFlight (internal testers).
 - [ ] Listing: 6.9″ screenshots, privacy labels (with Purchase history, and photos sent to Anthropic for Escanear),
   age rating, privacy and support URLs, and the Terms of Use link in the description (or as a custom EULA), which
   Apple asks for with subscriptions.
@@ -534,7 +534,9 @@ Program** membership is left for later: everything before step 3 works without i
 **Acceptance checks**
 
 - [ ] A TestFlight build signs in with email, Google and Apple, and lands in the same couple as the Android phone.
-- [ ] Dictar on iOS asks for the microphone and speech recognition, and works after allowing both.
+  Email and Google seen 2026-11-16; Apple still to confirm (it said `invalid_client` until the Services ID, which had
+  a trailing dot, was recreated as `com.ceibastudio.mitimiti.signin`). A TestFlight purchase of the yearly plan worked.
+- [x] Dictar on iOS asks for the microphone and speech recognition, and works after allowing both (TestFlight 1.0.1 (2), 2026-11-16, after the es-DE locale fix).
 - [ ] Bought on Android, Premium also shows on the partner's iPhone (Phase 6), and the other way round.
 - [ ] Approved by App Review.
 
