@@ -517,10 +517,10 @@ Program** membership is left for later: everything before step 3 works without i
 
 **4. Billing on iOS** ([BILLING.md › Apple](BILLING.md))
 
-- [ ] Subscription group with `premium_monthly` and `premium_yearly`, 1-week free intro offer on yearly.
-- [ ] RevenueCat iOS app (In-App Purchase key + App Store Connect API key), products in the `default` offering,
+- [x] Subscription group *Premium* (2026-11-15) with `premium_monthly` and `premium_yearly_1` (the App Store ids), 1-week free intro offer on yearly; es / en / de texts. The review screenshot waits for the TestFlight build.
+- [x] (2026-11-15) RevenueCat iOS app (In-App Purchase key + App Store Connect API key), products in the `default` offering,
   App Store Server Notifications v2 (Sandbox and Production), sandbox testers.
-- [ ] `EXPO_PUBLIC_REVENUECAT_IOS_KEY` (`appl_…`) in the EAS production and preview environments.
+- [x] (2026-11-15) `EXPO_PUBLIC_REVENUECAT_IOS_KEY` (`appl_…`) in the EAS production and preview environments (the preview profile builds with production).
 
 **5. TestFlight and App Store**
 

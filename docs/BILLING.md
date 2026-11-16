@@ -12,7 +12,7 @@ re-read that day: open the linked page first, because store consoles change ofte
 | --- | --- |
 | Entitlement (RevenueCat) | `premium` |
 | Offering (RevenueCat) | `default`, with the packages **Monthly** (`$rc_monthly`) and **Annual** (`$rc_annual`) |
-| Products | `premium_monthly`, `premium_yearly` (App Store; Google Play: the same subscription ids, base plans `monthly` / `yearly`) |
+| Products | App Store: `premium_monthly` and `premium_yearly_1` (group *Premium*, created 2026-11-15). Google Play: `premium_monthly`, `premium_yearly`, base plans `monthly` / `yearly`. The app reads RevenueCat packages, never the ids |
 | Trial | 7 days free on `premium_yearly` only |
 | Bundle id / package | iOS `com.ceibastudio.mitimiti` (`com.mitimiti.app` was taken on Apple); Android `com.mitimiti.app` |
 
