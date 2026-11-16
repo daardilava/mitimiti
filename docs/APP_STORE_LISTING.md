@@ -203,26 +203,34 @@ Notes:
 
 ---
 
-## Screenshots (6.9″, 1290 × 2796)
+## Screenshots (iPhone 6.3″, 1206 × 2622)
 
-In [screenshots/app-store/](screenshots/app-store/): rendered from Expo web with the sample data
-(`EXPO_PUBLIC_DEV_BYPASS_AUTH=1`) in a 430 × 932 @3x viewport, with the clock set to October 2026 so the sample month
-is the current one. RGB, without an alpha channel. Upload in this order (Apple shows the first three in search):
+One set per language in [screenshots/app-store/](screenshots/app-store/) (`es/`, `en/`, `de/`), JPEG, RGB. Made on
+2026-11-16 from captures of the TestFlight build on an iPhone (dark mode): a headline with one word in coral, a
+subtitle, and the capture in a phone frame. Two private details in the captures were painted over: the account email
+in Ajustes (now `diego@miti.app`) and one personal expense in Recientes (now *Luz e internet* / *Power & internet* /
+*Strom & Internet*). Retake them from the app, never from the web mock, when a screen changes.
 
-1. `01-inicio.png`: the balance (who owes whom)
-2. `02-movimientos.png`: history with the chart
-3. `03-resumen.png`: the month by category
-4. `04-saldar.png`: settle up
-5. `05-presupuestos.png`: budgets
-6. `06-nuevo-gasto.png`: adding an expense
-7. `08-inicio-oscuro.png`, `09-resumen-oscuro.png`: dark mode
+Upload all eight per localization, in this order (Apple shows the first three in search results):
+
+| # | File | Español | English | Deutsch |
+| --- | --- | --- | --- | --- |
+| 1 | `01-saldo` | Sepan **quién le debe** a quién | Know **who owes** whom | Seht, **wer wem** was schuldet |
+| 2 | `02-escanear` | **Escanea** el recibo | **Scan** any receipt | Belege **scannen** |
+| 3 | `03-gasto-leido` | Listo en **segundos** | Done in **seconds** | Fertig in **Sekunden** |
+| 4 | `04-dictar` | O simplemente **díctalo** | Or just **say it** | Oder einfach **diktieren** |
+| 5 | `05-resumen` | ¿En qué se **va el dinero**? | Where does the **money go**? | Wohin geht **euer Geld**? |
+| 6 | `06-reparto` | Justo para **los dos** | Fair for **both of you** | Fair für **euch beide** |
+| 7 | `07-recientes` | Todo en **un solo lugar** | Everything in **one place** | Alles an **einem Ort** |
+| 8 | `08-premium` | Uno paga, **disfrutan los dos** | One pays, **both enjoy** | Einer zahlt, **beide profitieren** |
+
+In App Store Connect › version › **Previsualizaciones y capturas de pantalla**, pick the language at the top right
+and drop the eight files of that folder into the iPhone slot App Store Connect shows (**6,1" o 6,3"**, the required one).
+That slot takes 1206 × 2622 or 1179 × 2556 only, and Apple scales it for the other iPhones. 1290 × 2796 and
+1320 × 2868 are refused there with "las dimensiones del archivo no son válidas".
 
 `07-paywall.png` is not for the listing: it's the **Review screenshot** for each subscription (App Store Connect ›
-Subscriptions › Review Information). It shows the web mock's prices, so take it again from a TestFlight build if
-App Review asks for the real ones.
-
-The sample data is in Spanish and COP. English and German use the Spanish screenshots unless you upload others.
-Before uploading, look at them on the phone: the web build has no status bar or home indicator, which Apple accepts.
+Subscriptions › Review Information).
 
 ---
 
