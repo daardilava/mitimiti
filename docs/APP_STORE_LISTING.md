@@ -203,7 +203,7 @@ Notes:
 
 ---
 
-## Screenshots (6.9″, 1320 × 2868)
+## Screenshots (iPhone 6.3″, 1206 × 2622)
 
 One set per language in [screenshots/app-store/](screenshots/app-store/) (`es/`, `en/`, `de/`), JPEG, RGB. Made on
 2026-11-16 from captures of the TestFlight build on an iPhone (dark mode): a headline with one word in coral, a
@@ -225,8 +225,9 @@ Upload all eight per localization, in this order (Apple shows the first three in
 | 8 | `08-premium` | Uno paga, **disfrutan los dos** | One pays, **both enjoy** | Einer zahlt, **beide profitieren** |
 
 In App Store Connect › version › **Previsualizaciones y capturas de pantalla**, pick the language at the top right
-and drop the eight files of that folder into **iPhone 6,9″**. Apple scales them down for the smaller iPhones. The 6.9″ slot takes 1320 × 2868 only: 1290 × 2796 (the 6.7″ size) is refused there with "las dimensiones del
-archivo no son válidas".
+and drop the eight files of that folder into the iPhone slot App Store Connect shows (**6,1" o 6,3"**, the required one).
+That slot takes 1206 × 2622 or 1179 × 2556 only, and Apple scales it for the other iPhones. 1290 × 2796 and
+1320 × 2868 are refused there with "las dimensiones del archivo no son válidas".
 
 `07-paywall.png` is not for the listing: it's the **Review screenshot** for each subscription (App Store Connect ›
 Subscriptions › Review Information).
