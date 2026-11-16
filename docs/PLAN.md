@@ -533,9 +533,9 @@ Program** membership is left for later: everything before step 3 works without i
 
 **Acceptance checks**
 
-- [ ] A TestFlight build signs in with email, Google and Apple, and lands in the same couple as the Android phone.
-  Email and Google seen 2026-11-16; Apple still to confirm (it said `invalid_client` until the Services ID, which had
-  a trailing dot, was recreated as `com.ceibastudio.mitimiti.signin`). A TestFlight purchase of the yearly plan worked.
+- [x] A TestFlight build signs in with email, Google and Apple, and lands in the same couple as the Android phone
+  (2026-11-16). Apple needed two fixes in setup: the Services ID had a trailing dot (Apple: `invalid_client`), and
+  Clerk's Apple Key ID was empty (back in the app with no session, no error). A TestFlight yearly purchase worked.
 - [x] Dictar on iOS asks for the microphone and speech recognition, and works after allowing both (TestFlight 1.0.1 (2), 2026-11-16, after the es-DE locale fix).
 - [ ] Bought on Android, Premium also shows on the partner's iPhone (Phase 6), and the other way round.
 - [ ] Approved by App Review.
