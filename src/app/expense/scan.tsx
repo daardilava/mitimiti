@@ -187,7 +187,7 @@ function Camera({ couple }: { couple: Couple }) {
               (refused ? (
                 <NavButton label={m.capture.openSettings} kind="inverse" onPress={() => void Linking.openSettings()} />
               ) : (
-                <NavButton label={t.permissionAllow} kind="inverse" onPress={() => void requestPermission()} />
+                <NavButton label={t.permissionContinue} kind="inverse" onPress={() => void requestPermission()} />
               ))}
             <NavButton label={t.choosePhoto} kind="outline" onPress={() => void gallery()} />
             <NavButton label={m.capture.locked.write} kind="outline" onPress={write} />
