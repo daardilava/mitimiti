@@ -113,7 +113,11 @@ entitlement and shows in the dashboard as sandbox data.
    *Premium (anual)*. Ids use lowercase letters, numbers, `_` and `.`, and can never be changed or reused.
 2. **Add base plan** `yearly`: **auto-renewing**, billing period **yearly**. Set the grace period and account hold,
    then the price: **Update prices** for all countries, then adjust Colombia and the US by hand.
-3. **Add offer** on `yearly`: id `trial-7d`, eligibility **new customer acquisition**, one phase **free trial,
+   - To set euro prices, edit each country's row (the pencil next to the price). The row price includes VAT, so
+     19.99 means the buyer pays 19,99 €. The bulk **Set prices** dialog treats the amount as before VAT and adds it
+     on top (19.99 became 23,99 €), so don't use it for euro countries.
+3. **Add offer** on `yearly`: id `trial-7d`, eligibility **new customer acquisition › Never had any subscription**
+   (one trial per person across both plans, like Apple's one intro offer per group), one phase **free trial,
    7 days** (Google allows 3 days to 3 years).
 4. Repeat for `premium_monthly` with base plan `monthly` (billing period **monthly**), without an offer.
 5. **Activate** each base plan and offer.
@@ -172,7 +176,9 @@ Follow README › [Deploy the billing webhook](../README.md#deploy-the-billing-w
   copy the URL from RevenueCat's App Store app settings into App Store Connect › **MitiMiti › App Information ›
   App Store Server Notifications**, for Production and Sandbox, version 2.
 - **Google Play** ([Google server notifications](https://www.revenuecat.com/docs/platform-resources/server-notifications/google-server-notifications)):
-  1. Enable **Pub/Sub** in the Google Cloud project of the service account.
+  1. Enable **Pub/Sub** in the Google Cloud project of the service account, and give that service account the
+     **Pub/Sub Admin** role (Editor is not enough: *Connect to Google* then fails with "does not have permission to
+     add Google Play as a publisher").
   2. In RevenueCat's Play app settings, **Connect to Google** and copy the **Pub/Sub topic id**.
   3. In Play Console › **Monetize › Monetization setup › Real-time developer notifications**, paste it as *Topic
      name*. Choose *Subscriptions, voided purchases, and all one-time products*, and save.

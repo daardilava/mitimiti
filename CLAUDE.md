@@ -53,7 +53,13 @@ npx expo start            # dev server (EXPO_PUBLIC_DEV_BYPASS_AUTH=1 in .env = 
 npm run db:start          # local Supabase (Docker)
 npm run db:reset          # apply supabase/migrations/*
 npm run db:types          # regenerate src/lib/database.types.ts
+npm run ship:update -- "What changed"   # checks, then OTA update (JS/assets only) to production builds
+npm run ship:release      # checks, then EAS workflow: store builds both platforms + iOS submit
 ```
+
+OTA updates reach only builds of the same app `version` (`runtimeVersion` policy `appVersion`). Native changes
+(native libraries, permissions, `app.json` plugins, SDK upgrades) need `ship:release`; bump `version` in `app.json`
+when native code changes so old builds never receive incompatible JavaScript.
 
 **Before declaring any task done**, run and make pass:
 
