@@ -8,6 +8,8 @@
 **A shared-budget app for couples.** It answers one question in under five seconds:
 **who owes whom, and how much?**
 
+[![Download on the App Store](https://img.shields.io/badge/App_Store-Download-0D96F6?logo=appstore&logoColor=white)](https://apps.apple.com/us/app/mitimiti-couples-budget/id6835165914)
+
 Two people log what they spend together, choose how each expense is split, and see one live balance on both
 phones. When they settle up outside the app, they record the payment and the balance goes back to zero.
 
