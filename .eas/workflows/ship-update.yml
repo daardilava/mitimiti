@@ -1,0 +1,24 @@
+# Over-the-air update: JavaScript, styles and assets only. Reaches installed production builds of the same app
+# version (runtimeVersion policy "appVersion") in minutes, on iPhone and Android, without store review.
+# Native changes (new native library, permissions, app.json plugins, SDK upgrade) need `release.yml` instead.
+#
+# Run from expo.dev › Workflows, or `npx eas-cli@latest workflow:run .eas/workflows/ship-update.yml`.
+# From your machine, `npm run ship:update -- "What changed"` publishes the same update directly, after the checks.
+name: Ship update (production)
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: What changed (shown in the EAS dashboard)
+        required: true
+
+jobs:
+  update:
+    name: Publish update to production
+    type: update
+    environment: production
+    params:
+      channel: production
+      platform: all
+      message: ${{ inputs.message }}

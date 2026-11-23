@@ -130,6 +130,12 @@
       "en": "./locales/en.json",
       "de": "./locales/de.json"
     },
-    "owner": "diegovargas"
+    "owner": "diegovargas",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8648d437-b63c-485a-a1fd-49751e4eae06"
+    }
   }
 }
