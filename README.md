@@ -13,8 +13,7 @@
 Two people log what they spend together, choose how each expense is split, and see one live balance on both
 phones. When they settle up outside the app, they record the payment and the balance goes back to zero.
 
-> **Status:** private beta in preparation. Phases 1–3 are built (live checks open); Phase 6 (*Billing*) is built,
-> with its store QA on real phones still open.
+> **Status:** Live on the App Store · Google Play in closed testing.
 > Roadmap and acceptance checks: [docs/PLAN.md](docs/PLAN.md).
 
 ---
